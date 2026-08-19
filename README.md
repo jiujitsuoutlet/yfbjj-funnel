@@ -38,8 +38,10 @@ Prices render from these values, so one edit moves every surface.
 
 Unauthenticated POST that writes to D1, so two layers per client IP:
 
-1. **5 per minute** - Workers Rate Limiting binding (`[[ratelimit]]`,
-   `LEAD_RATE_LIMIT`, in `wrangler.toml`). In-memory at the colo, no D1 write,
+1. **5 per minute** - Workers Rate Limiting binding (`[[ratelimits]]`, plural,
+   `LEAD_RATE_LIMIT`, in `wrangler.toml`). Wrangler 4.124 rejects the singular
+   `[[ratelimit]]` with `Unexpected fields found in top-level field` and then
+   silently omits the binding, leaving only the D1 layer. In-memory at the colo, no D1 write,
    no extra resource. `period` only accepts 10 or 60 seconds, which is why the
    hour window is not here.
 2. **30 per hour** - fixed hourly window in the `rate_limits` D1 table
