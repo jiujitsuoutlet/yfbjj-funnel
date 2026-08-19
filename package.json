@@ -15,9 +15,6 @@
   "author": "",
   "license": "ISC",
   "type": "module",
-  "dependencies": {
-    "stripe": "^22.5.0"
-  },
   "devDependencies": {
     "wrangler": "^4.124.0"
   },

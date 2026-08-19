@@ -3,8 +3,10 @@
 Cloudflare Worker behind `welcome.yogaforbjj.net`. Landing page + funnel data layer
 for the $14 course bundle and the $360 one-click lifetime upsell.
 
-Skeleton pass: pages, `/api/lead`, `/health`, and Stripe webhook signature
-verification + idempotency are real. Checkout and upsell are 501 stubs.
+Checkout runs on **ThriveCart** (`learnbjjfast.thrivecart.com`), not here. This
+Worker serves the pages, captures leads into D1 before the cart handoff, and
+reports health. The Stripe checkout/upsell/webhook layer is parked in
+`src/deferred/` - see the README there.
 
 ## Routes
 
@@ -15,9 +17,22 @@ verification + idempotency are real. Checkout and upsell are 501 stubs.
 | `/thanks`              | GET    | placeholder thank-you page                        |
 | `/health`              | GET    | 200 when D1 is reachable and all 3 tables exist; 503 otherwise |
 | `/api/lead`            | POST   | live - rate limited, validates email, inserts into `leads` |
-| `/api/checkout`        | POST   | 501 stub                                          |
-| `/api/upsell`          | POST   | 501 stub                                          |
-| `/api/stripe-webhook`  | POST   | signature verified (400 on failure), then idempotency-claimed, then handled |
+
+## Operator knobs
+
+Everything an operator changes lives in `[vars]` in `wrangler.toml` and reaches
+the pages through one JSON island (`<script id="page-config">`):
+
+| Var | Meaning |
+|-----|---------|
+| `THRIVECART_BUNDLE_URL`   | $14 bundle cart link. Empty = CTA scrolls to the email form instead of dead-linking. |
+| `THRIVECART_LIFETIME_URL` | $297 lifetime cart link. Empty = upsell CTAs render disabled. |
+| `OFFER_DEADLINE`          | ISO 8601. Empty = the deadline bar is not rendered at all. |
+| `BUNDLE_PRICE_CENTS`      | 1400 |
+| `LIFETIME_PRICE_CENTS`    | 29700 |
+| `YEARLY_PRICE_CENTS`      | 9700 |
+
+Prices render from these values, so one edit moves every surface.
 
 ## Rate limiting `/api/lead`
 
@@ -42,16 +57,11 @@ the whole zone's single free rule on this one endpoint.
 
 ## Secrets
 
-Never in source, never in `wrangler.toml`, never in the client bundle.
-
-
-    npx wrangler secret put STRIPE_SECRET_KEY
-    npx wrangler secret put STRIPE_WEBHOOK_SECRET
-
-Only `STRIPE_PUBLISHABLE_KEY` (a `pk_` value) belongs in `[vars]` in
-`wrangler.toml` - it is injected into the page server-side.
-
-Local dev: copy `.dev.vars.example` to `.dev.vars` (gitignored) and fill it.
+The Worker currently needs **no secrets** - ThriveCart owns payment. The rule
+still stands for anything added later: secrets go in Cloudflare Secrets, read
+off the `env` binding, never in source, never in `wrangler.toml`, never in the
+client bundle. Local dev values go in `.dev.vars` (gitignored); see
+`.dev.vars.example`.
 
     npm run scan     # fails non-zero if a secret-shaped key reaches served output
 

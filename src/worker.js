@@ -1,15 +1,13 @@
 /**
  * welcome.yogaforbjj.net - funnel Worker.
  *
- * Infrastructure + skeleton only: checkout and upsell are deliberate 501 stubs.
- * The only fully-live paths are the pages, /api/lead, /health, and Stripe
- * webhook signature verification + idempotency.
+ * Checkout runs on ThriveCart, not here. This Worker serves the pages, captures
+ * leads into D1, and reports health. The Stripe checkout/upsell/webhook layer is
+ * parked in src/deferred/ - see the README there.
  *
- * Secrets discipline: STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET arrive as
- * Cloudflare Secrets on `env`. Nothing secret is ever inlined into a page.
+ * No secrets are needed at present. If the Stripe layer is un-shelved, its keys
+ * come from Cloudflare Secrets on `env` and never touch a page or wrangler.toml.
  */
-
-import Stripe from 'stripe';
 
 import landingHtml from './pages/landing.html';
 import upsellHtml from './pages/upsell.html';
@@ -59,9 +57,26 @@ function html(body, status = 200) {
   });
 }
 
-/** Interpolates [vars] into a page. Only non-secret values are ever passed. */
+/**
+ * Page config. Every operator-editable knob lives in [vars] in wrangler.toml and
+ * arrives here; pages read it from one JSON island rather than N interpolations,
+ * so there is no attribute-injection surface. Only non-secret values are passed.
+ */
+const PAGE_CONFIG_KEYS = [
+  'THRIVECART_BUNDLE_URL',
+  'THRIVECART_LIFETIME_URL',
+  'OFFER_DEADLINE',
+  'BUNDLE_PRICE_CENTS',
+  'LIFETIME_PRICE_CENTS',
+  'YEARLY_PRICE_CENTS',
+];
+
 function renderPage(template, env) {
-  return template.replace(/\{\{STRIPE_PUBLISHABLE_KEY\}\}/g, env.STRIPE_PUBLISHABLE_KEY || '');
+  const config = {};
+  for (const key of PAGE_CONFIG_KEYS) config[key] = env[key] || '';
+  // `<` escaped so a value can never close the script tag it sits in.
+  const payload = JSON.stringify(config).replace(/</g, '\\u003c');
+  return template.replace(/\{\{PAGE_CONFIG_JSON\}\}/g, payload);
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -211,98 +226,8 @@ async function handleLead(request, env, ctx) {
     return json({ ok: false, error: 'storage_failed' }, 500);
   }
 
-  // next: /api/checkout creates the Stripe Checkout session for the bundle.
-  return json({ ok: true, next: '/api/checkout' }, 201);
-}
-
-function handleCheckoutStub() {
-  return json(
-    {
-      ok: false,
-      error: 'not_implemented',
-      note: 'Stub. Will create a Stripe Checkout session for the $14 bundle and return its URL. Needs STRIPE_SECRET_KEY + a live price id.',
-    },
-    501
-  );
-}
-
-function handleUpsellStub() {
-  return json(
-    {
-      ok: false,
-      error: 'not_implemented',
-      note: 'Stub. Will charge the $360 lifetime upsell one-click off the saved customer/payment method from the bundle purchase.',
-    },
-    501
-  );
-}
-
-/**
- * Stripe webhook. Order is load-bearing:
- *   1. verify signature (constructEventAsync + SubtleCrypto provider) -> 400 on failure
- *   2. claim the event id in webhook_events -> duplicate exits before side effects
- *   3. only then run the handler
- */
-async function handleStripeWebhook(request, env) {
-  if (!env.STRIPE_WEBHOOK_SECRET || !env.STRIPE_SECRET_KEY) {
-    console.error('stripe secrets missing from env');
-    return json({ ok: false, error: 'stripe_not_configured' }, 500);
-  }
-
-  const signature = request.headers.get('stripe-signature');
-  if (!signature) return json({ ok: false, error: 'missing_signature' }, 400);
-
-  const rawBody = await request.text();
-
-  const stripe = new Stripe(env.STRIPE_SECRET_KEY, { maxNetworkRetries: 2 });
-  // Workers have no Node crypto: the async path + SubtleCrypto provider is the
-  // only correct one here. stripe.webhooks.constructEvent() would throw.
-  const cryptoProvider = Stripe.createSubtleCryptoProvider();
-
-  let event;
-  try {
-    event = await stripe.webhooks.constructEventAsync(
-      rawBody,
-      signature,
-      env.STRIPE_WEBHOOK_SECRET,
-      undefined,
-      cryptoProvider
-    );
-  } catch (err) {
-    console.warn('stripe signature verification failed:', err && err.message);
-    return json({ ok: false, error: 'invalid_signature' }, 400);
-  }
-
-  // Idempotency claim. changes === 0 means another delivery already ran it.
-  let claim;
-  try {
-    claim = await env.DB.prepare(
-      'INSERT OR IGNORE INTO webhook_events (stripe_event_id, type, processed_at) VALUES (?1, ?2, ?3)'
-    )
-      .bind(event.id, event.type, nowIso())
-      .run();
-  } catch (err) {
-    console.error('webhook_events claim failed', err);
-    // 500 so Stripe retries: we do not know whether the handler ran.
-    return json({ ok: false, error: 'storage_failed' }, 500);
-  }
-
-  if (!claim.meta || claim.meta.changes === 0) {
-    return json({ ok: true, received: true, duplicate: true, id: event.id });
-  }
-
-  switch (event.type) {
-    case 'checkout.session.completed':
-      // TODO: upsert orders row (product 'bundle'), then hand off to fulfilment.
-      break;
-    case 'payment_intent.succeeded':
-      // TODO: lifetime upsell settlement -> orders row (product 'lifetime').
-      break;
-    default:
-      break;
-  }
-
-  return json({ ok: true, received: true, id: event.id, type: event.type });
+  // Client hands off to ThriveCart after this resolves; see src/pages/landing.html.
+  return json({ ok: true }, 201);
 }
 
 /* ------------------------------------------------------------------ router */
@@ -322,12 +247,9 @@ export default {
 
     if (method === 'POST') {
       if (path === '/api/lead') return handleLead(request, env, ctx);
-      if (path === '/api/checkout') return handleCheckoutStub();
-      if (path === '/api/upsell') return handleUpsellStub();
-      if (path === '/api/stripe-webhook') return handleStripeWebhook(request, env);
     }
 
-    const known = ['/', '/upsell', '/thanks', '/health', '/api/lead', '/api/checkout', '/api/upsell', '/api/stripe-webhook'];
+    const known = ['/', '/upsell', '/thanks', '/health', '/api/lead'];
     if (known.includes(path)) return json({ ok: false, error: 'method_not_allowed' }, 405);
 
     return json({ ok: false, error: 'not_found' }, 404);

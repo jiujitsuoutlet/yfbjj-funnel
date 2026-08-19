@@ -3,38 +3,50 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>[THANKS PAGE TITLE] | Yoga for BJJ</title>
+<meta name="color-scheme" content="dark">
+<title>[[THANKS_PAGE_TITLE]]</title>
 <meta name="robots" content="noindex">
 <style>
-  :root{--ink:#14161a;--muted:#5b6270;--bg:#fff;--panel:#f6f7f9}
+  :root{--bg:#0c0d10;--bg-raised:#15171c;--line:#24272f;--ink:#f4f6fa;--ink-dim:#a7aebc;--ink-faint:#767d8c;--accent:#f2b134}
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font:400 1.0625rem/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:400 1.0625rem/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
   main{max-width:34rem;margin:0 auto;padding:3rem 1.25rem}
-  h1{font-size:1.75rem;line-height:1.2;margin:0 0 .75rem;letter-spacing:-.02em}
+  h1{font-size:clamp(1.7rem,6vw,2.1rem);line-height:1.15;letter-spacing:-.02em;margin:0 0 .75rem}
+  h2{font-size:1.15rem;margin:0 0 .75rem}
   p{margin:0 0 1rem}
-  .sub{color:var(--muted)}
-  .panel{background:var(--panel);border-radius:.75rem;padding:1.25rem}
-  ol{margin:0;padding-left:1.2rem} li{margin:0 0 .5rem}
-  @media (prefers-color-scheme:dark){:root{--ink:#f2f4f8;--muted:#a2abbb;--bg:#0f1115;--panel:#171a20}}
+  .eyebrow{margin:0 0 .75rem;font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+  .lede{color:var(--ink-dim);font-size:1.1rem}
+  .card{background:var(--bg-raised);border:1px solid var(--line);border-radius:.9rem;padding:1.25rem;margin:0 0 1.25rem}
+  ol{margin:0;padding-left:1.2rem}
+  li{margin:0 0 .6rem;color:var(--ink-dim)}
+  li strong{color:var(--ink)}
+  .faint{color:var(--ink-faint);font-size:.875rem}
+  a{color:var(--accent)}
 </style>
 </head>
 <body>
 <main>
   <section id="thanks-hero">
-    <h1>[THANK YOU HEADLINE]</h1>
-    <p class="sub">[CONFIRMATION LINE - receipt sent, check inbox]</p>
+    <p class="eyebrow">[[THANKS_EYEBROW]]</p>
+    <h1>[[THANKS_HEADLINE]]</h1>
+    <p class="lede">[[THANKS_CONFIRMATION_LINE]]</p>
   </section>
+
   <section id="next-steps">
-    <div class="panel">
+    <div class="card">
+      <h2>[[NEXT_STEPS_HEADLINE]]</h2>
       <ol>
-        <li>[NEXT STEP 1]</li>
-        <li>[NEXT STEP 2]</li>
-        <li>[NEXT STEP 3]</li>
+        <li><strong>[[NEXT_STEP_1]]</strong> [[NEXT_STEP_1_DETAIL]]</li>
+        <li><strong>[[NEXT_STEP_2]]</strong> [[NEXT_STEP_2_DETAIL]]</li>
+        <li><strong>[[NEXT_STEP_3]]</strong> [[NEXT_STEP_3_DETAIL]]</li>
       </ol>
     </div>
   </section>
+
   <section id="support">
-    <p class="sub">[SUPPORT LINE - email address for help]</p>
+    <p class="faint">[[THANKS_SUPPORT_LINE]] <a href="mailto:[[SUPPORT_EMAIL]]">[[SUPPORT_EMAIL]]</a></p>
   </section>
 </main>
 </body>
