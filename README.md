@@ -23,15 +23,22 @@ verification + idempotency are real. Checkout and upsell are 501 stubs.
 
 Unauthenticated POST that writes to D1, so two layers per client IP:
 
-1. **5 per minute** - Workers Rate Limiting binding (`[[ratelimits]]` in
-   `wrangler.toml`). In-memory at the colo, no D1 write, no extra resource.
-   `period` only accepts 10 or 60 seconds, which is why the hour window is not here.
-2. **30 per hour** - fixed hourly window in the `rate_limits` D1 table. Only
-   requests that cleared layer 1 reach it, so D1 writes are capped at 5/min/IP.
+1. **5 per minute** - Workers Rate Limiting binding (`[[ratelimit]]`,
+   `LEAD_RATE_LIMIT`, in `wrangler.toml`). In-memory at the colo, no D1 write,
+   no extra resource. `period` only accepts 10 or 60 seconds, which is why the
+   hour window is not here.
+2. **30 per hour** - fixed hourly window in the `rate_limits` D1 table
+   (`0002_rate_limits.sql`). Only requests that cleared layer 1 reach it, so D1
+   writes are capped at 5/min/IP.
 
-Both keyed on SHA-256 of the IP; raw IPs are never stored. Over limit returns
-429 with a `Retry-After` header. A limiter failure fails **open** - the funnel
-stays up. Dead buckets are swept opportunistically on ~2% of first-hits.
+Both keyed on SHA-256 of `CF-Connecting-IP`; raw IPs are never stored. Over
+limit returns 429 with a `Retry-After` header. A limiter failure fails **open** -
+the funnel stays up. Dead buckets are swept opportunistically on ~2% of first-hits.
+
+This lives in the Worker rather than in a zone Rate Limiting rule because
+`yogaforbjj.net` is on the Free plan: one rate limiting rule per zone, maximum
+period 60 seconds. That cannot express the 30/hour window, and it would spend
+the whole zone's single free rule on this one endpoint.
 
 ## Secrets
 
