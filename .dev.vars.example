@@ -1,0 +1,6 @@
+# Copy to .dev.vars for local `wrangler dev`. NEVER commit .dev.vars.
+# In production these same names are Cloudflare Secrets, not vars:
+#   wrangler secret put STRIPE_SECRET_KEY
+#   wrangler secret put STRIPE_WEBHOOK_SECRET
+STRIPE_SECRET_KEY = "__REPLACE_ME_STRIPE_SECRET_KEY__"
+STRIPE_WEBHOOK_SECRET = "__REPLACE_ME_STRIPE_WEBHOOK_SIGNING_SECRET__"

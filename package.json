@@ -1,0 +1,25 @@
+{
+  "name": "yfbjj-funnel",
+  "version": "1.0.0",
+  "description": "welcome.yogaforbjj.net funnel Worker",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "scan": "bash scripts/scan-secrets.sh",
+    "db:create": "wrangler d1 create yfbjj_funnel",
+    "db:migrate:local": "wrangler d1 migrations apply yfbjj_funnel --local",
+    "db:migrate:remote": "wrangler d1 migrations apply yfbjj_funnel --remote",
+    "tail": "wrangler tail"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "stripe": "^22.5.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.124.0"
+  },
+  "private": true
+}

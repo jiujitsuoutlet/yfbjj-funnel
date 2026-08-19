@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[UPSELL PAGE TITLE] | Yoga for BJJ</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{--ink:#14161a;--muted:#5b6270;--line:#e3e6ec;--bg:#fff;--panel:#f6f7f9;--accent:#1b6ef3;--accent-ink:#fff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:400 1.0625rem/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  main{max-width:34rem;margin:0 auto;padding:2rem 1.25rem 3rem}
+  h1{font-size:1.75rem;line-height:1.2;margin:0 0 .75rem;letter-spacing:-.02em}
+  h2{font-size:1.15rem;margin:0 0 .5rem}
+  p{margin:0 0 1rem}
+  .sub{color:var(--muted)}
+  .panel{background:var(--panel);border-radius:.75rem;padding:1.25rem;margin:0 0 1.25rem}
+  .price{font-size:2.25rem;font-weight:700;margin:0 0 .5rem;letter-spacing:-.02em}
+  .price small{display:block;font-size:.9rem;font-weight:400;color:var(--muted)}
+  ul{margin:0 0 1rem;padding-left:1.15rem} li{margin:0 0 .5rem}
+  button{width:100%;padding:.95rem 1rem;font:600 1.0625rem/1 inherit;color:var(--accent-ink);background:var(--accent);border:0;border-radius:.6rem;cursor:pointer}
+  button[disabled]{opacity:.6;cursor:progress}
+  .decline{display:block;margin:1rem 0 0;text-align:center;color:var(--muted);font-size:.9rem}
+  .msg{min-height:1.25rem;margin:.6rem 0 0;font-size:.9rem}
+  .msg[data-state=error]{color:#b3261e}
+  @media (prefers-color-scheme:dark){:root{--ink:#f2f4f8;--muted:#a2abbb;--line:#2a2f38;--bg:#0f1115;--panel:#171a20;--accent:#5b9bff;--accent-ink:#08111f}}
+</style>
+</head>
+<body>
+<main>
+  <section id="upsell-hero">
+    <h1>[UPSELL HEADLINE - one-time offer]</h1>
+    <p class="sub">[UPSELL SUBHEAD - why now, why only here]</p>
+  </section>
+
+  <section id="upsell-included">
+    <h2>[UPSELL WHAT'S INCLUDED]</h2>
+    <ul>
+      <li>[UPSELL BULLET 1]</li>
+      <li>[UPSELL BULLET 2]</li>
+      <li>[UPSELL BULLET 3]</li>
+    </ul>
+  </section>
+
+  <section id="upsell-price">
+    <div class="panel">
+      <p class="price">$360 <small>[LIFETIME PRICE SUBLINE - one time, no renewal]</small></p>
+      <button id="upsell-buy" type="button">[ONE-CLICK UPSELL BUTTON TEXT]</button>
+      <p id="upsell-msg" class="msg" role="status" aria-live="polite"></p>
+      <a class="decline" href="/thanks">[DECLINE LINK TEXT]</a>
+    </div>
+  </section>
+</main>
+<script>
+(function () {
+  var btn = document.getElementById('upsell-buy');
+  var msg = document.getElementById('upsell-msg');
+  btn.addEventListener('click', async function () {
+    btn.disabled = true;
+    msg.textContent = ''; msg.dataset.state = '';
+    try {
+      // One click: no card re-entry. Server charges the saved payment method
+      // from the bundle purchase, keyed off the checkout session id.
+      var params = new URLSearchParams(location.search);
+      var res = await fetch('/api/upsell', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: params.get('session_id') || '', product: 'lifetime' })
+      });
+      var body = await res.json().catch(function () { return {}; });
+      if (res.ok && body.ok) { location.assign('/thanks?upgraded=1'); return; }
+      msg.textContent = '[UPSELL NOT LIVE YET MESSAGE] (' + res.status + ')';
+      msg.dataset.state = 'error';
+    } catch (_) {
+      msg.textContent = '[NETWORK ERROR MESSAGE]';
+      msg.dataset.state = 'error';
+    } finally {
+      btn.disabled = false;
+    }
+  });
+})();
+</script>
+</body>
+</html>
