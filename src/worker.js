@@ -12,6 +12,9 @@
 import landingHtml from './pages/landing.html';
 import upsellHtml from './pages/upsell.html';
 import thanksHtml from './pages/thanks.html';
+import previewCheckoutHtml from './pages/preview-checkout.html';
+import baseCss from './pages/_base.css';
+import pageJs from './pages/_page.js';
 
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
@@ -63,6 +66,7 @@ function html(body, status = 200) {
  * so there is no attribute-injection surface. Only non-secret values are passed.
  */
 const PAGE_CONFIG_KEYS = [
+  'PREVIEW_MODE',
   'THRIVECART_BUNDLE_URL',
   'THRIVECART_LIFETIME_URL',
   'OFFER_DEADLINE',
@@ -71,12 +75,28 @@ const PAGE_CONFIG_KEYS = [
   'YEARLY_PRICE_CENTS',
 ];
 
+/**
+ * PREVIEW_MODE defaults to TRUE and must be turned off explicitly. An unset or
+ * malformed value means preview, so a missing var can never route paid traffic
+ * at a cart that is not ready.
+ */
+function isPreviewMode(env) {
+  return String(env.PREVIEW_MODE ?? 'true').trim().toLowerCase() !== 'false';
+}
+
 function renderPage(template, env) {
   const config = {};
   for (const key of PAGE_CONFIG_KEYS) config[key] = env[key] || '';
+  config.PREVIEW_MODE = isPreviewMode(env);
   // `<` escaped so a value can never close the script tag it sits in.
   const payload = JSON.stringify(config).replace(/</g, '\\u003c');
-  return template.replace(/\{\{PAGE_CONFIG_JSON\}\}/g, payload);
+  // Replacer FUNCTIONS, not strings: a replacement string treats $$, $&, $`
+  // and $' as patterns, which silently mangles any injected JS or URL that
+  // contains them (`return '$' + ...` became `return '` and broke the page).
+  return template
+    .replace(/\{\{BASE_CSS\}\}/g, () => baseCss)
+    .replace(/\{\{PAGE_JS\}\}/g, () => pageJs)
+    .replace(/\{\{PAGE_CONFIG_JSON\}\}/g, () => payload);
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -242,6 +262,7 @@ export default {
       if (path === '/') return html(renderPage(landingHtml, env));
       if (path === '/upsell') return html(renderPage(upsellHtml, env));
       if (path === '/thanks') return html(renderPage(thanksHtml, env));
+      if (path === '/preview-checkout') return html(renderPage(previewCheckoutHtml, env));
       if (path === '/health') return handleHealth(env);
     }
 
@@ -249,7 +270,7 @@ export default {
       if (path === '/api/lead') return handleLead(request, env, ctx);
     }
 
-    const known = ['/', '/upsell', '/thanks', '/health', '/api/lead'];
+    const known = ['/', '/upsell', '/thanks', '/preview-checkout', '/health', '/api/lead'];
     if (known.includes(path)) return json({ ok: false, error: 'method_not_allowed' }, 405);
 
     return json({ ok: false, error: 'not_found' }, 404);

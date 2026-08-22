@@ -12,7 +12,7 @@ routes = [
 # Serve .html files as text modules -> plain HTML files, no build step.
 [[rules]]
 type = "Text"
-globs = ["**/*.html"]
+globs = ["**/*.html", "**/*.css", "**/_page.js"]
 fallthrough = true
 
 # Burst limiter: in-memory at the edge, no D1 write, no extra resource.
@@ -34,6 +34,11 @@ migrations_dir = "migrations"
 BUNDLE_PRICE_CENTS = "1400"
 LIFETIME_PRICE_CENTS = "29700"
 YEARLY_PRICE_CENTS = "9700"
+
+# PREVIEW_MODE gates the cart handoff. TRUE (or unset, or anything but the exact
+# string "false") sends every CTA to /preview-checkout instead of ThriveCart.
+# Turn it off only when the cart link below is real. `npm run preflight` enforces this.
+PREVIEW_MODE = "true"
 
 # Checkout is ThriveCart, not Stripe. These are the two knobs to turn at launch.
 # THRIVECART_*_URL: paste the real cart links. Until then the CTA renders in a

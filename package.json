@@ -4,12 +4,13 @@
   "description": "welcome.yogaforbjj.net funnel Worker",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "deploy": "npm run preflight && wrangler deploy",
     "scan": "bash scripts/scan-secrets.sh",
     "db:create": "wrangler d1 create yfbjj_funnel",
     "db:migrate:local": "wrangler d1 migrations apply yfbjj_funnel --local",
     "db:migrate:remote": "wrangler d1 migrations apply yfbjj_funnel --remote",
-    "tail": "wrangler tail"
+    "tail": "wrangler tail",
+    "preflight": "node scripts/preflight.mjs"
   },
   "keywords": [],
   "author": "",

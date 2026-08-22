@@ -4,50 +4,63 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>[[THANKS_PAGE_TITLE]]</title>
+<title>Order confirmed</title>
 <meta name="robots" content="noindex">
-<style>
-  :root{--bg:#0c0d10;--bg-raised:#15171c;--line:#24272f;--ink:#f4f6fa;--ink-dim:#a7aebc;--ink-faint:#767d8c;--accent:#f2b134}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);
-    font:400 1.0625rem/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    -webkit-font-smoothing:antialiased}
-  main{max-width:34rem;margin:0 auto;padding:3rem 1.25rem}
-  h1{font-size:clamp(1.7rem,6vw,2.1rem);line-height:1.15;letter-spacing:-.02em;margin:0 0 .75rem}
-  h2{font-size:1.15rem;margin:0 0 .75rem}
-  p{margin:0 0 1rem}
-  .eyebrow{margin:0 0 .75rem;font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
-  .lede{color:var(--ink-dim);font-size:1.1rem}
-  .card{background:var(--bg-raised);border:1px solid var(--line);border-radius:.9rem;padding:1.25rem;margin:0 0 1.25rem}
-  ol{margin:0;padding-left:1.2rem}
-  li{margin:0 0 .6rem;color:var(--ink-dim)}
-  li strong{color:var(--ink)}
-  .faint{color:var(--ink-faint);font-size:.875rem}
-  a{color:var(--accent)}
-</style>
+<style>{{BASE_CSS}}</style>
 </head>
 <body>
+
+<div id="preview-banner" class="preview-banner" hidden>
+  Preview build &middot; <strong>checkout not connected</strong>
+</div>
+
 <main>
+
   <section id="thanks-hero">
-    <p class="eyebrow">[[THANKS_EYEBROW]]</p>
-    <h1>[[THANKS_HEADLINE]]</h1>
-    <p class="lede">[[THANKS_CONFIRMATION_LINE]]</p>
+    <p class="eyebrow">Order confirmed</p>
+    <h1>You're in.</h1>
+    <p class="lede">
+      Payment went through and your receipt is on its way from ThriveCart. Keep that
+      email: it is your proof of purchase and it holds your access details.
+    </p>
   </section>
 
-  <section id="next-steps">
-    <div class="card">
-      <h2>[[NEXT_STEPS_HEADLINE]]</h2>
-      <ol>
-        <li><strong>[[NEXT_STEP_1]]</strong> [[NEXT_STEP_1_DETAIL]]</li>
-        <li><strong>[[NEXT_STEP_2]]</strong> [[NEXT_STEP_2_DETAIL]]</li>
-        <li><strong>[[NEXT_STEP_3]]</strong> [[NEXT_STEP_3_DETAIL]]</li>
-      </ol>
-    </div>
+  <section id="access">
+    <h2>Getting your access</h2>
+    <!-- PLACEHOLDER: the delivery mechanism is unconfirmed. Whichever it is
+         (course platform invite, login link, app access), name it here and in
+         step 1 below, and give the real arrival time in place of the range. -->
+    <ol class="checks" style="list-style:none">
+      <li><strong>Check your inbox</strong><span>Your access email arrives within [[ACCESS_ARRIVAL_TIME]]. It comes from [[SENDER_ADDRESS]].</span></li>
+      <li><strong>Open it on the device you train with</strong><span>[[DELIVERY_MECHANISM_NOTE]]</span></li>
+      <li><strong>Start with [[FIRST_SESSION_NAME]]</strong><span>[[FIRST_SESSION_NOTE]]</span></li>
+    </ol>
+    <p class="faint">
+      Nothing after 15 minutes? Check spam and promotions first, then email us and
+      we will resend it by hand.
+    </p>
   </section>
 
   <section id="support">
-    <p class="faint">[[THANKS_SUPPORT_LINE]] <a href="mailto:[[SUPPORT_EMAIL]]">[[SUPPORT_EMAIL]]</a></p>
+    <h2>If something is wrong</h2>
+    <p class="dim">
+      Wrong email address on the order, no access email, or a payment question:
+      write to <a href="mailto:[[SUPPORT_EMAIL]]">[[SUPPORT_EMAIL]]</a> with the receipt
+      attached and we will sort it out.
+    </p>
   </section>
+
+  <footer>
+    <p>[[FOOTER_LINE]]</p>
+    <nav>
+      <a href="[[TERMS_URL]]">[[TERMS_LABEL]]</a> &middot;
+      <a href="[[PRIVACY_URL]]">[[PRIVACY_LABEL]]</a>
+    </nav>
+  </footer>
+
 </main>
+
+<script id="page-config" type="application/json">{{PAGE_CONFIG_JSON}}</script>
+<script>{{PAGE_JS}}</script>
 </body>
 </html>
