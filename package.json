@@ -10,7 +10,8 @@
     "db:migrate:local": "wrangler d1 migrations apply yfbjj_funnel --local",
     "db:migrate:remote": "wrangler d1 migrations apply yfbjj_funnel --remote",
     "tail": "wrangler tail",
-    "preflight": "node scripts/preflight.mjs"
+    "preflight": "node scripts/preflight.mjs",
+    "build:tc": "node scripts/build-thrivecart.mjs"
   },
   "keywords": [],
   "author": "",

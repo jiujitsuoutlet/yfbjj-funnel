@@ -3,7 +3,7 @@
  * Deploy gate. Refuses to let a half-configured page take paid traffic.
  * Every check reports independently: one run tells you everything that is missing.
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -83,25 +83,72 @@ if (!dbId || dbId === 'REPLACE_WITH_D1_DATABASE_ID') {
 }
 
 /* 5. no unfilled copy placeholders left in any page */
-const PAGES = ['landing.html', 'thanks.html', 'preview-checkout.html'];
+// ThriveCart wires its own accept and decline URLs when the page is pasted into
+// its builder, so these two are expected to sit unfilled in this repo forever.
+const TC_EXPECTED = new Set(['[[TC_ACCEPT_URL]]', '[[TC_DECLINE_URL]]']);
+
+const WORKER_PAGES = ['landing.html', 'thanks.html', 'preview-checkout.html'];
 const leftovers = [];
-for (const page of PAGES) {
-  let html = '';
-  try {
-    html = readFileSync(join(ROOT, 'src', 'pages', page), 'utf8');
-  } catch {
-    fail(`cannot read src/pages/${page}`);
-    continue;
-  }
+const expected = [];
+
+function sweep(label, html) {
   // Strip comments first: a commented-out example is guidance, not a leak.
   const visible = html.replace(/<!--[\s\S]*?-->/g, '');
   const hits = visible.match(/\[\[[A-Z0-9_]+[^\]]*\]\]/g) || [];
-  for (const hit of new Set(hits)) leftovers.push(`${page}: ${hit}`);
+  for (const hit of new Set(hits)) {
+    if (TC_EXPECTED.has(hit)) expected.push(`${label}: ${hit}`);
+    else leftovers.push(`${label}: ${hit}`);
+  }
 }
+
+for (const page of WORKER_PAGES) {
+  try {
+    sweep(page, readFileSync(join(ROOT, 'src', 'pages', page), 'utf8'));
+  } catch {
+    fail(`cannot read src/pages/${page}`);
+  }
+}
+
+// ThriveCart pages are deliverables too, so their copy gaps are blockers as well.
+let tcPages = [];
+try {
+  tcPages = readdirSync(join(ROOT, 'src', 'thrivecart')).filter((f) => f.endsWith('.html'));
+} catch {
+  /* directory is optional */
+}
+for (const page of tcPages) {
+  sweep(`thrivecart/${page}`, readFileSync(join(ROOT, 'src', 'thrivecart', page), 'utf8'));
+}
+
 if (leftovers.length) {
   fail(`${leftovers.length} unfilled copy placeholder${leftovers.length > 1 ? 's' : ''} would render on a live page:\n      ${leftovers.join('\n      ')}`);
 } else {
   pass('no unfilled copy placeholders in any page');
+}
+if (expected.length) {
+  pass(`${expected.length} ThriveCart URL placeholder${expected.length > 1 ? 's' : ''} left unfilled on purpose (wired inside ThriveCart)`);
+}
+
+/* 5b. generated ThriveCart pages are current */
+if (tcPages.length) {
+  const css = readFileSync(join(ROOT, 'src', 'pages', '_base.css'), 'utf8');
+  const stale = [];
+  for (const page of tcPages) {
+    const built = readFileSync(join(ROOT, 'src', 'thrivecart', page), 'utf8');
+    let template = '';
+    try {
+      template = readFileSync(join(ROOT, 'src', 'thrivecart', '_src', page), 'utf8');
+    } catch {
+      stale.push(`${page} has no source in src/thrivecart/_src`);
+      continue;
+    }
+    if (built !== template.replace(/\{\{BASE_CSS\}\}/g, () => css)) stale.push(page);
+  }
+  if (stale.length) {
+    fail(`ThriveCart pages are stale, run \`npm run build:tc\`: ${stale.join(', ')}`);
+  } else {
+    pass(`${tcPages.length} ThriveCart pages built and current`);
+  }
 }
 
 /* 6. secrets scan */
