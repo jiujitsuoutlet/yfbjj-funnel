@@ -3,7 +3,7 @@
  * Deploy gate. Refuses to let a half-configured page take paid traffic.
  * Every check reports independently: one run tells you everything that is missing.
  */
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -142,7 +142,13 @@ if (tcPages.length) {
       stale.push(`${page} has no source in src/thrivecart/_src`);
       continue;
     }
-    if (built !== template.replace(/\{\{BASE_CSS\}\}/g, () => css)) stale.push(page);
+    // Mirror EVERY substitution the generator makes, or this check reports
+    // stale forever and stops meaning anything.
+    const assetBase = (cfg.ASSET_BASE_URL || '').trim() || '[[ASSET_BASE_URL]]';
+    const expected = template
+      .replace(/\{\{BASE_CSS\}\}/g, () => css)
+      .replace(/\{\{ASSET_BASE\}\}/g, () => assetBase);
+    if (built !== expected) stale.push(page);
   }
   if (stale.length) {
     fail(`ThriveCart pages are stale, run \`npm run build:tc\`: ${stale.join(', ')}`);
@@ -203,6 +209,32 @@ if (!appendsVariant) {
     }
   } catch (err) {
     fail(`cannot build a cart URL from THRIVECART_BUNDLE_URL: ${err.message}`);
+  }
+}
+
+/* 5e. every image a page references actually exists */
+// A renamed original or a skipped `npm run build:img` would otherwise ship a
+// page full of broken <img> boxes to paid traffic.
+const imageRefs = new Set();
+const scanPages = [
+  ...WORKER_PAGES.map((f) => ['src/pages', f]),
+  ...tcPages.map((f) => ['src/thrivecart', f]),
+];
+for (const [dir, file] of scanPages) {
+  let html = '';
+  try {
+    html = readFileSync(join(ROOT, dir, file), 'utf8');
+  } catch {
+    continue;
+  }
+  for (const m of html.matchAll(/\/img\/([a-z0-9-]+\.(?:webp|jpg))/g)) imageRefs.add(m[1]);
+}
+if (imageRefs.size) {
+  const broken = [...imageRefs].filter((f) => !existsSync(join(ROOT, 'public', 'img', f)));
+  if (broken.length) {
+    fail(`${broken.length} referenced image${broken.length > 1 ? 's are' : ' is'} missing from public/img. Run \`npm run build:img\`: ${broken.slice(0, 6).join(', ')}`);
+  } else {
+    pass(`${imageRefs.size} referenced image files all present in public/img`);
   }
 }
 

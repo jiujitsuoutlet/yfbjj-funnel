@@ -5,3 +5,8 @@ dist/
 .scan-out/
 .DS_Store
 *.log
+
+# Image originals: multi-megabyte camera files. Only the generated derivatives
+# in src/images/ are committed, because those are what the Worker serves.
+src/images/_src/
+src/images/exports/

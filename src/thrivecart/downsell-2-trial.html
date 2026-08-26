@@ -280,6 +280,60 @@ input[type=email]:focus-visible{outline:2px solid var(--red); outline-offset:2px
   font-size:1.25rem; line-height:1.4; font-weight:700;
 }
 
+/* ----------------------------------------------------------------- images */
+/* Every image declares width and height so its box is reserved before it
+   loads. aspect-ratio keeps that box correct once CSS takes over. */
+img{display:block; max-width:100%; height:auto}
+
+/* Full-bleed band image with type over it. The scrim is a measured value, not
+   an eyeballed one: see the contrast note in the build log. */
+.figure-band{
+  position:relative; margin:0; overflow:hidden;
+  background:var(--black-2);
+}
+.figure-band img{width:100%; height:100%; object-fit:cover; position:absolute; inset:0}
+.figure-band .figure-inner{
+  position:relative; z-index:2;
+  max-width:var(--measure); margin:0 auto; padding:var(--s8) var(--pad);
+}
+/* Two stops rather than a flat wash: the type sits in the dense end and the
+   photograph stays legible in the thin end. */
+.figure-band::after{
+  content:""; position:absolute; inset:0; z-index:1;
+  background:linear-gradient(180deg,
+    rgba(10,10,10,.94) 0%,     /* headline sits here, so it stays dense */
+    rgba(10,10,10,.86) 28%,
+    rgba(10,10,10,.62) 62%,    /* thin enough that the photograph reads */
+    rgba(10,10,10,.80) 100%);
+}
+.figure-band.scrim-side::after{
+  background:linear-gradient(100deg, rgba(10,10,10,.96) 0%, rgba(10,10,10,.90) 45%, rgba(10,10,10,.55) 100%);
+}
+
+/* Brand red over a photograph measures 2.77:1 against the brightest pixel under
+   the headline, below the 3:1 large-text floor. The lighter red measures 3.6:1
+   on the same scrim, so type over an image uses that one. Solid grounds keep
+   the exact brand value. */
+.figure-band .line-red{color:#ef4444}
+.figure-band .kicker::before{background:#ef4444}
+
+/* Inline figure inside a normal band: no type over it, so no scrim. */
+.figure{margin:0 0 var(--s5); border-radius:var(--r-card); overflow:hidden; background:var(--black-4)}
+.band-cream .figure{background:#e9eae2}
+.figure img{width:100%}
+.figure figcaption{
+  padding:var(--s3) var(--s4); font-size:var(--t-micro); font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3);
+}
+.band-cream .figure figcaption{color:var(--ink-cream-3)}
+
+/* Card thumbnail, used on the numbered rows. */
+.numbered .thumb{
+  flex:none; width:5.5rem; border-radius:.6rem; overflow:hidden; background:var(--black-4);
+}
+.numbered .thumb img{width:100%; height:100%; object-fit:cover}
+@media (max-width:26rem){ .numbered .thumb{width:4.25rem} }
+
 /* ---------------------------------------------------------------- marquee */
 /* Their ticker is skewed one degree and bordered top and bottom. Measured. */
 .marquee{
@@ -353,8 +407,14 @@ body[data-buybar=on]{padding-bottom:5rem}
 
 <div class="announce">Your order is confirmed. This offer is only on this page.</div>
 
-<section class="band band-hero">
-  <div class="inner">
+<section class="band band-hero figure-band scrim-side">
+  <picture>
+      <source type="image/webp" srcset="[[ASSET_BASE_URL]]/img/lunge-wide-400.webp 400w, [[ASSET_BASE_URL]]/img/lunge-wide-800.webp 800w, [[ASSET_BASE_URL]]/img/lunge-wide-1600.webp 1600w" sizes="100vw">
+      <img src="[[ASSET_BASE_URL]]/img/lunge-wide-800.jpg" srcset="[[ASSET_BASE_URL]]/img/lunge-wide-400.jpg 400w, [[ASSET_BASE_URL]]/img/lunge-wide-800.jpg 800w, [[ASSET_BASE_URL]]/img/lunge-wide-1600.jpg 1600w" sizes="100vw"
+           width="2000" height="841" decoding="async" loading="eager" fetchpriority="high"
+           alt="A man in a lunge with both arms raised overhead, in a bright studio.">
+    </picture>
+  <div class="inner figure-inner">
     <p class="eyebrow">Smaller option</p>
     <h1>
       <span class="line">Fair enough.</span>

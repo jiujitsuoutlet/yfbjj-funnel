@@ -19,6 +19,18 @@ const OUT = join(ROOT, 'src', 'thrivecart');
 
 const css = readFileSync(join(ROOT, 'src', 'pages', '_base.css'), 'utf8');
 
+/**
+ * These pages are hosted by ThriveCart, so every image needs an ABSOLUTE URL
+ * back to this Worker's domain. Read it from [vars] rather than hardcoding it.
+ * Empty leaves a marked placeholder, which preflight then refuses to ship.
+ */
+const config = readFileSync(join(ROOT, 'wrangler.toml'), 'utf8');
+const match = config.match(/^ASSET_BASE_URL\s*=\s*"([^"]*)"/m);
+const assetBase = (match && match[1].trim()) || '[[ASSET_BASE_URL]]';
+if (assetBase.startsWith('[[')) {
+  console.log('  note: ASSET_BASE_URL is unset, so image URLs stay as placeholders');
+}
+
 mkdirSync(OUT, { recursive: true });
 
 const pages = readdirSync(SRC).filter((f) => f.endsWith('.html'));
@@ -31,7 +43,9 @@ for (const page of pages) {
   const template = readFileSync(join(SRC, page), 'utf8');
   // Replacer FUNCTION, never a string: $$, $&, $` and $' in the CSS would
   // otherwise be treated as replacement patterns and silently mangle output.
-  const html = template.replace(/\{\{BASE_CSS\}\}/g, () => css);
+  const html = template
+    .replace(/\{\{BASE_CSS\}\}/g, () => css)
+    .replace(/\{\{ASSET_BASE\}\}/g, () => assetBase);
   const target = join(OUT, basename(page));
   writeFileSync(target, html);
   console.log(`  built  src/thrivecart/${basename(page)}  ${(html.length / 1024).toFixed(1)} KB`);
