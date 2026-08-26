@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>[[PAGE_TITLE]]</title>
-<meta name="description" content="[[META_DESCRIPTION]]">
+<title>The Guard Retention Bundle | Yoga for BJJ</title>
+<meta name="description" content="Eight mobility collections built around one problem: keeping your guard. $14, one time.">
 <meta name="robots" content="noindex">
 <style>{{BASE_CSS}}</style>
 </head>
@@ -19,102 +19,148 @@
 
   <!-- ============================================================== HERO -->
   <section id="hero">
-    <p class="eyebrow">[[HERO_EYEBROW]]</p>
-    <h1>[[HERO_HEADLINE]]</h1>
-    <p class="lede">[[HERO_SUBHEAD]]</p>
+    <p class="eyebrow">Anniversary offer</p>
+    <h1>Your guard isn't the problem.<br><span class="hl">Your hips are.</span></h1>
+    <p class="lede">
+      Eight mobility collections, built around one thing: keeping your guard when
+      your body wants to fold. Fourteen dollars for all eight.
+    </p>
 
     <!-- Renders only when OFFER_DEADLINE is set in wrangler.toml. -->
     <div id="deadline" class="deadline-bar" hidden>
-      <span>[[DEADLINE_LABEL]] <strong data-deadline-text></strong></span>
+      <span>Offer closes <strong data-deadline-text></strong></span>
     </div>
 
     <div class="card">
       <form id="lead-form" novalidate>
-        <label for="email">[[EMAIL_FIELD_LABEL]]</label>
+        <label for="email">Where should we send it?</label>
         <input id="email" name="email" type="email" inputmode="email" autocomplete="email"
-               required placeholder="[[EMAIL_FIELD_PLACEHOLDER]]" aria-describedby="lead-msg">
-        <button id="lead-submit" class="cta" type="submit">[[PRIMARY_CTA_LABEL]]</button>
+               required placeholder="you@example.com" aria-describedby="lead-msg">
+        <button id="lead-submit" class="cta" type="submit">Get the bundle &middot; $14</button>
         <p id="lead-msg" class="msg" role="status" aria-live="polite"></p>
       </form>
-      <p class="cta-note">[[CTA_REASSURANCE]]</p>
+      <p class="cta-note">One payment. Not a subscription.</p>
     </div>
   </section>
 
   <!-- =========================================================== PROBLEM -->
   <section id="problem">
-    <h2>[[PROBLEM_HEADLINE]]</h2>
-    <p>[[PROBLEM_PARA_1]]</p>
-    <p>[[PROBLEM_PARA_2]]</p>
-    <p class="dim">[[PROBLEM_TURN_LINE]]</p>
+    <h2>The guard that used to work</h2>
+    <p>
+      You know the passes coming at you. You have drilled the answers for years.
+      But the frames arrive late now. The knee shield sits lower than it used to.
+      The scramble you would have won at twenty-five goes the other way.
+    </p>
+    <p>
+      Your hips do not open the way they did. Something pinches in the front of
+      the hip when you stand up after a round. Three days later you are still
+      sore, and you are training around it instead of training.
+    </p>
+    <p class="dim">
+      None of that is a technique problem. You don't need another instructional.
+      You need a body that keeps up with what you already know.
+    </p>
   </section>
 
   <!-- ==================================================== WHAT'S INCLUDED -->
-  <!-- PLACEHOLDER BLOCK: the real bundle contents are unconfirmed. Add or cut
-       <li> rows to match the actual SKU; do not ship this list as written. -->
   <section id="whats-included">
-    <h2>[[INCLUDED_HEADLINE]]</h2>
+    <h2>Eight collections. One problem.</h2>
     <ul class="checks">
-      <li><strong>[[BUNDLE_ITEM_1_NAME]]</strong><span>[[BUNDLE_ITEM_1_DESC]]</span></li>
-      <li><strong>[[BUNDLE_ITEM_2_NAME]]</strong><span>[[BUNDLE_ITEM_2_DESC]]</span></li>
-      <li><strong>[[BUNDLE_ITEM_3_NAME]]</strong><span>[[BUNDLE_ITEM_3_DESC]]</span></li>
-      <li><strong>[[BUNDLE_ITEM_4_NAME]]</strong><span>[[BUNDLE_ITEM_4_DESC]]</span></li>
+      <li><strong>Guard Flexibility</strong><span>Build the range of motion that makes your guard a nightmare to pass.</span></li>
+      <li><strong>Guard Program</strong><span>Every guard position gets easier when your body stops fighting you.</span></li>
+      <li><strong>Inverted Guard</strong><span>Get comfortable upside down, without your neck and lower back filing complaints.</span></li>
+      <li><strong>Hip Program</strong><span>The engine of the whole bundle. Every guard, every escape, every inversion runs through your hips.</span></li>
+      <li><strong>Stiffest Hips</strong><span>Built for the grappler who can't sit cross-legged. Starts where you actually are.</span></li>
+      <li><strong>Hip Flexor Rehab</strong><span>That pinch in the front of your hip when you stand up? This exists for exactly that.</span></li>
+      <li><strong>Stiffest Legs</strong><span>Touch your toes for the first time since high school.</span></li>
     </ul>
-    <p class="faint">[[INCLUDED_FOOTNOTE]]</p>
+
+    <p class="setup-beat">And for those of you thinking you're too busy for any of this...</p>
+
+    <ul class="checks solo-item">
+      <li><strong>I'm too busy for Yoga... but I need it!</strong><span>Ten minutes. No excuses left.</span></li>
+    </ul>
+
+    <p class="faint">
+      Eight collections, all pointed at the same place: the hips and legs your
+      guard runs on. This is mobility work, not technique.
+    </p>
   </section>
 
   <!-- ============================================================= PRICE -->
   <section id="price">
-    <h2>[[PRICE_HEADLINE]]</h2>
+    <h2>Fourteen dollars</h2>
     <div class="card">
       <div class="price-row">
         <span class="price-now" data-price="bundle">$14</span>
-        <span class="price-was">[[PRICE_ANCHOR]]</span>
+        <!-- MISSING: no anchor price supplied. If there is a real "normally $X"
+             figure, add it back as: <span class="price-was">$39</span>
+             Do not invent one. -->
       </div>
-      <p class="price-terms">[[PRICE_TERMS]]</p>
+      <p class="price-terms">One time. Not a subscription. No card to cancel later.</p>
       <ul class="checks">
-        <li><strong>[[PRICE_BULLET_1]]</strong></li>
-        <li><strong>[[PRICE_BULLET_2]]</strong></li>
-        <li><strong>[[PRICE_BULLET_3]]</strong></li>
+        <li><strong>All eight collections, complete</strong></li>
+        <li><strong>Yours to keep</strong></li>
+        <li><strong>Built for grapplers, not for a yoga studio</strong></li>
       </ul>
-      <a class="cta" data-cart="bundle" data-source="landing-price" href="#hero" rel="noopener">[[PRIMARY_CTA_LABEL]]</a>
-      <p class="cta-note">[[GUARANTEE_LINE]]</p>
+      <a class="cta" data-cart="bundle" data-source="landing-price" href="#hero" rel="noopener">Get the bundle &middot; $14</a>
+      <!-- MISSING: refund policy unconfirmed. If there is one, it belongs here:
+           <p class="cta-note">30 day refund, no questions.</p> -->
     </div>
   </section>
 
   <!-- =============================================================== FAQ -->
   <section id="faq">
-    <h2>[[FAQ_HEADLINE]]</h2>
-    <details><summary>[[FAQ_Q1]]</summary><p>[[FAQ_A1]]</p></details>
-    <details><summary>[[FAQ_Q2]]</summary><p>[[FAQ_A2]]</p></details>
-    <details><summary>[[FAQ_Q3]]</summary><p>[[FAQ_A3]]</p></details>
-    <details><summary>[[FAQ_Q4]]</summary><p>[[FAQ_A4]]</p></details>
-    <details><summary>[[FAQ_Q5]]</summary><p>[[FAQ_A5]]</p></details>
+    <h2>Questions</h2>
+    <details>
+      <summary>I have never done yoga. Does that matter?</summary>
+      <p>No. These are mobility collections built around grappling positions. The goal isn't becoming better at yoga. The goal is becoming better at grappling.</p>
+    </details>
+    <details>
+      <summary>How much time does this take?</summary>
+      <p>Sessions are short. The busy collection runs ten minutes. Fit it around your training week rather than adding another training week to it.</p>
+    </details>
+    <details>
+      <summary>I am not flexible at all. Is this too advanced?</summary>
+      <p>Stiffest Hips and Stiffest Legs exist for exactly that. They start where you are, not where a flexible person starts.</p>
+    </details>
+    <details>
+      <summary>I am older and fairly beaten up. Is this for me?</summary>
+      <p>Hip Flexor Rehab is in the bundle because that pinch is common and it does not sort itself out. Work at the range you have. Nothing here asks you to force a position.</p>
+    </details>
+    <details>
+      <summary>Is this a subscription?</summary>
+      <p>No. Fourteen dollars, once. The full library is a separate thing and you never have to look at it.</p>
+    </details>
   </section>
 
   <!-- ============================================================= CLOSE -->
   <section id="close">
-    <h2>[[CLOSE_HEADLINE]]</h2>
-    <p>[[CLOSE_PARA]]</p>
-    <a class="cta" data-cart="bundle" data-source="landing-close" href="#hero" rel="noopener">[[PRIMARY_CTA_LABEL]]</a>
-    <p class="cta-note">[[CLOSE_REASSURANCE]]</p>
+    <h2>One problem, solved properly</h2>
+    <p>
+      This isn't a sampler. Eight collections, all aimed at the same thing: hips
+      and legs that let you keep your guard for another decade of training.
+    </p>
+    <a class="cta" data-cart="bundle" data-source="landing-close" href="#hero" rel="noopener">Get the bundle &middot; $14</a>
+    <p class="cta-note">One payment. Not a subscription.</p>
   </section>
 
   <!-- ============================================================ FOOTER -->
   <footer id="footer">
-    <p>[[FOOTER_LINE]]</p>
+    <p>Yoga for BJJ</p>
     <nav>
-      <a href="[[TERMS_URL]]">[[TERMS_LABEL]]</a> &middot;
-      <a href="[[PRIVACY_URL]]">[[PRIVACY_LABEL]]</a> &middot;
-      <a href="mailto:[[SUPPORT_EMAIL]]">[[SUPPORT_LABEL]]</a>
+      <a href="[[TERMS_URL]]">Terms</a> &middot;
+      <a href="[[PRIVACY_URL]]">Privacy</a> &middot;
+      <a href="mailto:[[SUPPORT_EMAIL]]">Support</a>
     </nav>
   </footer>
 
 </main>
 
-<!-- Signature: the offer follows you down the page on mobile. -->
+<!-- The offer follows you down the page on mobile. -->
 <div id="buybar" class="buybar" data-visible="false">
-  <span class="bb-price"><span class="bb-label">[[BUYBAR_LABEL]]</span><span data-price="bundle">$14</span></span>
-  <a class="cta" data-cart="bundle" data-source="landing-buybar" href="#hero" rel="noopener">[[BUYBAR_CTA_LABEL]]</a>
+  <span class="bb-price"><span class="bb-label">Bundle</span><span data-price="bundle">$14</span></span>
+  <a class="cta" data-cart="bundle" data-source="landing-buybar" href="#hero" rel="noopener">Get it</a>
 </div>
 
 <script id="page-config" type="application/json">{{PAGE_CONFIG_JSON}}</script>

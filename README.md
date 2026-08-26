@@ -19,6 +19,15 @@ reports health. The Stripe checkout/upsell/webhook layer is parked in
 | `/preview-checkout`    | GET    | stand-in for the cart while `PREVIEW_MODE` is on |
 | `/api/lead`            | POST   | live - rate limited, validates email, inserts into `leads` |
 
+## Design
+
+Palette and type are measured off yogaforbjj.net, not invented:
+accent `#dc2626`, grounds `#0a0a0a` / `#0e0e12`, translucent white for dim text,
+`Arial, Helvetica, sans-serif`, headings uppercase at weight 900 with `-.04em`
+tracking and `.92` leading, pill CTAs. Body copy runs 17px at weight 500 rather
+than their 14px/600, because this page is read on a phone by someone who arrived
+from an ad. That is the one deliberate deviation.
+
 ## Operator knobs
 
 Everything an operator changes lives in `[vars]` in `wrangler.toml` and reaches
