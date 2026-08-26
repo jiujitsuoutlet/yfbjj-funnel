@@ -17,9 +17,9 @@
 
 <main>
 
-  <section id="upsell-hero">
-    <p class="eyebrow">One more thing</p>
-    <h1>Your hips are handled.<br><span class="hl">The rest of you isn't.</span></h1>
+  <section id="upsell-hero" class="hero">
+    <p class="kicker">One more thing</p>
+    <h1>Your hips are handled.<br><span class="hl">Your neck isn't.</span></h1>
     <p class="lede">
       The bundle covers guard retention: hips, legs, inversions. Your neck, your
       shoulders, your lower back and your recovery are not in it.
@@ -30,11 +30,17 @@
   </section>
 
   <section id="upsell-case">
-    <h2>What the full library is</h2>
+    <p class="kicker">The full library</p>
+    <h2>What you didn't buy yet</h2>
+    <ul class="stats">
+      <li><span class="stat-n">90+</span><span class="stat-l">Programs</span></li>
+      <li><span class="stat-n">1,200+</span><span class="stat-l">Videos</span></li>
+      <li><span class="stat-n">6</span><span class="stat-l">Focus areas</span></li>
+      <li><span class="stat-n">7</span><span class="stat-l">Coaches</span></li>
+    </ul>
     <p>
-      90+ programs. 1,200+ videos. Six focus areas: hips, neck, spine, shoulders,
-      recovery and competition preparation. Seven coaches. Built for grapplers by
-      a double world champion.
+      Hips, neck, spine, shoulders, recovery and competition preparation. Built
+      for grapplers by a double world champion.
     </p>
     <p class="dim">
       Same approach as the eight collections you just bought. Not generic yoga.
@@ -43,7 +49,8 @@
   </section>
 
   <section id="upsell-included">
-    <h2>What that covers</h2>
+    <p class="kicker">What that covers</p>
+    <h2>The parts the bundle skipped</h2>
     <ul class="checks">
       <li><strong>Hip mobility programs</strong><span>The long version of what you just started.</span></li>
       <li><strong>Neck health programs</strong><span>One of the most abused areas in grappling, trained on purpose instead of after it hurts.</span></li>
@@ -56,7 +63,8 @@
 
   <!-- Prices render from [vars]: LIFETIME_PRICE_CENTS, YEARLY_PRICE_CENTS. -->
   <section id="upsell-plans">
-    <h2>Two ways in</h2>
+    <p class="kicker">Two ways in</p>
+    <h2>Rent it, or own it.</h2>
 
     <div class="card featured">
       <h3>Lifetime access</h3>
@@ -65,6 +73,11 @@
         <span class="price-unit">once</span>
       </div>
       <p class="price-terms">Pay once. Train forever. Nothing renews.</p>
+      <ul class="chips">
+        <li>One payment</li>
+        <li>No renewal</li>
+        <li>Full library</li>
+      </ul>
       <a class="cta" data-cart="lifetime" data-source="upsell-lifetime" href="#upsell-plans" rel="noopener">Get lifetime access</a>
       <p class="cta-note">Same library as yearly. One payment.</p>
     </div>
@@ -76,15 +89,22 @@
         <span class="price-unit">per year</span>
       </div>
       <p class="price-terms">Billed annually. Renews until you cancel it.</p>
+      <ul class="chips">
+        <li>Lower to start</li>
+        <li>Cancel anytime</li>
+        <li>Full library</li>
+      </ul>
       <!-- Points at the lifetime cart until THRIVECART_YEARLY_URL exists. -->
       <a class="cta secondary" data-cart="yearly" data-source="upsell-yearly" href="#upsell-plans" rel="noopener">Start yearly</a>
     </div>
 
-    <p class="dim" style="margin-top:1.25rem">
-      The arithmetic, since you can do it yourself anyway: yearly costs $97 and
-      comes back every year. Lifetime is $297 and does not. Three years and a
-      month in, lifetime is the cheaper one. Before that, yearly is.
-    </p>
+    <div class="maths">
+      <p class="dim">
+        The arithmetic, since you can do it yourself anyway: yearly costs $97 and
+        comes back every year. Lifetime is $297 and does not. Three years and a
+        month in, lifetime is the cheaper one. Before that, yearly is.
+      </p>
+    </div>
 
     <p class="center" style="margin:1.5rem 0 0">
       <a class="faint" href="/thanks">No thanks, take me to my programs.</a>
@@ -92,7 +112,8 @@
   </section>
 
   <section id="upsell-faq">
-    <h2>Questions</h2>
+    <p class="kicker">Questions</p>
+    <h2>Before you decide</h2>
     <details>
       <summary>Do I need this if I have the bundle?</summary>
       <p>No. The eight collections stand on their own and they are yours either way. This is for the parts of your body the bundle does not cover.</p>

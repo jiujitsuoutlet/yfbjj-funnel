@@ -82,7 +82,29 @@ if (!dbId || dbId === 'REPLACE_WITH_D1_DATABASE_ID') {
   pass(`database_id set (${dbId})`);
 }
 
-/* 5. secrets scan */
+/* 5. no unfilled copy placeholders left in any page */
+const PAGES = ['landing.html', 'upsell.html', 'thanks.html', 'preview-checkout.html'];
+const leftovers = [];
+for (const page of PAGES) {
+  let html = '';
+  try {
+    html = readFileSync(join(ROOT, 'src', 'pages', page), 'utf8');
+  } catch {
+    fail(`cannot read src/pages/${page}`);
+    continue;
+  }
+  // Strip comments first: a commented-out example is guidance, not a leak.
+  const visible = html.replace(/<!--[\s\S]*?-->/g, '');
+  const hits = visible.match(/\[\[[A-Z0-9_]+[^\]]*\]\]/g) || [];
+  for (const hit of new Set(hits)) leftovers.push(`${page}: ${hit}`);
+}
+if (leftovers.length) {
+  fail(`${leftovers.length} unfilled copy placeholder${leftovers.length > 1 ? 's' : ''} would render on a live page:\n      ${leftovers.join('\n      ')}`);
+} else {
+  pass('no unfilled copy placeholders in any page');
+}
+
+/* 6. secrets scan */
 try {
   execFileSync('bash', [join(ROOT, 'scripts', 'scan-secrets.sh')], { cwd: ROOT, stdio: 'pipe' });
   pass('secrets scan clean');

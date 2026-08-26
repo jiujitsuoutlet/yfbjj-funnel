@@ -1,204 +1,344 @@
-/* Design system. One source of truth, inlined into every page at render time.
-   Constraints: system fonts only, no external assets, dark ground, fast. */
+/* ============================================================================
+   Yoga for BJJ funnel: design system.
+   One source of truth, inlined into every page at render time. No web fonts,
+   no external assets, no images. Palette and type measured off yogaforbjj.net.
+   ========================================================================== */
 :root{
-  /* Palette measured off yogaforbjj.net, not invented.
-     Their dim text is translucent white rather than grey hexes, so it sits on
-     any of the three grounds without going muddy. Same trick here. */
+  /* Ground. Three depths, not one flat black. */
   --bg:#0a0a0a;
-  --surface:#0e0e12;
-  --sunken:#111116;
-  --line:rgba(255,255,255,.14);
-  --line-soft:rgba(255,255,255,.08);
-  --ink:#ffffff;
-  --ink-2:rgba(255,255,255,.70);
-  --ink-3:rgba(255,255,255,.55);
-  --accent:#dc2626;
-  --accent-ink:#ffffff;
-  --accent-hi:#ef4444;
-  --ok:#4ade80;
-  --err:#ff8f8f;
+  --surface:#111116;
+  --surface-2:#16161d;
+  --sunken:#070709;
 
-  /* Type scale: 1.25 ratio, capped so mobile never overflows. */
-  --t-display:clamp(2rem,8.5vw,2.75rem);
-  --t-h2:clamp(1.35rem,5vw,1.6rem);
+  /* Their dim text is translucent white, so it holds on any of the grounds. */
+  --ink:#ffffff;
+  --ink-2:rgba(255,255,255,.72);
+  --ink-3:rgba(255,255,255,.54);
+  --line:rgba(255,255,255,.12);
+  --line-soft:rgba(255,255,255,.07);
+
+  --accent:#dc2626;
+  --accent-hi:#ef4444;
+  --accent-dim:rgba(220,38,38,.18);
+  --accent-ink:#ffffff;
+  --ok:#4ade80;
+  --err:#ff9a9a;
+
+  /* Their stack. Already a system stack, so nothing is downloaded. */
+  --stack:Arial,Helvetica,sans-serif;
+
+  /* Type. Display runs bigger than their desktop h1 because this is a phone
+     page: the headline is the whole first impression. */
+  --t-display:clamp(2.3rem,10.2vw,3.4rem);
+  --t-h2:clamp(1.6rem,6.6vw,2.1rem);
   --t-h3:1.0625rem;
   --t-body:1.0625rem;
-  --t-small:.9rem;
+  --t-small:.9375rem;
   --t-micro:.75rem;
 
+  /* Space. One scale, used everywhere, so the rhythm is not improvised. */
+  --s1:.25rem; --s2:.5rem; --s3:.75rem; --s4:1rem;
+  --s5:1.5rem; --s6:2rem; --s7:3rem; --s8:4.5rem;
+
   --measure:34rem;
-  --pad:1.25rem;
-  --radius:.75rem;
-  /* Their stack exactly. Already a system stack, so nothing is downloaded. */
-  --stack:Arial,Helvetica,sans-serif;
-  --radius-pill:999px;
+  --pad:1.375rem;
+  --r-card:1rem;
+  --r-pill:999px;
 }
+
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-@media (prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
-  *,*::before,*::after{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important}
-}
 @media (prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important; transition-duration:.01ms !important}
+}
+
 body{
   margin:0; background:var(--bg); color:var(--ink);
   font:500 var(--t-body)/1.55 var(--stack);
-  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
 }
 main{max-width:var(--measure); margin:0 auto; padding:0 var(--pad)}
+[hidden]{display:none !important}
 
-/* Sections separate by rule, not by ornament. */
-section{padding:2.75rem 0; border-bottom:1px solid var(--line-soft)}
+/* --------------------------------------------------------------- sections */
+section{padding:var(--s7) 0; border-bottom:1px solid var(--line-soft)}
 section:last-of-type{border-bottom:0}
 
-/* Measured off their site: uppercase, weight 900, tracking -.04em, leading .9. */
-h1,h2{margin:0 0 .85rem; text-transform:uppercase; font-weight:900;
-      letter-spacing:-.04em; line-height:.92}
+/* Section kicker. Their site labels every section; the red rule carries the
+   accent so the label itself can stay white and pass contrast at small size. */
+.kicker{
+  display:flex; align-items:center; gap:var(--s3);
+  margin:0 0 var(--s4);
+  font-size:var(--t-micro); font-weight:900; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--ink-2);
+}
+.kicker::before{
+  content:""; width:1.75rem; height:3px; flex:none;
+  background:var(--accent); border-radius:2px;
+}
+
+/* ------------------------------------------------------------------- type */
+h1,h2{margin:0 0 var(--s4); text-transform:uppercase; font-weight:900;
+      letter-spacing:-.042em; line-height:.92; text-wrap:balance}
 h1{font-size:var(--t-display)}
 h2{font-size:var(--t-h2)}
-h3{margin:0 0 .35rem; font-size:var(--t-h3); font-weight:900;
-   text-transform:uppercase; letter-spacing:.03em}
-/* The one word of the headline that carries the point, in their red. */
-.hl{color:var(--accent)}
-p{margin:0 0 1rem}
+h3{margin:0 0 var(--s2); font-size:var(--t-h3); font-weight:900;
+   text-transform:uppercase; letter-spacing:.04em}
+p{margin:0 0 var(--s4)}
 p:last-child{margin-bottom:0}
-strong{font-weight:700}
-
-/* Their eyebrow is a red pill badge, not loose red text. */
-.eyebrow{
-  display:inline-block; margin:0 0 1rem; padding:.4rem .8rem;
-  border-radius:var(--radius-pill); background:var(--accent);
-  color:#fff; font-size:var(--t-micro); font-weight:900;
-  letter-spacing:.09em; text-transform:uppercase;
-}
-.lede{font-size:1.15rem; line-height:1.55; color:var(--ink-2)}
+.hl{color:var(--accent)}
+.lede{font-size:1.125rem; line-height:1.5; color:var(--ink-2); text-wrap:pretty}
 .dim{color:var(--ink-2)}
-.faint{color:var(--ink-3); font-size:var(--t-small)}
+.faint{color:var(--ink-3); font-size:var(--t-small); line-height:1.5}
 .center{text-align:center}
 
-.card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:1.25rem}
-.card + .card{margin-top:.75rem}
-.card.featured{border-color:var(--accent)}
+/* --------------------------------------------------------------- hero band */
+/* Full bleed, with a red bloom behind the headline. Pure CSS, no image. */
+.hero{
+  position:relative; margin:0 calc(var(--pad) * -1);
+  padding:var(--s7) var(--pad) var(--s7);
+  border-bottom:1px solid var(--line-soft);
+  background:
+    radial-gradient(120% 70% at 8% -10%, rgba(220,38,38,.28) 0%, rgba(220,38,38,0) 58%),
+    linear-gradient(180deg, #101014 0%, var(--bg) 72%);
+}
+.hero > *{position:relative}
+.hero h1{margin-bottom:var(--s4)}
 
-/* Body links. .cta and footer rules out-specify this, so buttons keep their look. */
-main a{color:var(--accent); text-decoration:underline; text-underline-offset:.15em}
-main a:hover{color:var(--accent-hi)}
-main a:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+/* ---------------------------------------------------------------- marquee */
+/* Their site runs a ticker band. Ours carries the actual contents of the
+   bundle, so the device reinforces the offer instead of decorating. */
+.marquee{
+  margin:0 calc(var(--pad) * -1); padding:var(--s3) 0;
+  border-block:1px solid var(--line);
+  background:var(--sunken);
+  overflow:hidden; -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+}
+.marquee-track{
+  display:flex; width:max-content; gap:var(--s5);
+  animation:marquee 38s linear infinite;
+}
+.marquee span{
+  font-size:var(--t-micro); font-weight:900; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--ink-3); white-space:nowrap;
+}
+.marquee span::after{content:"·"; margin-left:var(--s5); color:var(--accent)}
+@keyframes marquee{ from{transform:translateX(0)} to{transform:translateX(-50%)} }
+@media (prefers-reduced-motion:reduce){
+  .marquee{ -webkit-mask-image:none; mask-image:none }
+  .marquee-track{ animation:none; flex-wrap:wrap; width:auto; padding:0 var(--pad); gap:var(--s2) var(--s4) }
+  .marquee-track > span:nth-child(n+9){display:none}
+}
 
-/* CTA */
+/* ------------------------------------------------------------------ cards */
+.card{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r-card); padding:var(--s5);
+}
+.card + .card{margin-top:var(--s3)}
+.card.featured{
+  border-color:rgba(220,38,38,.55);
+  background:linear-gradient(180deg, rgba(220,38,38,.10) 0%, var(--surface) 45%);
+}
+
+/* Collection cards. Grouped, because the grouping is true: three for the
+   guard, three for the hips, one for the legs, one for the clock. */
+.group{margin:0 0 var(--s6)}
+.group:last-of-type{margin-bottom:0}
+.group-label{
+  display:flex; align-items:baseline; gap:var(--s3);
+  margin:0 0 var(--s3); padding:0 0 var(--s2);
+  border-bottom:1px solid var(--line-soft);
+  font-size:var(--t-micro); font-weight:900; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--ink-3);
+}
+.group-label .count{margin-left:auto; color:var(--ink-3); font-weight:700; letter-spacing:.08em}
+
+.item{
+  padding:var(--s4) 0;
+  border-bottom:1px solid var(--line-soft);
+}
+.item:last-child{border-bottom:0}
+.item h3{color:var(--ink)}
+.item p{margin:0; color:var(--ink-2); font-size:var(--t-small)}
+
+/* The Hip Program is the hub of the bundle, so it is built like one. */
+.item.engine{
+  margin:var(--s2) 0; padding:var(--s5);
+  border:1px solid rgba(220,38,38,.55); border-radius:var(--r-card);
+  background:linear-gradient(180deg, rgba(220,38,38,.12) 0%, var(--surface) 55%);
+}
+.tag{
+  display:inline-block; margin:0 0 var(--s2); padding:.25rem .55rem;
+  border-radius:var(--r-pill); background:var(--accent);
+  font-size:.65rem; font-weight:900; letter-spacing:.12em;
+  text-transform:uppercase; color:#fff;
+}
+
+/* -------------------------------------------------------------------- CTA */
 .cta{
   display:flex; align-items:center; justify-content:center; gap:.5rem;
-  width:100%; min-height:3.25rem; padding:.95rem 1.25rem;
-  font:900 1rem/1.2 var(--stack); letter-spacing:.05em; text-transform:uppercase;
+  width:100%; min-height:3.5rem; padding:1rem 1.5rem;
+  font:900 1rem/1.2 var(--stack); letter-spacing:.06em; text-transform:uppercase;
   text-align:center; text-decoration:none;
   color:var(--accent-ink); background:var(--accent);
-  border:0; border-radius:var(--radius-pill); cursor:pointer;
-  transition:background .12s ease, transform .06s ease;
+  border:0; border-radius:var(--r-pill); cursor:pointer;
+  box-shadow:0 10px 30px -12px rgba(220,38,38,.85);
+  transition:background .14s ease, transform .08s ease, box-shadow .14s ease;
 }
-.cta:hover{background:var(--accent-hi)}
+.cta:hover{background:var(--accent-hi); box-shadow:0 14px 34px -12px rgba(220,38,38,.95)}
 .cta:active{transform:translateY(1px)}
-.cta:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
-.cta[disabled],.cta[aria-disabled=true]{opacity:.45; cursor:not-allowed}
-.cta.secondary{color:var(--ink); background:transparent; border:1px solid var(--line); font-weight:700}
-.cta.secondary:hover{background:var(--sunken)}
-.cta-note{margin:.65rem 0 0; text-align:center; font-size:var(--t-small); color:var(--ink-3)}
+.cta:focus-visible{outline:3px solid #fff; outline-offset:3px}
+.cta[disabled],.cta[aria-disabled=true]{opacity:.45; cursor:not-allowed; box-shadow:none}
+.cta.secondary{
+  color:var(--ink); background:transparent; border:1px solid var(--line);
+  box-shadow:none; font-weight:900;
+}
+.cta.secondary:hover{background:var(--surface-2); border-color:var(--ink-3)}
+.cta-note{margin:var(--s3) 0 0; text-align:center; font-size:var(--t-small); color:var(--ink-3)}
 
-/* Forms */
-form{display:grid; gap:.65rem; margin:0}
-label{font-size:var(--t-small); color:var(--ink-2)}
+/* ------------------------------------------------------------------ forms */
+form{display:grid; gap:var(--s3); margin:0}
+label{font-size:var(--t-small); font-weight:700; color:var(--ink-2)}
 input[type=email]{
-  width:100%; min-height:3.25rem; padding:.85rem 1.1rem;
-  font:400 1rem/1.2 var(--stack); color:var(--ink);
-  background:var(--sunken); border:1px solid var(--line); border-radius:var(--radius-pill);
+  width:100%; min-height:3.5rem; padding:1rem 1.25rem;
+  font:500 1rem/1.2 var(--stack); color:var(--ink);
+  background:var(--sunken); border:1px solid var(--line); border-radius:var(--r-pill);
 }
 input[type=email]::placeholder{color:var(--ink-3)}
-input[type=email]:focus-visible{outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent)}
-.msg{min-height:1.3rem; margin:0; font-size:.875rem; color:var(--ink-2)}
+input[type=email]:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-color:var(--accent)}
+.msg{min-height:1.3rem; margin:0; font-size:var(--t-small); color:var(--ink-2)}
 .msg[data-state=error]{color:var(--err)}
 .msg[data-state=ok]{color:var(--ok)}
 
-/* Price */
-.price-row{display:flex; align-items:baseline; gap:.6rem; flex-wrap:wrap; margin:0 0 .35rem}
-.price-now{font-size:2.75rem; font-weight:900; letter-spacing:-.04em; line-height:1}
-.price-was{font-size:1.05rem; color:var(--ink-3); text-decoration:line-through}
-.price-unit{font-size:.95rem; color:var(--ink-3)}
-.price-terms{margin:0 0 1rem; font-size:var(--t-small); color:var(--ink-2)}
+/* ------------------------------------------------------------------ price */
+.price-row{display:flex; align-items:baseline; gap:var(--s3); flex-wrap:wrap; margin:0 0 var(--s2)}
+.price-now{font-size:clamp(3rem,15vw,4rem); font-weight:900; letter-spacing:-.05em; line-height:.85}
+.price-was{font-size:1.0625rem; color:var(--ink-3); text-decoration:line-through}
+.price-unit{font-size:var(--t-small); font-weight:700; color:var(--ink-3);
+  text-transform:uppercase; letter-spacing:.1em}
+.price-terms{margin:0 0 var(--s4); font-size:var(--t-small); color:var(--ink-2)}
 
-/* Benefit lists. The check is drawn in CSS: no icon font, no SVG payload. */
-.checks{list-style:none; margin:0 0 1rem; padding:0}
-.checks li{position:relative; margin:0 0 .85rem; padding-left:1.75rem}
+/* Chips state the terms in three words each, so the fine print is the design. */
+.chips{display:flex; flex-wrap:wrap; gap:var(--s2); margin:0 0 var(--s5); padding:0; list-style:none}
+.chips li{
+  padding:.4rem .7rem; border:1px solid var(--line); border-radius:var(--r-pill);
+  background:var(--surface-2);
+  font-size:var(--t-micro); font-weight:700; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--ink-2);
+}
+
+/* Stat band. The library's scale is the whole argument on the upsell, so the
+   numbers get to be the design instead of sitting inside a sentence. */
+.stats{
+  display:grid; grid-template-columns:repeat(2,1fr); gap:1px;
+  margin:0 0 var(--s5); padding:0; list-style:none;
+  background:var(--line-soft); border:1px solid var(--line); border-radius:var(--r-card);
+  overflow:hidden;
+}
+.stats li{display:flex; flex-direction:column; gap:.15rem; padding:var(--s4); background:var(--surface)}
+.stat-n{font-size:1.75rem; font-weight:900; letter-spacing:-.04em; line-height:1; color:var(--ink)}
+.stat-l{font-size:var(--t-micro); font-weight:700; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink-3)}
+@media (min-width:30rem){ .stats{grid-template-columns:repeat(4,1fr)} }
+
+/* The break-even paragraph. Set apart because it is the honest bit. */
+.maths{
+  margin:var(--s5) 0 0; padding:var(--s4) var(--s5);
+  border:1px dashed var(--line); border-radius:var(--r-card); background:var(--sunken);
+}
+.maths p{margin:0; font-size:var(--t-small)}
+
+/* ------------------------------------------------------------------ lists */
+.checks{list-style:none; margin:0 0 var(--s4); padding:0}
+.checks li{position:relative; margin:0 0 var(--s4); padding-left:1.9rem}
 .checks li:last-child{margin-bottom:0}
 .checks li::before{
-  content:""; position:absolute; left:.1rem; top:.42rem;
-  width:.7rem; height:.4rem;
-  border-left:2px solid var(--accent); border-bottom:2px solid var(--accent);
+  content:""; position:absolute; left:.15rem; top:.45rem;
+  width:.75rem; height:.42rem;
+  border-left:2.5px solid var(--accent); border-bottom:2.5px solid var(--accent);
   transform:rotate(-45deg);
 }
-.checks strong{display:block; font-weight:900; text-transform:uppercase; letter-spacing:.02em; font-size:.95rem}
-.checks span{color:var(--ink-2); font-size:.95rem}
+.checks strong{display:block; font-weight:900; text-transform:uppercase;
+  letter-spacing:.03em; font-size:.9375rem}
+.checks span{display:block; margin-top:.15rem; color:var(--ink-2); font-size:var(--t-small)}
 
-/* Deadline bar. Absent from the DOM flow entirely when no deadline is set. */
-[hidden]{display:none !important}
+/* --------------------------------------------------------------- deadline */
 .deadline-bar{
-  display:flex; align-items:center; justify-content:center; gap:.5rem;
-  padding:.7rem 1rem; margin:0 0 1.25rem;
-  background:var(--sunken); border:1px solid var(--line); border-radius:.65rem;
-  font-size:var(--t-small); color:var(--ink-2); text-align:center;
+  display:flex; align-items:center; justify-content:center; gap:var(--s2);
+  padding:var(--s3) var(--s4); margin:0 0 var(--s5);
+  background:var(--accent-dim); border:1px solid rgba(220,38,38,.45);
+  border-radius:var(--r-pill);
+  font-size:var(--t-small); font-weight:700; color:var(--ink); text-align:center;
 }
-.deadline-bar strong{color:var(--ink); font-weight:700}
 
-/* FAQ */
-details{border-bottom:1px solid var(--line-soft)}
-details:last-of-type{border-bottom:0}
-summary{position:relative; padding:1rem 1.9rem 1rem 0; font-weight:900; cursor:pointer; list-style:none}
-summary::-webkit-details-marker{display:none}
-summary::after{
-  content:""; position:absolute; right:.4rem; top:1.35rem;
-  width:.65rem; height:.65rem; border-right:2px solid var(--accent); border-bottom:2px solid var(--accent);
-  transform:rotate(45deg); transform-origin:center;
-}
-details[open] summary::after{transform:rotate(-135deg); top:1.5rem}
-summary:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-details p{padding:0 0 1.1rem; color:var(--ink-2)}
-
-/* Preview banner: states a fact, occupies one line, never covers content. */
-.preview-banner{
-  padding:.55rem var(--pad); border-bottom:1px solid var(--line);
-  background:var(--sunken); color:var(--ink-3);
-  font-size:var(--t-micro); letter-spacing:.06em; text-transform:uppercase; text-align:center;
-}
-.preview-banner strong{color:var(--ink-2); font-weight:700}
-
-/* Signature element: the offer stays reachable once the hero scrolls away.
-   Mobile only, where the scroll cost of finding the button is highest. */
-.buybar{
-  position:fixed; left:0; right:0; bottom:0; z-index:20;
-  display:flex; align-items:center; gap:.75rem;
-  padding:.7rem var(--pad) calc(.7rem + env(safe-area-inset-bottom));
-  background:rgba(10,10,10,.94); border-top:1px solid var(--line);
-  -webkit-backdrop-filter:saturate(1.4) blur(8px); backdrop-filter:saturate(1.4) blur(8px);
-  transform:translateY(110%); transition:transform .18s ease;
-}
-.buybar[data-visible=true]{transform:translateY(0)}
-.buybar .bb-price{font-size:1.35rem; font-weight:900; letter-spacing:-.04em; white-space:nowrap}
-.buybar .bb-label{display:block; font-size:.7rem; font-weight:600; letter-spacing:.1em;
-  text-transform:uppercase; color:var(--ink-3)}
-.buybar .cta{width:auto; flex:1; min-height:2.9rem; padding:.7rem 1rem; font-size:1rem}
-@media (min-width:48rem){ .buybar{display:none} }
-body[data-buybar=on]{padding-bottom:4.75rem}
-
-footer{padding:2rem 0 3rem; color:var(--ink-3); font-size:var(--t-small); text-align:center}
-footer a{color:var(--ink-2)}
-footer nav{margin:.5rem 0 0}
-footer nav a{display:inline-block; padding:.4rem .3rem}
-
-.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
-
-/* The line that sets up the last collection. Given room on purpose: it is the
+/* -------------------------------------------------------------- the beat */
+/* The setup line before the last collection. Given room on purpose: it is the
    emotional beat of that section, not a list item. */
 .setup-beat{
-  margin:2rem 0 1.5rem; padding:0 0 0 1rem;
+  margin:var(--s7) 0 var(--s5); padding:0 0 0 var(--s4);
   border-left:3px solid var(--accent);
-  font-size:1.1rem; line-height:1.45; color:var(--ink);
+  font-size:1.25rem; line-height:1.4; font-weight:700; color:var(--ink);
 }
-.solo-item{margin-top:0}
+
+/* -------------------------------------------------------------------- FAQ */
+details{border-bottom:1px solid var(--line-soft)}
+details:last-of-type{border-bottom:0}
+summary{
+  position:relative; padding:var(--s4) 2rem var(--s4) 0;
+  font-weight:900; font-size:1rem; cursor:pointer; list-style:none;
+}
+summary::-webkit-details-marker{display:none}
+summary::after{
+  content:""; position:absolute; right:.4rem; top:1.5rem;
+  width:.6rem; height:.6rem;
+  border-right:2.5px solid var(--accent); border-bottom:2.5px solid var(--accent);
+  transform:rotate(45deg);
+}
+details[open] summary::after{transform:rotate(-135deg); top:1.65rem}
+summary:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+details p{padding:0 0 var(--s5); color:var(--ink-2); font-size:var(--t-small)}
+
+/* ---------------------------------------------------------------- banners */
+.preview-banner{
+  padding:.5rem var(--pad); border-bottom:1px solid var(--line);
+  background:var(--sunken); color:var(--ink-3);
+  font-size:.6875rem; font-weight:700; letter-spacing:.14em;
+  text-transform:uppercase; text-align:center;
+}
+.preview-banner strong{color:var(--ink-2)}
+
+/* ----------------------------------------------------------------- buybar */
+/* The offer follows you down the page once the hero is gone. Mobile only. */
+.buybar{
+  position:fixed; left:0; right:0; bottom:0; z-index:20;
+  display:flex; align-items:center; gap:var(--s4);
+  padding:var(--s3) var(--pad) calc(var(--s3) + env(safe-area-inset-bottom));
+  background:rgba(10,10,10,.92); border-top:1px solid var(--line);
+  -webkit-backdrop-filter:saturate(1.5) blur(10px); backdrop-filter:saturate(1.5) blur(10px);
+  transform:translateY(115%); transition:transform .2s ease;
+}
+.buybar[data-visible=true]{transform:translateY(0)}
+.buybar .bb-price{font-size:1.5rem; font-weight:900; letter-spacing:-.04em; white-space:nowrap; line-height:1}
+.buybar .bb-label{display:block; margin-bottom:.15rem; font-size:.625rem; font-weight:900;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3)}
+.buybar .cta{width:auto; flex:1; min-height:3rem; padding:.75rem 1rem; font-size:.9375rem}
+@media (min-width:48rem){ .buybar{display:none} }
+body[data-buybar=on]{padding-bottom:5rem}
+
+/* ----------------------------------------------------------------- footer */
+footer{padding:var(--s6) 0 var(--s8); color:var(--ink-3); font-size:var(--t-small); text-align:center}
+footer a{color:var(--ink-2)}
+footer nav{margin:var(--s2) 0 0}
+footer nav a{display:inline-block; padding:.4rem .3rem}
+
+/* Body links. .cta and footer rules out-specify this. */
+main a{color:var(--ink); text-decoration:underline; text-decoration-color:var(--accent);
+  text-underline-offset:.18em; text-decoration-thickness:2px}
+main a:hover{color:var(--accent-hi)}
+main a:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}

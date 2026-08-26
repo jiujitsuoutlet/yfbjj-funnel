@@ -18,8 +18,8 @@
 <main>
 
   <!-- ============================================================== HERO -->
-  <section id="hero">
-    <p class="eyebrow">Anniversary offer</p>
+  <section id="hero" class="hero">
+    <p class="kicker">Anniversary offer</p>
     <h1>Your guard isn't the problem.<br><span class="hl">Your hips are.</span></h1>
     <p class="lede">
       Eight mobility collections, built around one thing: keeping your guard when
@@ -43,8 +43,21 @@
     </div>
   </section>
 
+  <!-- Their ticker device, carrying the actual contents of the bundle. -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>Guard Flexibility</span><span>Guard Program</span><span>Inverted Guard</span>
+      <span>Hip Program</span><span>Stiffest Hips</span><span>Hip Flexor Rehab</span>
+      <span>Stiffest Legs</span><span>Ten Minutes</span>
+      <span>Guard Flexibility</span><span>Guard Program</span><span>Inverted Guard</span>
+      <span>Hip Program</span><span>Stiffest Hips</span><span>Hip Flexor Rehab</span>
+      <span>Stiffest Legs</span><span>Ten Minutes</span>
+    </div>
+  </div>
+
   <!-- =========================================================== PROBLEM -->
   <section id="problem">
+    <p class="kicker">The problem</p>
     <h2>The guard that used to work</h2>
     <p>
       You know the passes coming at you. You have drilled the answers for years.
@@ -64,24 +77,60 @@
 
   <!-- ==================================================== WHAT'S INCLUDED -->
   <section id="whats-included">
+    <p class="kicker">What's included</p>
     <h2>Eight collections. One problem.</h2>
-    <ul class="checks">
-      <li><strong>Guard Flexibility</strong><span>Build the range of motion that makes your guard a nightmare to pass.</span></li>
-      <li><strong>Guard Program</strong><span>Every guard position gets easier when your body stops fighting you.</span></li>
-      <li><strong>Inverted Guard</strong><span>Get comfortable upside down, without your neck and lower back filing complaints.</span></li>
-      <li><strong>Hip Program</strong><span>The engine of the whole bundle. Every guard, every escape, every inversion runs through your hips.</span></li>
-      <li><strong>Stiffest Hips</strong><span>Built for the grappler who can't sit cross-legged. Starts where you actually are.</span></li>
-      <li><strong>Hip Flexor Rehab</strong><span>That pinch in the front of your hip when you stand up? This exists for exactly that.</span></li>
-      <li><strong>Stiffest Legs</strong><span>Touch your toes for the first time since high school.</span></li>
-    </ul>
+
+    <div class="group">
+      <p class="group-label">For the guard <span class="count">Three</span></p>
+      <div class="item">
+        <h3>Guard Flexibility</h3>
+        <p>Build the range of motion that makes your guard a nightmare to pass.</p>
+      </div>
+      <div class="item">
+        <h3>Guard Program</h3>
+        <p>Every guard position gets easier when your body stops fighting you.</p>
+      </div>
+      <div class="item">
+        <h3>Inverted Guard</h3>
+        <p>Get comfortable upside down, without your neck and lower back filing complaints.</p>
+      </div>
+    </div>
+
+    <div class="group">
+      <p class="group-label">For the hips <span class="count">Three</span></p>
+      <div class="item engine">
+        <span class="tag">The engine</span>
+        <h3>Hip Program</h3>
+        <p>The engine of the whole bundle. Every guard, every escape, every inversion runs through your hips.</p>
+      </div>
+      <div class="item">
+        <h3>Stiffest Hips</h3>
+        <p>Built for the grappler who can't sit cross-legged. Starts where you actually are.</p>
+      </div>
+      <div class="item">
+        <h3>Hip Flexor Rehab</h3>
+        <p>That pinch in the front of your hip when you stand up? This exists for exactly that.</p>
+      </div>
+    </div>
+
+    <div class="group">
+      <p class="group-label">For the legs <span class="count">One</span></p>
+      <div class="item">
+        <h3>Stiffest Legs</h3>
+        <p>Touch your toes for the first time since high school.</p>
+      </div>
+    </div>
 
     <p class="setup-beat">And for those of you thinking you're too busy for any of this...</p>
 
-    <ul class="checks solo-item">
-      <li><strong>I'm too busy for Yoga... but I need it!</strong><span>Ten minutes. No excuses left.</span></li>
-    </ul>
+    <div class="group">
+      <div class="item engine">
+        <h3>I'm too busy for Yoga... but I need it!</h3>
+        <p>Ten minutes. No excuses left.</p>
+      </div>
+    </div>
 
-    <p class="faint">
+    <p class="faint" style="margin-top:2rem">
       Eight collections, all pointed at the same place: the hips and legs your
       guard runs on. This is mobility work, not technique.
     </p>
@@ -89,19 +138,21 @@
 
   <!-- ============================================================= PRICE -->
   <section id="price">
+    <p class="kicker">The price</p>
     <h2>Fourteen dollars</h2>
-    <div class="card">
+    <div class="card featured">
       <div class="price-row">
         <span class="price-now" data-price="bundle">$14</span>
+        <span class="price-unit">once</span>
         <!-- MISSING: no anchor price supplied. If there is a real "normally $X"
              figure, add it back as: <span class="price-was">$39</span>
              Do not invent one. -->
       </div>
       <p class="price-terms">One time. Not a subscription. No card to cancel later.</p>
-      <ul class="checks">
-        <li><strong>All eight collections, complete</strong></li>
-        <li><strong>Yours to keep</strong></li>
-        <li><strong>Built for grapplers, not for a yoga studio</strong></li>
+      <ul class="chips">
+        <li>All eight collections</li>
+        <li>Yours to keep</li>
+        <li>Built for grapplers</li>
       </ul>
       <a class="cta" data-cart="bundle" data-source="landing-price" href="#hero" rel="noopener">Get the bundle &middot; $14</a>
       <!-- MISSING: refund policy unconfirmed. If there is one, it belongs here:
@@ -111,7 +162,8 @@
 
   <!-- =============================================================== FAQ -->
   <section id="faq">
-    <h2>Questions</h2>
+    <p class="kicker">Questions</p>
+    <h2>Before you buy</h2>
     <details>
       <summary>I have never done yoga. Does that matter?</summary>
       <p>No. These are mobility collections built around grappling positions. The goal isn't becoming better at yoga. The goal is becoming better at grappling.</p>
@@ -136,8 +188,8 @@
 
   <!-- ============================================================= CLOSE -->
   <section id="close">
-    <h2>One problem, solved properly</h2>
-    <p>
+    <h2>One problem,<br><span class="hl">solved properly.</span></h2>
+    <p class="dim">
       This isn't a sampler. Eight collections, all aimed at the same thing: hips
       and legs that let you keep your guard for another decade of training.
     </p>
@@ -157,9 +209,8 @@
 
 </main>
 
-<!-- The offer follows you down the page on mobile. -->
 <div id="buybar" class="buybar" data-visible="false">
-  <span class="bb-price"><span class="bb-label">Bundle</span><span data-price="bundle">$14</span></span>
+  <span class="bb-price"><span class="bb-label">The bundle</span><span data-price="bundle">$14</span></span>
   <a class="cta" data-cart="bundle" data-source="landing-buybar" href="#hero" rel="noopener">Get it</a>
 </div>
 
