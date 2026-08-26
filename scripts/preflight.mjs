@@ -83,7 +83,7 @@ if (!dbId || dbId === 'REPLACE_WITH_D1_DATABASE_ID') {
 }
 
 /* 5. no unfilled copy placeholders left in any page */
-const PAGES = ['landing.html', 'upsell.html', 'thanks.html', 'preview-checkout.html'];
+const PAGES = ['landing.html', 'thanks.html', 'preview-checkout.html'];
 const leftovers = [];
 for (const page of PAGES) {
   let html = '';

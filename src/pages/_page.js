@@ -8,11 +8,7 @@
 
   var PREVIEW = CFG.PREVIEW_MODE === true;
   var PREVIEW_PATH = '/preview-checkout';
-  var CART = {
-    bundle: CFG.THRIVECART_BUNDLE_URL || '',
-    lifetime: CFG.THRIVECART_LIFETIME_URL || '',
-    yearly: CFG.THRIVECART_LIFETIME_URL || ''
-  };
+  var CART = { bundle: CFG.THRIVECART_BUNDLE_URL || '' };
 
   // Preview mode, or a missing cart link, always routes to the preview page.
   // A CTA on this site is never a dead link and never a broken cart.
@@ -27,11 +23,7 @@
     if (!isFinite(n)) return null;
     return '$' + (n % 100 === 0 ? String(n / 100) : (n / 100).toFixed(2));
   }
-  var PRICES = {
-    bundle: money(CFG.BUNDLE_PRICE_CENTS),
-    lifetime: money(CFG.LIFETIME_PRICE_CENTS),
-    yearly: money(CFG.YEARLY_PRICE_CENTS)
-  };
+  var PRICES = { bundle: money(CFG.BUNDLE_PRICE_CENTS) };
   [].forEach.call(document.querySelectorAll('[data-price]'), function (el) {
     var v = PRICES[el.getAttribute('data-price')];
     if (v) el.textContent = v;

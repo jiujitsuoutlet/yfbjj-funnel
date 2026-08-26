@@ -1,6 +1,48 @@
-# Parked: Stripe checkout, upsell, and webhook
+# Parked
 
-Parked 2026-08-19. Nothing in this directory is imported by the Worker.
+Nothing in this directory is imported by the Worker.
+
+Two things are parked here: the Stripe payment layer, and the `/upsell` page.
+
+---
+
+# Parked: the /upsell page
+
+Parked 2026-08-25. File: `upsell.html`.
+
+## Why
+
+One-click upsells require the payment session to stay on ThriveCart. Sending a
+buyer back to this Worker after purchase would force a second card entry, which
+is the single most expensive thing you can do to a post-purchase flow. The whole
+post-purchase chain therefore lives in ThriveCart's native funnel, and this
+Worker's job ends at the handoff.
+
+The page itself was built and verified: hero, stat band, two plan cards, the
+break-even arithmetic, and a clean decline link. It is kept because the writing
+and layout are reusable if the chain ever moves back.
+
+## What it would take to bring back
+
+A reason the chain should leave ThriveCart, which today there is not one. If it
+does: restore the import and the `/upsell` route in `src/worker.js`, add the
+page back to the `PAGES` list in `scripts/preflight.mjs`, and re-add whatever
+price and cart variables it needs to `[vars]`.
+
+## One warning if you do
+
+The page hardcoded `$297` lifetime and `$97` yearly as fallback text, and read
+the real figures from `LIFETIME_PRICE_CENTS` and `YEARLY_PRICE_CENTS`. Those
+variables are gone on purpose: prices now live in ThriveCart only. Lifetime is
+$247 in the funnel and $297 on the main site, which is exactly the kind of drift
+a second copy causes. Do not reintroduce prices to this repo without deciding
+which system owns them.
+
+---
+
+# Parked: Stripe checkout and webhook
+
+Parked 2026-08-19.
 
 ## Why
 

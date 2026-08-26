@@ -1,20 +1,25 @@
 # yfbjj-funnel
 
-Cloudflare Worker behind `welcome.yogaforbjj.net`. Landing page + funnel data layer
-for the $14 course bundle and the $360 one-click lifetime upsell.
+Cloudflare Worker behind `welcome.yogaforbjj.net`. The landing page for the $14
+Guard Retention Bundle, plus lead capture. That is the whole job.
 
-Checkout runs on **ThriveCart** (`learnbjjfast.thrivecart.com`), not here. This
-Worker serves the pages, captures leads into D1 before the cart handoff, and
-reports health. The Stripe checkout/upsell/webhook layer is parked in
-`src/deferred/` - see the README there.
+Checkout runs on **ThriveCart** (`learnbjjfast.thrivecart.com`), and so does
+everything after it. One-click upsells require the payment session to stay on
+ThriveCart, so the entire post-purchase chain is theirs. This Worker serves the
+landing page, captures leads into D1 before the handoff, and reports health.
+
+Upsell prices are deliberately absent from this repo. They live in ThriveCart
+only, because two copies drift: lifetime is $247 in the funnel and $297 on the
+main site.
+
+The Stripe layer and the retired `/upsell` page are parked in `src/deferred/`.
 
 ## Routes
 
 | Route                  | Method | State                                            |
 |------------------------|--------|--------------------------------------------------|
-| `/`                    | GET    | landing page (placeholder copy)                   |
-| `/upsell`              | GET    | placeholder upsell page                           |
-| `/thanks`              | GET    | placeholder thank-you page                        |
+| `/`                    | GET    | landing page                                      |
+| `/thanks`              | GET    | fallback confirmation only, nothing is sold there  |
 | `/health`              | GET    | 200 when D1 is reachable and all 3 tables exist; 503 otherwise |
 | `/preview-checkout`    | GET    | stand-in for the cart while `PREVIEW_MODE` is on |
 | `/api/lead`            | POST   | live - rate limited, validates email, inserts into `leads` |
@@ -37,11 +42,8 @@ the pages through one JSON island (`<script id="page-config">`):
 |-----|---------|
 | `PREVIEW_MODE`            | Default **true**. Any value other than the exact string `false` routes every CTA to `/preview-checkout` and shows the preview banner. Unset means preview, so a missing var can never send paid traffic at a cart that is not ready. |
 | `THRIVECART_BUNDLE_URL`   | $14 bundle cart link. Empty = CTA scrolls to the email form instead of dead-linking. |
-| `THRIVECART_LIFETIME_URL` | $297 lifetime cart link. Empty = upsell CTAs render disabled. |
 | `OFFER_DEADLINE`          | ISO 8601. Empty = the deadline bar is not rendered at all. |
 | `BUNDLE_PRICE_CENTS`      | 1400 |
-| `LIFETIME_PRICE_CENTS`    | 29700 |
-| `YEARLY_PRICE_CENTS`      | 9700 |
 
 Prices render from these values, so one edit moves every surface.
 
@@ -88,7 +90,8 @@ Refuses to deploy a half-configured page. Checks, all reported in one run:
 2. `OFFER_DEADLINE` is set, parses, and is in the future
 3. `PREVIEW_MODE` is exactly `"false"`
 4. `database_id` is a real D1 uuid, not the placeholder
-5. the secrets scan passes
+5. no unfilled `[[PLACEHOLDER]]` markers would render on a live page
+6. the secrets scan passes
 
 `npm run deploy` runs preflight first and stops on any failure.
 

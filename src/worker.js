@@ -1,8 +1,10 @@
 /**
  * welcome.yogaforbjj.net - funnel Worker.
  *
- * Checkout runs on ThriveCart, not here. This Worker serves the pages, captures
- * leads into D1, and reports health. The Stripe checkout/upsell/webhook layer is
+ * One job: the landing page for the $14 Guard Retention Bundle, plus lead
+ * capture. Checkout and everything after it belongs to ThriveCart, including
+ * the whole post-purchase upsell chain, because one-click requires the payment
+ * session to stay on their side. The Stripe layer and the old /upsell page are
  * parked in src/deferred/ - see the README there.
  *
  * No secrets are needed at present. If the Stripe layer is un-shelved, its keys
@@ -10,7 +12,6 @@
  */
 
 import landingHtml from './pages/landing.html';
-import upsellHtml from './pages/upsell.html';
 import thanksHtml from './pages/thanks.html';
 import previewCheckoutHtml from './pages/preview-checkout.html';
 import baseCss from './pages/_base.css';
@@ -68,11 +69,8 @@ function html(body, status = 200) {
 const PAGE_CONFIG_KEYS = [
   'PREVIEW_MODE',
   'THRIVECART_BUNDLE_URL',
-  'THRIVECART_LIFETIME_URL',
   'OFFER_DEADLINE',
   'BUNDLE_PRICE_CENTS',
-  'LIFETIME_PRICE_CENTS',
-  'YEARLY_PRICE_CENTS',
 ];
 
 /**
@@ -260,7 +258,6 @@ export default {
 
     if (method === 'HEAD' || method === 'GET') {
       if (path === '/') return html(renderPage(landingHtml, env));
-      if (path === '/upsell') return html(renderPage(upsellHtml, env));
       if (path === '/thanks') return html(renderPage(thanksHtml, env));
       if (path === '/preview-checkout') return html(renderPage(previewCheckoutHtml, env));
       if (path === '/health') return handleHealth(env);
@@ -270,7 +267,7 @@ export default {
       if (path === '/api/lead') return handleLead(request, env, ctx);
     }
 
-    const known = ['/', '/upsell', '/thanks', '/preview-checkout', '/health', '/api/lead'];
+    const known = ['/', '/thanks', '/preview-checkout', '/health', '/api/lead'];
     if (known.includes(path)) return json({ ok: false, error: 'method_not_allowed' }, 405);
 
     return json({ ok: false, error: 'not_found' }, 404);

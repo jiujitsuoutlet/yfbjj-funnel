@@ -32,18 +32,14 @@ migrations_dir = "migrations"
 
 [vars]
 BUNDLE_PRICE_CENTS = "1400"
-LIFETIME_PRICE_CENTS = "29700"
-YEARLY_PRICE_CENTS = "9700"
-
 # PREVIEW_MODE gates the cart handoff. TRUE (or unset, or anything but the exact
 # string "false") sends every CTA to /preview-checkout instead of ThriveCart.
 # Turn it off only when the cart link below is real. `npm run preflight` enforces this.
 PREVIEW_MODE = "true"
 
-# Checkout is ThriveCart, not Stripe. These are the two knobs to turn at launch.
-# THRIVECART_*_URL: paste the real cart links. Until then the CTA renders in a
-# disabled state instead of a dead link.
+# Checkout is ThriveCart, not Stripe. Two knobs to turn at launch.
+# Upsell prices deliberately do NOT live here: they are set in ThriveCart, and a
+# second copy in this file would drift the moment either side changed.
 THRIVECART_BUNDLE_URL = ""
-THRIVECART_LIFETIME_URL = ""
 # ISO 8601, e.g. "2026-09-01T23:59:00Z". Empty = deadline block hidden entirely.
 OFFER_DEADLINE = ""
