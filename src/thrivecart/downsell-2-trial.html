@@ -97,17 +97,18 @@ body{
 .band-cream .kicker{color:var(--red)}
 
 /* ------------------------------------------------------ diagonal slab edge */
-/* Measured mechanism: a 200%-tall clipped div inside an 80px band, so the
+/* Measured mechanism: a 200%-tall clipped layer crossing an 80px band, so the
    angle is a function of viewport width exactly as it is on their site
    (about 13 degrees on a phone, about 4 on a wide desktop). */
-.slab{position:relative; height:var(--diagonal); overflow:hidden}
+.slab{position:relative; z-index:1; height:var(--diagonal); overflow:visible}
 .slab > i{position:absolute; left:0; right:0; height:200%; top:-50%; display:block}
 /* The incoming ground rides 12px below the red edge, which is what leaves the
    red stripe visible along the diagonal. */
-.slab > .slab-edge{top:calc(-50% + 12px)}
+.slab > .slab-fill{z-index:2}
+.slab > .slab-edge{z-index:1; top:calc(-50% + 12px)}
 .slab-red{background:var(--red)}
-.slab-down > .slab-fill{clip-path:polygon(0 0, 100% 60%, 100% 100%, 0 100%)}
-.slab-up   > .slab-fill{clip-path:polygon(0 60%, 100% 0, 100% 100%, 0 100%)}
+.slab-down > .slab-fill{clip-path:polygon(0 0, 100% 60%, 100% calc(60% + 12px), 0 12px)}
+.slab-up   > .slab-fill{clip-path:polygon(0 60%, 100% 0, 100% 12px, 0 calc(60% + 12px))}
 .slab-down > .slab-edge{clip-path:polygon(0 0, 100% 60%, 100% 100%, 0 100%)}
 .slab-up   > .slab-edge{clip-path:polygon(0 60%, 100% 0, 100% 100%, 0 100%)}
 .fill-cream{background:var(--cream)}
