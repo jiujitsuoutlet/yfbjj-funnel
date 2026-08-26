@@ -22,7 +22,8 @@ The Stripe layer and the retired `/upsell` page are parked in `src/deferred/`.
 | `/thanks`              | GET    | fallback confirmation only, nothing is sold there  |
 | `/health`              | GET    | 200 when D1 is reachable and all 3 tables exist; 503 otherwise |
 | `/preview-checkout`    | GET    | stand-in for the cart while `PREVIEW_MODE` is on |
-| `/api/lead`            | POST   | live - rate limited, validates email, inserts into `leads` |
+| `/api/lead`            | POST   | live - rate limited, validates email, inserts into `leads` with its variant |
+| `/api/stats`           | GET    | per-variant counts, JSON. `Authorization: Bearer $STATS_SECRET` |
 
 ## Design
 
@@ -80,6 +81,31 @@ client bundle. Local dev values go in `.dev.vars` (gitignored); see
 
     npm run scan     # fails non-zero if a secret-shaped key reaches served output
 
+## A/B test
+
+Two variants of the same offer at `/`. A is the short page, B is the long-form
+arc. The Worker decides before it renders, so there is no client redirect and no
+flash of the wrong page.
+
+Order of precedence:
+
+1. `?v=a` / `?v=b` forces a variant, sets no cookie, and is never counted
+2. the `yfbjj_v` cookie, so a returning visitor is stable for 180 days
+3. crawlers get A, uncounted, so preview fetches do not skew the split
+4. everyone else is flipped 50/50, cookied, and counted once
+
+Attribution rides the whole way through: the variant is stored on the lead row
+at capture, appended to the ThriveCart URL as `passthrough[variant]` plus
+`utm_content`, and has a column waiting on `orders` for when the webhook is
+wired. Without that last step the test measures clicks, not money.
+
+Cost to know about: the landing page now sends `Cache-Control: private,
+no-store` and `Vary: Cookie`, because its body depends on the cookie. It cannot
+be edge cached while the test runs. That is a reason to end the test, not to
+leave it running forever.
+
+    curl -H "Authorization: Bearer $STATS_SECRET" https://welcome.yogaforbjj.net/api/stats
+
 ## Deploy gate
 
     npm run preflight
@@ -91,7 +117,10 @@ Refuses to deploy a half-configured page. Checks, all reported in one run:
 3. `PREVIEW_MODE` is exactly `"false"`
 4. `database_id` is a real D1 uuid, not the placeholder
 5. no unfilled `[[PLACEHOLDER]]` markers would render on a live page
-6. the secrets scan passes
+6. both variants are complete pages (CTA, price block, lead form, all 8 collections)
+7. the variant parameter survives onto the outbound cart URL
+8. the ThriveCart pages are built and current
+9. the secrets scan passes
 
 `npm run deploy` runs preflight first and stops on any failure.
 

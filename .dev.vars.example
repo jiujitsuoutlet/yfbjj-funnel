@@ -4,3 +4,7 @@
 #   wrangler secret put STRIPE_WEBHOOK_SECRET
 STRIPE_SECRET_KEY = "__REPLACE_ME_STRIPE_SECRET_KEY__"
 STRIPE_WEBHOOK_SECRET = "__REPLACE_ME_STRIPE_WEBHOOK_SIGNING_SECRET__"
+
+# Shared secret for GET /api/stats. Sent as: Authorization: Bearer <value>
+#   wrangler secret put STATS_SECRET
+STATS_SECRET = "__REPLACE_ME_STATS_SHARED_SECRET__"

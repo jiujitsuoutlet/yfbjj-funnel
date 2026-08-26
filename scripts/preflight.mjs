@@ -87,7 +87,7 @@ if (!dbId || dbId === 'REPLACE_WITH_D1_DATABASE_ID') {
 // its builder, so these two are expected to sit unfilled in this repo forever.
 const TC_EXPECTED = new Set(['[[TC_ACCEPT_URL]]', '[[TC_DECLINE_URL]]']);
 
-const WORKER_PAGES = ['landing.html', 'thanks.html', 'preview-checkout.html'];
+const WORKER_PAGES = ['landing-a.html', 'landing-b.html', 'thanks.html', 'preview-checkout.html'];
 const leftovers = [];
 const expected = [];
 
@@ -148,6 +148,61 @@ if (tcPages.length) {
     fail(`ThriveCart pages are stale, run \`npm run build:tc\`: ${stale.join(', ')}`);
   } else {
     pass(`${tcPages.length} ThriveCart pages built and current`);
+  }
+}
+
+/* 5c. both A/B variants are complete pages */
+// A variant that silently lost its price block or its CTA would still render,
+// and would quietly lose the test. Check the load-bearing parts of each.
+const COLLECTIONS = [
+  'Guard Flexibility', 'Guard Program', 'Inverted Guard', 'Hip Program',
+  'Stiffest Hips', 'Hip Flexor Rehab', 'Stiffest Legs', "I'm too busy for Yoga",
+];
+for (const variant of ['a', 'b']) {
+  const file = `landing-${variant}.html`;
+  let page = '';
+  try {
+    page = readFileSync(join(ROOT, 'src', 'pages', file), 'utf8');
+  } catch {
+    fail(`variant ${variant.toUpperCase()} is missing: src/pages/${file}`);
+    continue;
+  }
+  const missing = [];
+  if (!page.includes('data-cart="bundle"')) missing.push('a bundle CTA');
+  if (!page.includes('data-price="bundle"')) missing.push('the price block');
+  if (!page.includes('id="lead-form"')) missing.push('the lead capture form');
+  if (!page.includes('{{PAGE_CONFIG_JSON}}')) missing.push('the page config island');
+  const absent = COLLECTIONS.filter((c) => !page.includes(c));
+  if (absent.length) missing.push(`${absent.length} of the 8 collections (${absent.join(', ')})`);
+  if (missing.length) fail(`variant ${variant.toUpperCase()} (${file}) is missing ${missing.join('; ')}`);
+  else pass(`variant ${variant.toUpperCase()} renders complete (CTA, price, form, all 8 collections)`);
+}
+
+/* 5d. the variant actually rides the outbound cart URL */
+// This is the check that protects the whole test: without the parameter the
+// experiment measures clicks instead of money.
+const pageJs = readFileSync(join(ROOT, 'src', 'pages', '_page.js'), 'utf8');
+const appendsVariant = pageJs.includes('passthrough[variant]');
+if (!appendsVariant) {
+  fail('src/pages/_page.js no longer appends passthrough[variant] to the cart URL. The A/B test would measure clicks, not purchases.');
+} else if (preview !== 'false') {
+  pass('variant passthrough present in _page.js (not exercised while PREVIEW_MODE is on)');
+} else if (!cart) {
+  pass('variant passthrough present in _page.js (no cart URL to test against yet)');
+} else {
+  // Simulate exactly what the page does at click time.
+  try {
+    const built = new URL(cart);
+    built.searchParams.set('passthrough[variant]', 'b');
+    built.searchParams.set('utm_content', 'variant-b');
+    const round = new URL(built.toString());
+    if (round.searchParams.get('passthrough[variant]') !== 'b') {
+      fail(`the variant parameter does not survive on the cart URL: ${built.toString()}`);
+    } else {
+      pass(`variant rides the cart URL (${built.toString()})`);
+    }
+  } catch (err) {
+    fail(`cannot build a cart URL from THRIVECART_BUNDLE_URL: ${err.message}`);
   }
 }
 

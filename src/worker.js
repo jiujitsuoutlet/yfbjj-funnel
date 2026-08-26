@@ -11,7 +11,8 @@
  * come from Cloudflare Secrets on `env` and never touch a page or wrangler.toml.
  */
 
-import landingHtml from './pages/landing.html';
+import landingAHtml from './pages/landing-a.html';
+import landingBHtml from './pages/landing-b.html';
 import thanksHtml from './pages/thanks.html';
 import previewCheckoutHtml from './pages/preview-checkout.html';
 import baseCss from './pages/_base.css';
@@ -49,14 +50,16 @@ function json(body, status = 200, extraHeaders = {}) {
   });
 }
 
-function html(body, status = 200) {
+function html(body, status = 200, extraHeaders = {}) {
   return new Response(body, {
     status,
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
-      // Paid traffic: short edge/browser cache, long stale window.
+      // Paid traffic: short edge/browser cache, long stale window. The landing
+      // page overrides this, because its body depends on the variant cookie.
       'Cache-Control': 'public, max-age=300, stale-while-revalidate=86400',
       ...SECURITY_HEADERS,
+      ...extraHeaders,
     },
   });
 }
@@ -73,6 +76,81 @@ const PAGE_CONFIG_KEYS = [
   'BUNDLE_PRICE_CENTS',
 ];
 
+/* --------------------------------------------------------------- A/B test */
+
+const VARIANT_COOKIE = 'yfbjj_v';
+const VARIANTS = ['a', 'b'];
+const VARIANT_MAX_AGE = 60 * 60 * 24 * 180; // 180 days
+
+/**
+ * Crawlers are served variant A and are never assigned, cookied, or counted.
+ * Keeping them out of the denominator matters more than which page they see:
+ * a preview fetch that lands in the visitor count quietly biases the split.
+ */
+const BOT_RE = /bot\b|crawler|crawling|spider|slurp|bingpreview|facebookexternalhit|whatsapp|telegram|discord|slackbot|embedly|quora link preview|headless|lighthouse|pagespeed|gtmetrix|pingdom|uptime|monitor|curl\/|wget\/|python-requests|axios\/|node-fetch|go-http-client|java\/|libwww|scrapy|semrush|ahrefs|mj12|dotbot|petalbot|yandex|baiduspider|duckduckbot|applebot|gptbot|claudebot|ccbot|perplexity/i;
+
+function isBot(request) {
+  const ua = request.headers.get('user-agent') || '';
+  return ua === '' || BOT_RE.test(ua);
+}
+
+function readCookie(request, name) {
+  const header = request.headers.get('cookie');
+  if (!header) return null;
+  for (const part of header.split(';')) {
+    const eq = part.indexOf('=');
+    if (eq < 0) continue;
+    if (part.slice(0, eq).trim() === name) return part.slice(eq + 1).trim();
+  }
+  return null;
+}
+
+/** Unbiased coin. Math.random is fine here too, but this is free and auditable. */
+function coinFlip() {
+  const byte = new Uint8Array(1);
+  crypto.getRandomValues(byte);
+  return byte[0] < 128 ? 'a' : 'b';
+}
+
+/**
+ * Decides the variant BEFORE anything renders, so there is no client-side
+ * redirect and no flash of the wrong page.
+ *   1. ?v=a / ?v=b wins, and never sets a cookie or counts a visit
+ *   2. an existing cookie wins next, so a returning visitor is stable
+ *   3. bots get A, uncounted
+ *   4. everyone else is flipped, cookied and counted once
+ */
+function assignVariant(request) {
+  const override = (new URL(request.url).searchParams.get('v') || '').toLowerCase();
+  if (VARIANTS.includes(override)) return { variant: override, assigned: false, forced: true };
+
+  const cookie = readCookie(request, VARIANT_COOKIE);
+  if (VARIANTS.includes(cookie)) return { variant: cookie, assigned: false, forced: false };
+
+  if (isBot(request)) return { variant: 'a', assigned: false, forced: false, bot: true };
+
+  return { variant: coinFlip(), assigned: true, forced: false };
+}
+
+function variantCookie(variant) {
+  return `${VARIANT_COOKIE}=${variant}; Path=/; Max-Age=${VARIANT_MAX_AGE}; SameSite=Lax; Secure; HttpOnly`;
+}
+
+const utcDay = () => nowIso().slice(0, 10);
+
+async function countVisit(env, variant) {
+  try {
+    await env.DB.prepare(
+      `INSERT INTO variant_visits (variant, day, count) VALUES (?1, ?2, 1)
+       ON CONFLICT(variant, day) DO UPDATE SET count = count + 1`
+    )
+      .bind(variant, utcDay())
+      .run();
+  } catch (err) {
+    console.error('visit count failed', err);
+  }
+}
+
 /**
  * PREVIEW_MODE defaults to TRUE and must be turned off explicitly. An unset or
  * malformed value means preview, so a missing var can never route paid traffic
@@ -82,10 +160,11 @@ function isPreviewMode(env) {
   return String(env.PREVIEW_MODE ?? 'true').trim().toLowerCase() !== 'false';
 }
 
-function renderPage(template, env) {
+function renderPage(template, env, variant) {
   const config = {};
   for (const key of PAGE_CONFIG_KEYS) config[key] = env[key] || '';
   config.PREVIEW_MODE = isPreviewMode(env);
+  config.VARIANT = variant || '';
   // `<` escaped so a value can never close the script tag it sits in.
   const payload = JSON.stringify(config).replace(/</g, '\\u003c');
   // Replacer FUNCTIONS, not strings: a replacement string treats $$, $&, $`
@@ -188,6 +267,21 @@ async function checkLeadRateLimit(request, env, ctx) {
 
 /* ------------------------------------------------------------------ routes */
 
+function handleLanding(request, env, ctx) {
+  const { variant, assigned } = assignVariant(request);
+  const doc = variant === 'b' ? landingBHtml : landingAHtml;
+
+  // The response body now depends on a cookie, so it must never be held in a
+  // shared cache. This costs the landing page its edge caching: a deliberate
+  // trade, and the reason to end the test rather than leave it running.
+  const headers = { 'Cache-Control': 'private, no-store', Vary: 'Cookie' };
+  if (assigned) headers['Set-Cookie'] = variantCookie(variant);
+
+  const response = html(renderPage(doc, env, variant), 200, headers);
+  if (assigned && ctx && ctx.waitUntil) ctx.waitUntil(countVisit(env, variant));
+  return response;
+}
+
 async function handleHealth(env) {
   try {
     const row = await env.DB.prepare(
@@ -235,9 +329,21 @@ async function handleLead(request, env, ctx) {
 
   const source = typeof payload.source === 'string' ? payload.source.slice(0, 64) : 'landing';
 
+  // Trust our own cookie over anything the client sends; fall back to the body
+  // only when the cookie is missing, which is the forced-override case.
+  const cookieVariant = readCookie(request, VARIANT_COOKIE);
+  const bodyVariant = typeof payload.variant === 'string' ? payload.variant.toLowerCase() : '';
+  const variant = VARIANTS.includes(cookieVariant)
+    ? cookieVariant
+    : VARIANTS.includes(bodyVariant)
+      ? bodyVariant
+      : null;
+
   try {
-    await env.DB.prepare('INSERT INTO leads (id, email, source, created_at) VALUES (?1, ?2, ?3, ?4)')
-      .bind(crypto.randomUUID(), email, source, nowIso())
+    await env.DB.prepare(
+      'INSERT INTO leads (id, email, source, variant, created_at) VALUES (?1, ?2, ?3, ?4, ?5)'
+    )
+      .bind(crypto.randomUUID(), email, source, variant, nowIso())
       .run();
   } catch (err) {
     console.error('lead insert failed', err);
@@ -246,6 +352,76 @@ async function handleLead(request, env, ctx) {
 
   // Client hands off to ThriveCart after this resolves; see src/pages/landing.html.
   return json({ ok: true }, 201);
+}
+
+/**
+ * Per-variant counts. JSON only, no dashboard.
+ * Auth: Authorization: Bearer <STATS_SECRET>, read from Cloudflare Secrets.
+ */
+function timingSafeEqual(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+async function handleStats(request, env) {
+  if (!env.STATS_SECRET) {
+    console.error('STATS_SECRET missing from env');
+    return json({ ok: false, error: 'stats_not_configured' }, 500);
+  }
+
+  const header = request.headers.get('authorization') || '';
+  const token = header.startsWith('Bearer ') ? header.slice(7) : '';
+  if (!timingSafeEqual(token, env.STATS_SECRET)) {
+    return json({ ok: false, error: 'unauthorized' }, 401, { 'WWW-Authenticate': 'Bearer' });
+  }
+
+  try {
+    const [visits, leads, orders] = await Promise.all([
+      env.DB.prepare('SELECT variant, sum(count) AS n FROM variant_visits GROUP BY variant').all(),
+      env.DB.prepare('SELECT variant, count(*) AS n FROM leads GROUP BY variant').all(),
+      env.DB.prepare('SELECT variant, count(*) AS n, sum(amount_cents) AS cents FROM orders GROUP BY variant').all(),
+    ]);
+
+    const tally = (rows, field = 'n') => {
+      const out = {};
+      for (const row of rows.results || []) out[row.variant || 'unassigned'] = row[field] || 0;
+      return out;
+    };
+
+    const visitors = tally(visits);
+    const leadCounts = tally(leads);
+    const orderCounts = tally(orders);
+    const orderCents = tally(orders, 'cents');
+
+    const variants = {};
+    for (const v of VARIANTS) {
+      const seen = visitors[v] || 0;
+      const captured = leadCounts[v] || 0;
+      variants[v] = {
+        visitors: seen,
+        leads: captured,
+        lead_rate: seen ? Number((captured / seen).toFixed(4)) : null,
+        purchases: orderCounts[v] || 0,
+        revenue_cents: orderCents[v] || 0,
+      };
+    }
+
+    return json({
+      ok: true,
+      at: nowIso(),
+      variants,
+      unassigned_leads: leadCounts.unassigned || 0,
+      notes: {
+        visitors: 'Counted once per newly assigned human. Returning visitors, ?v= overrides and bots are excluded.',
+        purchases: 'Always 0 until a ThriveCart webhook writes to the orders table. Nothing writes it yet.',
+      },
+    });
+  } catch (err) {
+    console.error('stats query failed', err);
+    return json({ ok: false, error: 'query_failed' }, 500);
+  }
 }
 
 /* ------------------------------------------------------------------ router */
@@ -257,17 +433,18 @@ export default {
     const method = request.method.toUpperCase();
 
     if (method === 'HEAD' || method === 'GET') {
-      if (path === '/') return html(renderPage(landingHtml, env));
-      if (path === '/thanks') return html(renderPage(thanksHtml, env));
-      if (path === '/preview-checkout') return html(renderPage(previewCheckoutHtml, env));
+      if (path === '/') return handleLanding(request, env, ctx);
+      if (path === '/thanks') return html(renderPage(thanksHtml, env, null));
+      if (path === '/preview-checkout') return html(renderPage(previewCheckoutHtml, env, null));
       if (path === '/health') return handleHealth(env);
+      if (path === '/api/stats') return handleStats(request, env);
     }
 
     if (method === 'POST') {
       if (path === '/api/lead') return handleLead(request, env, ctx);
     }
 
-    const known = ['/', '/thanks', '/preview-checkout', '/health', '/api/lead'];
+    const known = ['/', '/thanks', '/preview-checkout', '/health', '/api/lead', '/api/stats'];
     if (known.includes(path)) return json({ ok: false, error: 'method_not_allowed' }, 405);
 
     return json({ ok: false, error: 'not_found' }, 404);

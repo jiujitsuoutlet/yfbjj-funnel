@@ -9,12 +9,35 @@
   var PREVIEW = CFG.PREVIEW_MODE === true;
   var PREVIEW_PATH = '/preview-checkout';
   var CART = { bundle: CFG.THRIVECART_BUNDLE_URL || '' };
+  var VARIANT = CFG.VARIANT || '';
+
+  /**
+   * Carries the variant across the handoff. Without this the test measures
+   * clicks, not money: ThriveCart owns the purchase, so the variant has to
+   * ride along and come back on the webhook.
+   *
+   * passthrough[variant] is ThriveCart's documented custom-data convention.
+   * utm_content is sent as well, because it survives more systems than any one
+   * vendor field does. Verify both land in the webhook payload before trusting
+   * the numbers.
+   */
+  function withVariant(raw) {
+    if (!raw || !VARIANT) return raw;
+    try {
+      var u = new URL(raw);
+      u.searchParams.set('passthrough[variant]', VARIANT);
+      u.searchParams.set('utm_content', 'variant-' + VARIANT);
+      return u.toString();
+    } catch (e) {
+      return raw;
+    }
+  }
 
   // Preview mode, or a missing cart link, always routes to the preview page.
   // A CTA on this site is never a dead link and never a broken cart.
   function target(kind) {
     if (PREVIEW) return PREVIEW_PATH;
-    return CART[kind] || PREVIEW_PATH;
+    return withVariant(CART[kind]) || PREVIEW_PATH;
   }
 
   /* ------------------------------------------------------------- prices */
@@ -68,7 +91,7 @@
     return fetch('/api/lead', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email, source: source })
+      body: JSON.stringify({ email: email, source: source, variant: VARIANT })
     }).then(function (res) { if (res.ok) captured = true; })
       .catch(function () { /* the sale never waits on our storage */ });
   }
