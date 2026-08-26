@@ -7,6 +7,7 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { renderCartPage } from './build-thrivecart.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CONFIG = join(ROOT, 'wrangler.toml');
@@ -142,12 +143,12 @@ if (tcPages.length) {
       stale.push(`${page} has no source in src/thrivecart/_src`);
       continue;
     }
-    // Mirror EVERY substitution the generator makes, or this check reports
-    // stale forever and stops meaning anything.
-    const assetBase = (cfg.ASSET_BASE_URL || '').trim() || '[[ASSET_BASE_URL]]';
-    const expected = template
-      .replace(/\{\{BASE_CSS\}\}/g, () => css)
-      .replace(/\{\{ASSET_BASE\}\}/g, () => assetBase);
+    // Uses the generator's own transform, so this check cannot drift from it.
+    const expected = renderCartPage(template, {
+      css,
+      assetBase: (cfg.ASSET_BASE_URL || '').trim() || '[[ASSET_BASE_URL]]',
+      vslUrl: (cfg.VSL_EMBED_URL || '').trim(),
+    });
     if (built !== expected) stale.push(page);
   }
   if (stale.length) {
@@ -210,6 +211,16 @@ if (!appendsVariant) {
   } catch (err) {
     fail(`cannot build a cart URL from THRIVECART_BUNDLE_URL: ${err.message}`);
   }
+}
+
+/* 5d-2. video slot status, reported rather than blocking */
+// [[VSL_EMBED]] never appears in a built page (the generator drops the whole
+// block when there is no embed), so the placeholder sweep cannot see it. Say so
+// here instead, or the missing video becomes invisible.
+{
+  const vsl = (cfg.VSL_EMBED_URL || '').trim();
+  if (vsl) pass(`certification video embedded (${vsl})`);
+  else pass('certification page ships without the video slot: VSL_EMBED_URL is unset, hero photo carries it');
 }
 
 /* 5e. every image a page references actually exists */
