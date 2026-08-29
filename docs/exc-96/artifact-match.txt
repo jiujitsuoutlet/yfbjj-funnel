@@ -1,0 +1,28 @@
+Target commit: d323d792cc2f0b4b8171f2b4bf04604b8b8d5276
+variant a local_sha256=917b616743517b78dff5706c7fc6a960b4e64ad2a0479699457897e0892678f5 staging_sha256=917b616743517b78dff5706c7fc6a960b4e64ad2a0479699457897e0892678f5 byte_equal=yes
+variant b local_sha256=292115136ce76446f5b8e953e0aa858c87f20c6f946af8bfb704bff140c214a2 staging_sha256=292115136ce76446f5b8e953e0aa858c87f20c6f946af8bfb704bff140c214a2 byte_equal=yes
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mProxy environment variables detected. We'll use your proxy for fetch requests.[0m
+
+
+
+ ⛅️ wrangler 4.124.0
+────────────────────
+Version ID:  51febbf4-abe8-413d-b0ba-5a2171239a97
+Created:     2026-08-29T08:00:47.118Z
+Author:      sebastian.brosche@gmail.com
+Source:      Unknown (version_upload)
+Tag:         -
+Message:     EXC-95 revision d323d792cc2f0b4b8171f2b4bf04604b8b8d5276
+
+Handlers:            fetch
+Compatibility Date:  2026-05-01
+Your Worker has access to the following bindings:
+Binding                                 Resource                  
+env.ASSET_BASE_URL ("")                 Environment Variable      
+env.BUNDLE_PRICE_CENTS ("1400")         Environment Variable      
+env.OFFER_DEADLINE ("")                 Environment Variable      
+env.PREVIEW_MODE ("true")               Environment Variable      
+env.PREVIEW_NO_D1 ("true")              Environment Variable      
+env.THRIVECART_BUNDLE_URL ("")          Environment Variable      
+env.VSL_EMBED_URL ("")                  Environment Variable      
+
