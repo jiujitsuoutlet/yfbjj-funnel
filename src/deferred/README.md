@@ -1,6 +1,8 @@
 # Parked
 
-Nothing in this directory is imported by the Worker.
+Nothing in this directory is imported by the Worker. The protected Stripe
+reconstruction now lives in `src/stripe.js`; this is the retired prototype and
+must not be restored alongside it.
 
 Two things are parked here: the Stripe payment layer, and the `/upsell` page.
 

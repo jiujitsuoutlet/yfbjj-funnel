@@ -11,6 +11,9 @@
     "db:migrate:remote": "wrangler d1 migrations apply yfbjj_funnel --remote",
     "tail": "wrangler tail",
     "preflight": "node scripts/preflight.mjs",
+    "test": "node --test",
+    "dry-run:staging": "wrangler deploy --env staging --dry-run",
+    "db:migrate:staging": "wrangler d1 migrations apply yfbjj_funnel_staging --env staging --remote",
     "build:tc": "node scripts/build-thrivecart.mjs",
     "build:img": "node scripts/build-images.mjs"
   },
@@ -18,6 +21,9 @@
   "author": "",
   "license": "ISC",
   "type": "module",
+  "dependencies": {
+    "stripe": "^18.5.0"
+  },
   "devDependencies": {
     "wrangler": "^4.124.0"
   },

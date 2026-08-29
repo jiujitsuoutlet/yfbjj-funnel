@@ -12,7 +12,9 @@ Upsell prices are deliberately absent from this repo. They live in ThriveCart
 only, because two copies drift: lifetime is $247 in the funnel and $297 on the
 main site.
 
-The Stripe layer and the retired `/upsell` page are parked in `src/deferred/`.
+Stripe staging is wired behind the same fail-closed preview lock. Production
+still uses ThriveCart. The Stripe endpoints cannot create a Checkout Session
+unless `PREVIEW_MODE` is the exact string `false`.
 
 ## Routes
 
@@ -24,6 +26,37 @@ The Stripe layer and the retired `/upsell` page are parked in `src/deferred/`.
 | `/preview-checkout`    | GET    | stand-in for the cart while `PREVIEW_MODE` is on |
 | `/api/lead`            | POST   | live - rate limited, validates email, inserts into `leads` with its variant |
 | `/api/stats`           | GET    | per-variant counts, JSON. `Authorization: Bearer $STATS_SECRET` |
+| `/api/checkout`        | POST   | creates one of four Stripe-hosted Checkout Sessions only when preview is explicitly off |
+| `/api/customer-portal` | POST   | creates a portal only after retrieving and verifying a completed Checkout Session |
+| `/api/stripe-webhook`  | POST   | verifies the raw signed body, then processes it through the D1 retry ledger |
+
+## Stripe staging
+
+The `staging` Wrangler environment has a separate Worker name, no custom
+routes, a separate D1 binding, and `PREVIEW_MODE = "true"`. It is safe to put
+on an unlisted `workers.dev` hostname after replacing the staging D1 placeholder.
+The lock returns HTTP 423 with `{"ok":false,"error":"preview_locked"}` before
+constructing a Stripe client, so no Checkout Session is created.
+
+Four existing Price IDs are mapped in configuration. Do not create, edit, or
+duplicate them. The Two-Month Checkout contains the one-time $8 item and trials
+the existing $20/month recurring item until exactly two UTC calendar months
+later. Month-end dates clamp to the last valid day.
+
+Webhook registration is deliberately not part of staging setup. Once a stable
+destination is approved, register exactly:
+
+    https://<staging-worker-host>/api/stripe-webhook
+
+Minimum event types:
+
+* `checkout.session.completed`
+* `checkout.session.async_payment_succeeded`
+
+The real signing secret exists only after that destination is registered. Do
+not deploy a fixture value. Tests generate signatures from a test-only secret.
+The explicit AutoCreator mapping currently maps the Guard Retention Price to
+`Guard Retention`, but there are intentionally no entitlement writes.
 
 ## Design
 
