@@ -17,6 +17,7 @@ import thanksHtml from './pages/thanks.html';
 import previewCheckoutHtml from './pages/preview-checkout.html';
 import baseCss from './pages/_base.css';
 import pageJs from './pages/_page.js';
+import { handleCheckout, handlePortal, handleWebhook } from './stripe.js';
 
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
@@ -157,7 +158,7 @@ async function countVisit(env, variant) {
  * at a cart that is not ready.
  */
 function isPreviewMode(env) {
-  return String(env.PREVIEW_MODE ?? 'true').trim().toLowerCase() !== 'false';
+  return env.PREVIEW_MODE !== 'false';
 }
 
 function isNoD1Preview(env) {
@@ -458,9 +459,12 @@ export default {
         return json({ ok: false, error: 'preview_locked' }, 423);
       }
       if (path === '/api/lead') return handleLead(request, env, ctx);
+      if (path === '/api/checkout') return handleCheckout(request, env);
+      if (path === '/api/customer-portal') return handlePortal(request, env);
+      if (path === '/api/stripe-webhook') return handleWebhook(request, env);
     }
 
-    const known = ['/', '/thanks', '/preview-checkout', '/health', '/api/checkout', '/api/lead', '/api/stats'];
+    const known = ['/', '/thanks', '/preview-checkout', '/health', '/api/lead', '/api/stats', '/api/checkout', '/api/customer-portal', '/api/stripe-webhook'];
     if (known.includes(path)) return json({ ok: false, error: 'method_not_allowed' }, 405);
 
     return json({ ok: false, error: 'not_found' }, 404);

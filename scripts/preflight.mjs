@@ -66,7 +66,7 @@ if (!deadline) {
 }
 
 /* 3. preview mode off */
-const preview = (cfg.PREVIEW_MODE ?? 'true').trim().toLowerCase();
+const preview = cfg.PREVIEW_MODE ?? 'true';
 if (preview !== 'false') {
   fail(`PREVIEW_MODE is "${cfg.PREVIEW_MODE ?? '(unset)'}". Set PREVIEW_MODE = "false" or every CTA routes to /preview-checkout instead of the cart.`);
 } else {

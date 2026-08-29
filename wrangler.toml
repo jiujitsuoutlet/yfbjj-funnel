@@ -60,3 +60,40 @@ ASSET_BASE_URL = ""
 # "https://iframe.mediadelivery.net/embed/<library>/<video>". Empty means the
 # video slot is left out of the built page entirely. autoplay is forced off.
 VSL_EMBED_URL = ""
+
+# Stripe identifiers are non-secret. Secret keys and the future webhook
+# signing secret are Cloudflare Secrets and must never appear in this file.
+STRIPE_PRICE_BUNDLE = "price_1U9IkNIwpEtt4FIedvXFb9tC"
+STRIPE_PRICE_HEAD_TO_TOES = "price_1U9IkOIwpEtt4FIeqq3edSnR"
+STRIPE_PRICE_LIFETIME = "price_1U9IkPIwpEtt4FIeD0mbQvCK"
+STRIPE_PRICE_TWO_MONTH = "price_1U9IkQIwpEtt4FIenOTDpw8e"
+STRIPE_PRODUCT_TWO_MONTH = "prod_V9byHoYGBGpDpc"
+
+[env.staging]
+name = "yfbjj-funnel-stripe-staging"
+workers_dev = true
+routes = []
+
+[[env.staging.ratelimits]]
+name = "LEAD_RATE_LIMIT"
+namespace_id = "1002"
+simple = { limit = 5, period = 60 }
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "yfbjj_funnel_staging"
+database_id = "REPLACE_WITH_STAGING_D1_DATABASE_ID"
+migrations_dir = "migrations"
+
+[env.staging.vars]
+PREVIEW_MODE = "true"
+BUNDLE_PRICE_CENTS = "1400"
+THRIVECART_BUNDLE_URL = ""
+OFFER_DEADLINE = ""
+ASSET_BASE_URL = ""
+VSL_EMBED_URL = ""
+STRIPE_PRICE_BUNDLE = "price_1U9IkNIwpEtt4FIedvXFb9tC"
+STRIPE_PRICE_HEAD_TO_TOES = "price_1U9IkOIwpEtt4FIeqq3edSnR"
+STRIPE_PRICE_LIFETIME = "price_1U9IkPIwpEtt4FIeD0mbQvCK"
+STRIPE_PRICE_TWO_MONTH = "price_1U9IkQIwpEtt4FIenOTDpw8e"
+STRIPE_PRODUCT_TWO_MONTH = "prod_V9byHoYGBGpDpc"
