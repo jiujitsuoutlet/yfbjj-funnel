@@ -157,6 +157,27 @@ Refuses to deploy a half-configured page. Checks, all reported in one run:
 
 `npm run deploy` runs preflight first and stops on any failure.
 
+## Preview-only staging without D1
+
+`wrangler.preview.toml` is a temporary visual and interaction review profile.
+It deploys only to the separately named `yfbjj-funnel-visual-staging` Worker on
+`workers.dev`. It has no custom route, DNS, D1 database, service binding, cart
+URL, or secret. It does not replace the production configuration or migration.
+
+Both `PREVIEW_MODE` and `PREVIEW_NO_D1` must be true. Every CTA therefore opens
+`/preview-checkout`. `/api/checkout` returns `423 preview_locked`. Health, lead,
+stats, webhook, portal, order, and entitlement paths return an explicit `503
+staging_not_configured` response before any persistent handler can run. Landing
+variant assignment still works, but visit counting is skipped because staging
+has no persistence. No in-memory substitute is used.
+
+    npm run validate:preview
+    npm run deploy:preview
+
+The preview deploy command has its own fail-closed validation, secrets scan,
+and Worker dry-run before deployment. Production remains protected by the
+stricter `npm run preflight` gate and `npm run deploy` chain.
+
 ## Setup
 
     npm install

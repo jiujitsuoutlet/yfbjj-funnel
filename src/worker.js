@@ -161,6 +161,27 @@ function isPreviewMode(env) {
   return env.PREVIEW_MODE !== 'false';
 }
 
+/**
+ * Temporary visual-review profile. It is deliberately useful only when the
+ * normal checkout gate is also closed. This profile has no D1 binding, and no
+ * request may fall through to code that reads or mutates persistent state.
+ */
+function isPreviewOnlyStaging(env) {
+  return isPreviewMode(env) && String(env.PREVIEW_NO_D1 ?? '').trim().toLowerCase() === 'true';
+}
+
+function stagingLocked(path) {
+  const checkout = path === '/api/checkout';
+  return json(
+    {
+      ok: false,
+      error: checkout ? 'preview_locked' : 'staging_not_configured',
+      detail: 'Visual and interaction staging only. Persistent services are not configured.',
+    },
+    checkout ? 423 : 503
+  );
+}
+
 function renderPage(template, env, variant) {
   const config = {};
   for (const key of PAGE_CONFIG_KEYS) config[key] = env[key] || '';
@@ -279,7 +300,7 @@ function handleLanding(request, env, ctx) {
   if (assigned) headers['Set-Cookie'] = variantCookie(variant);
 
   const response = html(renderPage(doc, env, variant), 200, headers);
-  if (assigned && ctx && ctx.waitUntil) ctx.waitUntil(countVisit(env, variant));
+  if (assigned && !isPreviewOnlyStaging(env) && ctx && ctx.waitUntil) ctx.waitUntil(countVisit(env, variant));
   return response;
 }
 
@@ -432,6 +453,26 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '') || '/';
     const method = request.method.toUpperCase();
+
+    if (isPreviewOnlyStaging(env)) {
+      if (path === '/api/checkout') return stagingLocked(path);
+      if (
+        path === '/health' ||
+        path === '/api/lead' ||
+        path === '/api/stats' ||
+        path.startsWith('/webhook') ||
+        path.startsWith('/api/webhook') ||
+        path.startsWith('/api/stripe-webhook') ||
+        path.startsWith('/customer-portal') ||
+        path.startsWith('/api/customer-portal') ||
+        path.startsWith('/portal') ||
+        path.startsWith('/api/portal') ||
+        path.startsWith('/order') ||
+        path.startsWith('/api/order') ||
+        path.startsWith('/entitlement') ||
+        path.startsWith('/api/entitlement')
+      ) return stagingLocked(path);
+    }
 
     if (method === 'HEAD' || method === 'GET') {
       if (path === '/') return handleLanding(request, env, ctx);

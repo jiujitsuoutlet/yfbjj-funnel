@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "npm run preflight && wrangler deploy",
+    "deploy:preview": "npm run validate:preview && wrangler deploy --config wrangler.preview.toml",
     "scan": "bash scripts/scan-secrets.sh",
     "db:create": "wrangler d1 create yfbjj_funnel",
     "db:migrate:local": "wrangler d1 migrations apply yfbjj_funnel --local",
@@ -14,6 +15,7 @@
     "test": "node --test",
     "dry-run:staging": "wrangler deploy --env staging --dry-run",
     "db:migrate:staging": "wrangler d1 migrations apply yfbjj_funnel_staging --env staging --remote",
+    "validate:preview": "node scripts/validate-preview.mjs && npm run scan && wrangler deploy --config wrangler.preview.toml --dry-run",
     "build:tc": "node scripts/build-thrivecart.mjs",
     "build:img": "node scripts/build-images.mjs"
   },

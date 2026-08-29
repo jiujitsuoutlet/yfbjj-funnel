@@ -1,0 +1,24 @@
+name = "yfbjj-funnel-visual-staging"
+main = "src/worker.js"
+compatibility_date = "2026-05-01"
+account_id = "cb8ab13b857925cdb9b3c0fd9d4ec4bf"
+workers_dev = true
+
+# Isolated visual-review profile. There are intentionally no routes, D1
+# databases, service bindings, or secrets in this file.
+[assets]
+directory = "./public"
+
+[[rules]]
+type = "Text"
+globs = ["**/*.html", "**/*.css", "**/_page.js"]
+fallthrough = true
+
+[vars]
+BUNDLE_PRICE_CENTS = "1400"
+PREVIEW_MODE = "true"
+PREVIEW_NO_D1 = "true"
+THRIVECART_BUNDLE_URL = ""
+OFFER_DEADLINE = ""
+ASSET_BASE_URL = ""
+VSL_EMBED_URL = ""
