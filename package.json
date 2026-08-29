@@ -12,13 +12,15 @@
     "tail": "wrangler tail",
     "preflight": "node scripts/preflight.mjs",
     "build:tc": "node scripts/build-thrivecart.mjs",
-    "build:img": "node scripts/build-images.mjs"
+    "build:img": "node scripts/build-images.mjs",
+    "visual:audit": "node scripts/visual-audit.mjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "devDependencies": {
+    "playwright": "^1.55.0",
     "wrangler": "^4.124.0"
   },
   "private": true

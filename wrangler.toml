@@ -42,6 +42,9 @@ BUNDLE_PRICE_CENTS = "1400"
 # string "false") sends every CTA to /preview-checkout instead of ThriveCart.
 # Turn it off only when the cart link below is real. `npm run preflight` enforces this.
 PREVIEW_MODE = "true"
+# Visual staging has no D1 binding. In this mode every stateful endpoint stops
+# before it reads or writes, while the reviewable pages continue to render.
+PREVIEW_NO_D1 = "true"
 
 # Checkout is ThriveCart, not Stripe. Two knobs to turn at launch.
 # Upsell prices deliberately do NOT live here: they are set in ThriveCart, and a

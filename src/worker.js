@@ -160,6 +160,10 @@ function isPreviewMode(env) {
   return String(env.PREVIEW_MODE ?? 'true').trim().toLowerCase() !== 'false';
 }
 
+function isNoD1Preview(env) {
+  return isPreviewMode(env) && String(env.PREVIEW_NO_D1 || '').trim().toLowerCase() === 'true';
+}
+
 function renderPage(template, env, variant) {
   const config = {};
   for (const key of PAGE_CONFIG_KEYS) config[key] = env[key] || '';
@@ -278,11 +282,14 @@ function handleLanding(request, env, ctx) {
   if (assigned) headers['Set-Cookie'] = variantCookie(variant);
 
   const response = html(renderPage(doc, env, variant), 200, headers);
-  if (assigned && ctx && ctx.waitUntil) ctx.waitUntil(countVisit(env, variant));
+  if (assigned && !isNoD1Preview(env) && ctx && ctx.waitUntil) ctx.waitUntil(countVisit(env, variant));
   return response;
 }
 
 async function handleHealth(env) {
+  if (isNoD1Preview(env)) {
+    return json({ ok: false, d1: 'intentionally_unbound', preview: true, at: nowIso() }, 503);
+  }
   try {
     const row = await env.DB.prepare(
       `SELECT count(*) AS n FROM sqlite_master
@@ -302,6 +309,9 @@ async function handleHealth(env) {
 }
 
 async function handleLead(request, env, ctx) {
+  if (isNoD1Preview(env)) {
+    return json({ ok: false, error: 'preview_state_disabled' }, 503);
+  }
   const rl = await checkLeadRateLimit(request, env, ctx);
   if (!rl.allowed) {
     return json(
@@ -366,6 +376,9 @@ function timingSafeEqual(a, b) {
 }
 
 async function handleStats(request, env) {
+  if (isNoD1Preview(env)) {
+    return json({ ok: false, error: 'preview_state_disabled' }, 503);
+  }
   if (!env.STATS_SECRET) {
     console.error('STATS_SECRET missing from env');
     return json({ ok: false, error: 'stats_not_configured' }, 500);

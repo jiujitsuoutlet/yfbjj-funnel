@@ -50,7 +50,8 @@
   --s1:.25rem; --s2:.5rem; --s3:.75rem; --s4:1rem;
   --s5:1.5rem; --s6:2rem; --s7:3rem; --s8:4.5rem;
 
-  --measure:34rem;
+  --measure:70rem;
+  --copy:38rem;
   --pad:1.375rem;
   --r-card:1rem;          /* 16px, measured on the stat cards */
   --r-badge:.75rem;       /* 12px, measured on the numbered badges */
@@ -83,6 +84,8 @@ body{
 /* Sections alternate. Each band owns its ground and its ink. */
 .band{position:relative}
 .band > .inner{max-width:var(--measure); margin:0 auto; padding:var(--s7) var(--pad)}
+.band > .inner > p,.band > .inner > h1,.band > .inner > h2,
+.band > .inner > details,.band > .inner > .setup-beat{max-width:var(--copy)}
 .band-dark{background:var(--black)}
 .band-dark-2{background:var(--black-3)}
 .band-hero{
@@ -124,7 +127,7 @@ h2{font-size:var(--t-h2)}
 h3{margin:0 0 var(--s2); font-size:var(--t-h3); font-weight:900;
    text-transform:uppercase; letter-spacing:.03em}
 @media (min-width:48rem){
-  :root{--t-h1:2.5rem; --t-h2:3rem}
+  :root{--t-h1:clamp(3rem,5.2vw,5rem); --t-h2:clamp(2.75rem,4.4vw,4rem); --pad:2.5rem}
 }
 /* Headlines break on meaning. Every line is its own block, never wrapped. */
 .line{display:block}
@@ -430,11 +433,65 @@ body[data-buybar=on]{padding-bottom:5rem}
 .inner a:not(.cta):not(.decline){color:inherit; text-decoration:underline;
   text-decoration-color:var(--red); text-underline-offset:.18em; text-decoration-thickness:2px}
 .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+
+/* ---------------------------------------------------------- second pass */
+/* The first draft collapsed every viewport into one phone-width column. The
+   wider system keeps copy readable while letting the offer and imagery use the
+   canvas on tablet and desktop. */
+.hero-grid{display:grid; gap:var(--s6); align-items:end}
+.hero-copy{max-width:42rem}
+.hero-copy .lede{max-width:36rem}
+.hero-offer{
+  max-width:30rem; padding:var(--s5); border:1px solid rgba(255,255,255,.22);
+  border-radius:calc(var(--r-card) + .25rem); background:rgba(10,10,10,.88);
+  box-shadow:0 1.5rem 4rem rgba(0,0,0,.35); backdrop-filter:blur(10px)
+}
+.offer-summary{display:flex; align-items:end; justify-content:space-between; gap:var(--s4); margin-bottom:var(--s4)}
+.offer-summary strong{display:block; font-size:2.75rem; line-height:.85; letter-spacing:-.06em}
+.offer-summary span{display:block; color:var(--ink-2); font-size:var(--t-small)}
+.offer-count{padding-left:var(--s4); border-left:1px solid var(--line); text-align:right}
+.offer-count b{display:block; font-size:1.25rem; color:#fff}
+.hero-offer label{color:#fff}
+.journey{display:grid; gap:var(--s3); margin:var(--s5) 0 0; padding:0; list-style:none; counter-reset:journey}
+.journey li{position:relative; padding:var(--s4) var(--s4) var(--s4) 3.75rem; border:1px solid var(--line); border-radius:var(--r-card); background:rgba(255,255,255,.025)}
+.journey li::before{counter-increment:journey; content:counter(journey,decimal-leading-zero); position:absolute; left:var(--s4); top:var(--s4); color:#fff; font-size:.75rem; font-weight:900; letter-spacing:.08em}
+.journey strong{display:block; text-transform:uppercase; font-size:.9375rem; letter-spacing:.03em}
+.journey span{display:block; margin-top:.2rem; color:var(--ink-2); font-size:var(--t-small)}
+
+/* Utility routes were using legacy, unstyled section classes. They now share
+   the same rhythm and focus treatment as the sales pages. */
+main{max-width:var(--measure); margin:0 auto; padding:clamp(2.5rem,7vw,6rem) var(--pad)}
+main > section,main > footer{max-width:44rem; margin:0 auto; padding:var(--s6) 0; border-bottom:1px solid var(--line-soft)}
+main > section:first-child{padding-top:0}
+main > footer{border:0; text-align:center}
+main h1{font-size:clamp(2.5rem,7vw,4.75rem)}
+main h2{font-size:clamp(2rem,5vw,3.25rem)}
+
+@media (min-width:48rem){
+  .band > .inner{padding-top:5.5rem; padding-bottom:5.5rem}
+  .figure-band .figure-inner{padding-top:clamp(5rem,9vw,8rem); padding-bottom:clamp(5rem,9vw,8rem)}
+  .hero-grid{grid-template-columns:minmax(0,1fr) minmax(20rem,28rem); gap:clamp(2rem,6vw,6rem)}
+  .hero-offer{justify-self:end}
+  .numbered{display:inline-flex; vertical-align:top; width:calc(50% - .5rem); min-height:8.5rem; border:1px solid var(--line-dark); border-radius:var(--r-card); padding:var(--s4); margin:.25rem}
+  .band-dark .numbered,.band-dark-2 .numbered{border-color:var(--line)}
+  .journey{grid-template-columns:repeat(3,1fr)}
+}
+@media (min-width:64rem){
+  .figure-band.scrim-side::after{background:linear-gradient(90deg,rgba(10,10,10,.97) 0%,rgba(10,10,10,.88) 52%,rgba(10,10,10,.25) 100%)}
+  .figure-band.scrim-side img{object-position:70% 45%}
+}
+@media (max-width:30rem){
+  .announce{padding-inline:.75rem}
+  .hero-offer{padding:var(--s4)}
+  .offer-summary strong{font-size:2.35rem}
+  .cta{padding-inline:1.25rem}
+  .price-now{font-size:3rem}
+}
 </style>
 </head>
 <body>
 
-<div class="announce">Your order is confirmed. This offer is only on this page.</div>
+<div class="announce">Step 3 of 4 &middot; Your earlier choices are confirmed.</div>
 
 <section class="band band-hero figure-band scrim-side">
   <picture>
@@ -444,15 +501,15 @@ body[data-buybar=on]{padding-bottom:5rem}
            alt="A man seated on the floor holding one leg extended high beside his head, on a dark grey ground.">
     </picture>
   <div class="inner figure-inner">
-    <p class="eyebrow">One-time offer</p>
+    <p class="eyebrow">14th anniversary lifetime offer</p>
     <h1>
       <span class="line">You bought</span>
       <span class="line">one problem's worth.</span>
       <span class="line-red">This is all of it.</span>
     </h1>
     <p class="lede">
-      Everything Sebastian and the team have built for grapplers, in one library,
-      for as long as you train.
+      The bundle solved one training problem. Lifetime opens the complete Yoga
+      for BJJ library with one payment and no renewal.
     </p>
   </div>
 </section>
