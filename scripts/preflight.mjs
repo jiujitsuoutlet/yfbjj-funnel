@@ -161,10 +161,6 @@ if (tcPages.length) {
 /* 5c. both A/B variants are complete pages */
 // A variant that silently lost its price block or its CTA would still render,
 // and would quietly lose the test. Check the load-bearing parts of each.
-const COLLECTIONS = [
-  'Guard Flexibility', 'Guard Program', 'Inverted Guard', 'Hip Program',
-  'Stiffest Hips', 'Hip Flexor Rehab', 'Stiffest Legs', "I'm too busy for Yoga",
-];
 for (const variant of ['a', 'b']) {
   const file = `landing-${variant}.html`;
   let page = '';
@@ -179,10 +175,9 @@ for (const variant of ['a', 'b']) {
   if (!page.includes('data-price="bundle"')) missing.push('the price block');
   if (!page.includes('id="lead-form"')) missing.push('the lead capture form');
   if (!page.includes('{{PAGE_CONFIG_JSON}}')) missing.push('the page config island');
-  const absent = COLLECTIONS.filter((c) => !page.includes(c));
-  if (absent.length) missing.push(`${absent.length} of the 8 collections (${absent.join(', ')})`);
+  if (!page.includes('>8</b>') || !page.includes('mobility collections')) missing.push('the eight-collection offer summary');
   if (missing.length) fail(`variant ${variant.toUpperCase()} (${file}) is missing ${missing.join('; ')}`);
-  else pass(`variant ${variant.toUpperCase()} renders complete (CTA, price, form, all 8 collections)`);
+  else pass(`variant ${variant.toUpperCase()} renders complete (CTA, price, form, eight-collection offer summary)`);
 }
 
 /* 5d. the variant actually rides the outbound cart URL */

@@ -7,47 +7,58 @@
 <title>The Guard Retention Bundle | Yoga for BJJ</title>
 <meta name="description" content="Eight mobility collections built around one problem: keeping your guard. $14, one time.">
 <meta name="robots" content="noindex">
-<link rel="preload" as="image" href="/img/guard-pass-800.webp"
-      imagesrcset="/img/guard-pass-400.webp 400w, /img/guard-pass-800.webp 800w, /img/guard-pass-1600.webp 1600w"
-      imagesizes="100vw" type="image/webp">
+<link rel="preload" as="image" href="/img/guard-pass-800.webp" imagesrcset="/img/guard-pass-400.webp 400w, /img/guard-pass-800.webp 800w, /img/guard-pass-1600.webp 1600w" imagesizes="100vw" type="image/webp">
 <style>{{BASE_CSS}}</style>
+<style>
+html,body{height:100%;overflow:hidden}
+body{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;min-height:100svh}
+.announce{padding:.35rem 1rem;font-size:.6875rem}
+.preview-banner{position:static;padding:.3rem 1rem;font-size:.6875rem}
+.one-screen{min-height:0;display:grid;position:relative;isolation:isolate;background:#0d0d10;overflow:hidden}
+.one-screen>picture,.one-screen::after{position:absolute;inset:0}
+.one-screen>picture img{width:100%;height:100%;object-fit:cover;object-position:58% 45%}
+.one-screen::after{content:"";z-index:1;background:linear-gradient(90deg,rgba(10,10,10,.97),rgba(10,10,10,.84) 55%,rgba(10,10,10,.35))}
+.one-screen .inner{z-index:2;width:100%;max-width:70rem;margin:auto;padding:clamp(.85rem,3vh,2rem) var(--pad);display:grid;grid-template-columns:minmax(0,1fr) minmax(18rem,25rem);gap:clamp(1.25rem,5vw,4rem);align-items:center}
+.identity{margin:0 0 .55rem;font-size:.75rem;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:#fff}
+.identity::before{content:"";display:inline-block;width:1.4rem;height:.22rem;margin-right:.55rem;vertical-align:.18rem;background:var(--red)}
+.one-screen h1{max-width:11ch;margin:0 0 .65rem;font-size:clamp(2.65rem,5.8vw,5rem);line-height:.88}
+.one-screen .lede{max-width:34rem;margin:0;font-size:clamp(1rem,1.8vw,1.2rem);line-height:1.45;color:rgba(255,255,255,.78)}
+.hero-offer{width:100%;padding:clamp(.9rem,2.5vh,1.35rem);background:rgba(10,10,10,.9);border:1px solid rgba(255,255,255,.16);border-radius:1rem;backdrop-filter:blur(8px)}
+.offer-summary{margin-bottom:.7rem}
+.offer-summary strong{font-size:2.5rem}
+.offer-count{display:flex;align-items:baseline;gap:.4rem;text-align:right}.offer-count b{font-size:1.5rem}.offer-count span{max-width:7rem}
+.hero-offer form{gap:.55rem}.hero-offer input[type=email]{min-height:3rem;padding:.75rem 1rem}.hero-offer .cta{min-height:3.1rem;padding:.8rem 1.2rem}
+.hero-offer .msg{min-height:0}.hero-offer .msg:empty{display:none}.cta-note{margin-top:.5rem;font-size:.75rem}
+.site-footer{display:flex;align-items:center;justify-content:space-between;gap:1rem;max-width:none;padding:.25rem var(--pad);font-size:.6875rem;background:#0a0a0a}.site-footer p,.site-footer nav{margin:0}.site-footer nav a{padding:.45rem .3rem;min-height:2rem}
+@media(max-width:47.99rem){
+ .one-screen::after{background:linear-gradient(180deg,rgba(10,10,10,.72),rgba(10,10,10,.96) 52%,#0a0a0a)}
+ .one-screen>picture img{object-position:58% 35%;opacity:.62}
+ .one-screen .inner{grid-template-columns:1fr;gap:.85rem;align-content:center;padding-top:.65rem;padding-bottom:.65rem}
+ .identity{margin-bottom:.35rem}.one-screen h1{font-size:clamp(2rem,10.3vw,2.55rem);margin-bottom:.45rem}.one-screen .lede{font-size:.9375rem;line-height:1.35}
+ .hero-offer{padding:.75rem}.hero-offer label{font-size:.8125rem}.offer-summary{margin-bottom:.5rem}.offer-summary strong{font-size:2rem}.offer-count b{font-size:1.25rem}
+ .site-footer{padding-left:.75rem;padding-right:.75rem}
+}
+@media(max-height:700px) and (max-width:47.99rem){
+ .announce{padding:.25rem .75rem}.preview-banner{padding:.2rem .75rem}
+ .one-screen .inner{gap:.55rem;padding-top:.4rem;padding-bottom:.4rem}.identity{font-size:.6875rem;margin-bottom:.25rem}.one-screen h1{font-size:1.95rem}.one-screen .lede{font-size:.875rem}
+ .hero-offer{padding:.6rem}.hero-offer form{gap:.4rem}.hero-offer input[type=email]{min-height:2.75rem;padding:.6rem 1rem}.hero-offer .cta{min-height:2.8rem;padding:.65rem 1rem}.cta-note{margin-top:.35rem}
+}
+</style>
 </head>
 <body>
-
-<div class="announce">Mobility, recovery and flexibility built specifically for Brazilian Jiu-Jitsu athletes.</div>
-
-<div id="preview-banner" class="preview-banner" hidden>
-  Preview build &middot; <strong>checkout not connected</strong>
-</div>
-
-<!-- ================================================================= HERO -->
-<section id="hero" class="band band-hero figure-band">
+<div class="announce">Mobility for Brazilian Jiu-Jitsu athletes.</div>
+<div id="preview-banner" class="preview-banner" hidden>Preview &middot; <strong>checkout not connected</strong></div>
+<main class="one-screen">
   <picture>
-      <source type="image/webp" srcset="/img/guard-pass-400.webp 400w, /img/guard-pass-800.webp 800w, /img/guard-pass-1600.webp 1600w" sizes="100vw">
-      <img src="/img/guard-pass-800.jpg" srcset="/img/guard-pass-400.jpg 400w, /img/guard-pass-800.jpg 800w, /img/guard-pass-1600.jpg 1600w" sizes="100vw"
-           width="4674" height="3096" decoding="async" loading="eager" fetchpriority="high"
-           alt="A black and white competition photo: one grappler in a white gi passing the guard of an opponent in a black gi, on IBJJF mats.">
-    </picture>
-  <div class="inner figure-inner hero-grid">
+    <source type="image/webp" srcset="/img/guard-pass-400.webp 400w, /img/guard-pass-800.webp 800w, /img/guard-pass-1600.webp 1600w" sizes="100vw">
+    <img src="/img/guard-pass-800.jpg" srcset="/img/guard-pass-400.jpg 400w, /img/guard-pass-800.jpg 800w, /img/guard-pass-1600.jpg 1600w" sizes="100vw" width="4674" height="3096" decoding="async" loading="eager" fetchpriority="high" alt="A black and white competition photo of one grappler passing another grappler's guard.">
+  </picture>
+  <div class="inner">
     <div class="hero-copy">
-    <p class="eyebrow">14th anniversary offer</p>
-    <h1>
-      <span class="line">Your guard</span>
-      <span class="line">isn't the problem.</span>
-      <span class="line-red">Your hips are.</span>
-    </h1>
-    <p class="lede">
-      Eight mobility collections, built around one thing: keeping your guard when
-      your body wants to fold. Fourteen dollars for all eight.
-    </p>
-
-    <!-- Renders only when OFFER_DEADLINE is set in wrangler.toml. -->
-    <div id="deadline" class="deadline-bar" hidden>
-      <span>Offer closes <strong data-deadline-text></strong></span>
+      <p class="identity">Yoga for BJJ</p>
+      <h1>Your guard isn't the problem. Your hips are.</h1>
+      <p class="lede">This isn't another technique instructional. It's mobility work built around keeping your guard.</p>
     </div>
-
-    </div>
-
     <div class="hero-offer" aria-label="Guard Retention Bundle offer">
       <div class="offer-summary">
         <div><span>Guard Retention Bundle</span><strong data-price="bundle">$14</strong></div>
@@ -55,432 +66,18 @@
       </div>
       <form id="lead-form" novalidate>
         <label for="email">Where should we send it?</label>
-        <input id="email" name="email" type="email" inputmode="email" autocomplete="email"
-               required placeholder="you@example.com" aria-describedby="lead-msg">
-        <button id="lead-submit" class="cta" type="submit">Get the bundle &middot; $14</button>
+        <input id="email" name="email" type="email" inputmode="email" autocomplete="email" required placeholder="you@example.com" aria-describedby="lead-msg">
+        <button id="lead-submit" class="cta" data-cart="bundle" data-source="landing-hero" type="submit">Get the bundle &middot; $14</button>
         <p id="lead-msg" class="msg" role="status" aria-live="polite"></p>
       </form>
       <p class="cta-note">One payment. Not a subscription. Optional offers come next.</p>
     </div>
   </div>
-</section>
-
-<!-- Their ticker, carrying the actual contents of the bundle. -->
-<div class="marquee" aria-hidden="true">
-  <div class="marquee-track">
-    <span>Guard Flexibility</span><span>Guard Program</span><span>Inverted Guard</span>
-    <span>Hip Program</span><span>Stiffest Hips</span><span>Hip Flexor Rehab</span>
-    <span>Stiffest Legs</span><span>Ten Minutes</span>
-    <span>Guard Flexibility</span><span>Guard Program</span><span>Inverted Guard</span>
-    <span>Hip Program</span><span>Stiffest Hips</span><span>Hip Flexor Rehab</span>
-    <span>Stiffest Legs</span><span>Ten Minutes</span>
-  </div>
-</div>
-
-<!-- ============================================================== PROBLEM -->
-<section id="problem" class="band band-dark">
-  <div class="inner">
-    <p class="kicker">The problem</p>
-    <h2>
-      <span class="line">The guard</span>
-      <span class="line">that used to work</span>
-    </h2>
-    <p>
-      You know the passes coming at you. You have drilled the answers for years.
-      But the frames arrive late now. The knee shield sits lower than it used to.
-      The scramble you would have won at twenty-five goes the other way.
-    </p>
-    <p>
-      Your hips do not open the way they did. Something pinches in the front of
-      the hip when you stand up after a round. Three days later you are still
-      sore, and you are training around it instead of training.
-    </p>
-    <p>
-      It shows up in the small things first. Sitting cross-legged on the mat
-      before class is uncomfortable, so you sit against the wall with your legs
-      out. Getting your knee across on a body lock pass takes an extra beat.
-      Inverting is something you used to do and now describe as something you
-      used to do.
-    </p>
-    <p>
-      Then it shows up in the rounds. Your guard is a step behind, so you play
-      it flatter. Flatter means heavier top pressure. Heavier top pressure means
-      you get tired earlier, and tired is when the injuries happen.
-    </p>
-    <p>
-      The frustrating part is that nothing about your jiu-jitsu got worse. Your
-      timing is better than it was five years ago. Your understanding of the
-      position is better. The only thing that changed is the range your body
-      will give you, and that is quietly deciding which techniques are still
-      available to you.
-    </p>
-    <p>
-      The newer guy who taps you now is not better than you. He is just able to
-      get into positions you have stopped being able to get into. You are
-      solving the same puzzle he is, with a smaller range of pieces.
-    </p>
-    <p>
-      And you have adapted, which is the part that hides it. You picked the
-      guards that do not ask much of your hips. You stopped inverting. You warm
-      up longer. You train twice a week instead of four times, and you call that
-      being sensible. Some of it is sensible. Some of it is managing a problem
-      instead of fixing it.
-    </p>
-    <figure class="figure">
-      <picture>
-      <source type="image/webp" srcset="/img/inverted-400.webp 400w, /img/inverted-800.webp 800w, /img/inverted-1600.webp 1600w" sizes="(min-width: 34rem) 32rem, 100vw">
-      <img src="/img/inverted-800.jpg" srcset="/img/inverted-400.jpg 400w, /img/inverted-800.jpg 800w, /img/inverted-1600.jpg 1600w" sizes="(min-width: 34rem) 32rem, 100vw"
-           width="1600" height="1600" decoding="async" loading="lazy"
-           alt="A man on a mat in a shoulder stand with his legs held horizontally overhead.">
-    </picture>
-    </figure>
-    <p class="dim">
-      None of that is a technique problem. You don't need another instructional.
-      You need a body that keeps up with what you already know.
-    </p>
-  </div>
-</section>
-
-<div class="slab slab-down fill-black" aria-hidden="true">
-  <i class="slab-fill slab-red"></i>
-  <i class="slab-edge fill-cream"></i>
-</div>
-
-<!-- ====================================================== WRONG SOLUTIONS -->
-<section id="wrong-solutions" class="band band-cream">
-  <div class="inner">
-    <p class="kicker">What you already tried</p>
-    <h2>
-      <span class="line">None of it</span>
-      <span class="line">was aimed at this</span>
-    </h2>
-
-    <div class="numbered">
-      <span class="num">01</span>
-      <div>
-        <h3>Stretching before class</h3>
-        <p>Five minutes of reaching for your toes while the room fills up. It is
-        a warm-up, and it was never meant to change how far your hips travel.</p>
-      </div>
-    </div>
-    <div class="numbered">
-      <span class="num">02</span>
-      <div>
-        <h3>The foam roller in the corner</h3>
-        <p>It helps you feel better for the next hour. That is a recovery tool,
-        not a mobility plan, and you already know the difference.</p>
-      </div>
-    </div>
-    <div class="numbered">
-      <span class="num">03</span>
-      <div>
-        <h3>A general yoga class</h3>
-        <p>Built for a room of people who do not get their hips loaded by a
-        two-hundred-pound man twice a week. Nothing in it is organised around
-        guard retention, because why would it be.</p>
-      </div>
-    </div>
-    <div class="numbered">
-      <span class="num">04</span>
-      <div>
-        <h3>Another instructional</h3>
-        <p>More detail on a position your body cannot get into yet. The problem
-        was never that you did not know what to do.</p>
-      </div>
-    </div>
-    <div class="numbered">
-      <span class="num">05</span>
-      <div>
-        <h3>Ice and painkillers after training</h3>
-        <p>You are treating the evening. The morning arrives with the same hips
-        it had yesterday.</p>
-      </div>
-    </div>
-    <div class="numbered">
-      <span class="num">06</span>
-      <div>
-        <h3>Waiting for a gap in the calendar</h3>
-        <p>After this competition. After the seminar. After the busy month at
-        work. The gap does not arrive, and mobility is the one thing that does
-        not need you to be fresh to work on it.</p>
-      </div>
-    </div>
-    <div class="numbered">
-      <span class="num">07</span>
-      <div>
-        <h3>Training through it</h3>
-        <p>The one that works until it doesn't.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="slab slab-up fill-cream" aria-hidden="true">
-  <i class="slab-fill slab-red"></i>
-  <i class="slab-edge fill-black"></i>
-</div>
-
-<!-- ============================================================= EPIPHANY -->
-<!-- First person, drawn from the "Meet Sebastian Brosche" section of
-     yogaforbjj.net. Every fact below appears there: thirty-plus years training,
-     competing and coaching, double world champion, BJJ black belt, judo black
-     belt, and the specific problems that led to building this. Nothing is
-     invented. The marked placeholder is where a personal anecdote would go,
-     and only Sebastian can supply it. -->
-<section id="epiphany" class="band band-dark">
-  <div class="inner">
-    <p class="kicker">Why this exists</p>
-    <h2>
-      <span class="line">I built this</span>
-      <span class="line-red">because I needed it.</span>
-    </h2>
-    <p>
-      I have spent more than thirty years training, competing and coaching. Two
-      world titles, a black belt in Brazilian Jiu-Jitsu, a black belt in judo.
-      None of that stopped my body from doing what everybody's body does.
-    </p>
-    <p>
-      Tight hips. Neck pain. Shoulders that complained. A lower back that let me
-      know about it after hard weeks. Recovery that took longer than it used to.
-      The quiet question of how many more years I had in me.
-    </p>
-    <p>
-      [[SEBASTIAN_ANECDOTE ... the specific moment, in his words. Leave this out
-      entirely rather than have anyone write it for him.]]
-    </p>
-    <p>
-      What I found was that the fix was not more jiu-jitsu. It was the physical
-      qualities underneath the jiu-jitsu... how far a joint travels, how quickly
-      you recover, how much load a position can take before something protests.
-      Nobody was training those for grapplers specifically, so I started to.
-    </p>
-    <p>
-      That is also why it is not a solo project any more. There is a team of
-      coaches behind it now, all grapplers, and the library covers the areas
-      that grappling actually punishes... hips, neck, spine, shoulders, and the
-      recovery in between. This bundle is the hip and leg corner of it.
-    </p>
-    <p class="dim">
-      Yoga for BJJ came out of solving my own problem. Everything in it is built
-      around positions you actually end up in.
-    </p>
-  </div>
-</section>
-
-<!-- ============================================================== REFRAME -->
-<section id="reframe" class="band band-dark-2">
-  <div class="inner">
-    <p class="kicker">The reframe</p>
-    <h2>
-      <span class="line">This is not</span>
-      <span class="line">a yoga purchase</span>
-    </h2>
-    <p>
-      The goal isn't becoming better at yoga. The goal is becoming better at
-      grappling. Nothing here is scored on how a position looks.
-    </p>
-    <p>
-      Which means the measure of whether this worked is not on a mat with a mirror.
-      It is whether your knee shield holds where it used to, whether you can sit
-      in the position long enough to work, whether the round after the hard round
-      is still a round you want.
-    </p>
-    <p>
-      It also means the work is boring in the way that useful things are boring.
-      There is no position to unlock and no photograph at the end of it. You do
-      short sessions, repeatedly, and the range comes back slowly enough that
-      you notice it in a roll before you notice it on the mat at home.
-    </p>
-    <p>
-      Not generic yoga. Not random stretching. Everything has a purpose, and the
-      purpose is the eight collections below.
-    </p>
-  </div>
-</section>
-
-<div class="slab slab-down fill-black" aria-hidden="true">
-  <i class="slab-fill slab-red"></i>
-  <i class="slab-edge fill-cream"></i>
-</div>
-
-<!-- ======================================================= WHAT'S INCLUDED -->
-<section id="whats-included" class="band band-cream">
-  <div class="inner">
-    <p class="kicker">What's included</p>
-    <h2>
-      <span class="line">Eight collections.</span>
-      <span class="line">One problem.</span>
-    </h2>
-
-    <div class="numbered">
-      <span class="num">01</span>
-      <div><h3>Guard Flexibility</h3><p>Build the range of motion that makes your guard a nightmare to pass.</p></div>
-    </div>
-    <div class="numbered">
-      <span class="num">02</span>
-      <div><h3>Guard Program</h3><p>Every guard position gets easier when your body stops fighting you.</p></div>
-    </div>
-    <div class="numbered">
-      <span class="num">03</span>
-      <div><h3>Inverted Guard</h3><p>Get comfortable upside down, without your neck and lower back filing complaints.</p></div>
-    </div>
-    <div class="numbered engine">
-      <span class="num">04</span>
-      <div><h3>Hip Program</h3><p>The engine of the whole bundle. Every guard, every escape, every inversion runs through your hips.</p></div>
-    </div>
-    <div class="numbered">
-      <span class="num">05</span>
-      <div><h3>Stiffest Hips</h3><p>Built for the grappler who can't sit cross-legged. Starts where you actually are.</p></div>
-    </div>
-    <div class="numbered">
-      <span class="num">06</span>
-      <div><h3>Hip Flexor Rehab</h3><p>That pinch in the front of your hip when you stand up? This exists for exactly that.</p></div>
-    </div>
-    <div class="numbered">
-      <span class="num">07</span>
-      <div><h3>Stiffest Legs</h3><p>Touch your toes for the first time since high school.</p></div>
-    </div>
-
-    <p class="setup-beat">And for those of you thinking you're too busy for any of this...</p>
-
-    <div class="numbered">
-      <span class="num">08</span>
-      <div><h3>I'm too busy for Yoga... but I need it!</h3><p>Ten minutes. No excuses left.</p></div>
-    </div>
-
-    <figure class="figure" style="margin-top:2rem">
-      <picture>
-      <source type="image/webp" srcset="/img/wall-happy-baby-400.webp 400w, /img/wall-happy-baby-800.webp 800w, /img/wall-happy-baby-1600.webp 1600w" sizes="(min-width: 34rem) 32rem, 100vw">
-      <img src="/img/wall-happy-baby-800.jpg" srcset="/img/wall-happy-baby-400.jpg 400w, /img/wall-happy-baby-800.jpg 800w, /img/wall-happy-baby-1600.jpg 1600w" sizes="(min-width: 34rem) 32rem, 100vw"
-           width="1600" height="1600" decoding="async" loading="lazy"
-           alt="A man lying on his back on a mat with his feet up against a wall, knees drawn wide.">
-    </picture>
-    </figure>
-    <p class="faint">
-      Eight collections, all pointed at the same place: the hips and legs your
-      guard runs on. This is mobility work, not technique.
-    </p>
-  </div>
-</section>
-
-<div class="slab slab-up fill-cream" aria-hidden="true">
-  <i class="slab-fill slab-red"></i>
-  <i class="slab-edge fill-black"></i>
-</div>
-
-<!-- ========================================================= WHO IT IS FOR -->
-<section id="who" class="band band-dark-2">
-  <div class="inner">
-    <p class="kicker">Straight answer</p>
-    <h2>
-      <span class="line">Who this</span>
-      <span class="line">is actually for</span>
-    </h2>
-    <p><strong>It is for you if</strong> your guard has got worse as your hips
-    have got tighter, if the front of your hip pinches when you stand up, if you
-    have stopped inverting, or if you cannot sit cross-legged without propping
-    yourself up. It is for you if you intend to still be training in ten years
-    and have started to wonder about that.</p>
-    <p class="dim"><strong>It is not for you if</strong> you are looking for
-    technique. There is no guard instruction in here. It is also not for you if
-    you want something to do instead of training... this sits alongside training,
-    in the gaps, and it is built to take up very little room.</p>
-    <p>
-      One more honest note. If you are dealing with an injury that a doctor is
-      already involved in, keep them involved. Mobility work is not a substitute
-      for that conversation, and nothing in these collections asks you to push
-      through pain to get a result.
-    </p>
-  </div>
-</section>
-
-<!-- ================================================================ PRICE -->
-<section id="price" class="band band-dark">
-  <div class="inner">
-    <p class="kicker">The price</p>
-    <h2>Fourteen dollars</h2>
-    <div class="card card-red">
-      <div class="price-row">
-        <span class="price-now" data-price="bundle">$14</span>
-        <span class="price-unit">once</span>
-        <!-- MISSING: no anchor price supplied. If there is a real "normally $X"
-             figure, add it as: <span class="price-was">$39</span>
-             Do not invent one. -->
-      </div>
-      <p class="price-terms">One time. Not a subscription. No card to cancel later.</p>
-      <ul class="chips">
-        <li>All eight collections</li>
-        <li>Yours to keep</li>
-        <li>Built for grapplers</li>
-      </ul>
-      <a class="cta" data-cart="bundle" data-source="landing-price" href="#hero" rel="noopener">Get the bundle &middot; $14</a>
-      <p class="cta-note">
-        Checkout will offer you a few optional add-ons after this. Skip them and
-        the eight collections are still yours.
-      </p>
-      <!-- MISSING: refund policy unconfirmed. If there is one, it belongs here. -->
-    </div>
-  </div>
-</section>
-
-<!-- ================================================================== FAQ -->
-<section id="faq" class="band band-dark-2">
-  <div class="inner">
-    <p class="kicker">Questions</p>
-    <h2>Before you buy</h2>
-    <details>
-      <summary>I have never done yoga. Does that matter?</summary>
-      <p>No. These are mobility collections built around grappling positions. The goal isn't becoming better at yoga. The goal is becoming better at grappling.</p>
-    </details>
-    <details>
-      <summary>How much time does this take?</summary>
-      <p>Sessions are short. The busy collection runs ten minutes. Fit it around your training week rather than adding another training week to it.</p>
-    </details>
-    <details>
-      <summary>I am not flexible at all. Is this too advanced?</summary>
-      <p>Stiffest Hips and Stiffest Legs exist for exactly that. They start where you are, not where a flexible person starts.</p>
-    </details>
-    <details>
-      <summary>I am older and fairly beaten up. Is this for me?</summary>
-      <p>Hip Flexor Rehab is in the bundle because that pinch is common and it does not sort itself out. Work at the range you have. Nothing here asks you to force a position.</p>
-    </details>
-    <details>
-      <summary>Is this a subscription?</summary>
-      <p>No. Fourteen dollars, once. Checkout will show you a few optional add-ons afterwards. Skip them and nothing recurring is attached to your name.</p>
-    </details>
-  </div>
-</section>
-
-<!-- ================================================================ CLOSE -->
-<section id="close" class="band band-dark">
-  <div class="inner">
-    <h2>
-      <span class="line">One problem,</span>
-      <span class="line-red">solved properly.</span>
-    </h2>
-    <p class="dim">
-      This isn't a sampler. Eight collections, all aimed at the same thing: hips
-      and legs that let you keep your guard for another decade of training.
-    </p>
-    <a class="cta" data-cart="bundle" data-source="landing-close" href="#hero" rel="noopener">Get the bundle &middot; $14</a>
-    <p class="cta-note">One payment. Not a subscription.</p>
-  </div>
-</section>
-
+</main>
 <footer class="site-footer">
   <p>Yoga for BJJ</p>
-  <nav>
-    <a href="[[TERMS_URL]]">Terms</a> &middot;
-    <a href="[[PRIVACY_URL]]">Privacy</a> &middot;
-    <a href="mailto:[[SUPPORT_EMAIL]]">Support</a>
-  </nav>
+  <nav aria-label="Legal and support"><a href="[[TERMS_URL]]">Terms</a> &middot; <a href="[[PRIVACY_URL]]">Privacy</a> &middot; <a href="mailto:[[SUPPORT_EMAIL]]">Support</a></nav>
 </footer>
-
-<div id="buybar" class="buybar" data-visible="false">
-  <span class="bb-price"><span class="bb-label">The bundle</span><span data-price="bundle">$14</span></span>
-  <a class="cta" data-cart="bundle" data-source="landing-buybar" href="#hero" rel="noopener">Get it</a>
-</div>
-
 <script id="page-config" type="application/json">{{PAGE_CONFIG_JSON}}</script>
 <script>{{PAGE_JS}}</script>
 </body>
