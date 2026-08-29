@@ -10,6 +10,21 @@
   var PREVIEW_PATH = '/preview-checkout';
   var CART = { bundle: CFG.THRIVECART_BUNDLE_URL || '' };
   var VARIANT = CFG.VARIANT || '';
+  var ATTRIBUTION_KEYS = ['utm_source', 'utm_medium', 'gclid'];
+
+  function withAttribution(raw) {
+    if (!raw) return raw;
+    try {
+      var u = new URL(raw, location.href);
+      var incoming = new URL(location.href);
+      ATTRIBUTION_KEYS.forEach(function (key) {
+        if (incoming.searchParams.has(key)) u.searchParams.set(key, incoming.searchParams.get(key));
+      });
+      return raw.charAt(0) === '/' ? u.pathname + u.search + u.hash : u.toString();
+    } catch (e) {
+      return raw;
+    }
+  }
 
   /**
    * Carries the variant across the handoff. Without this the test measures
@@ -24,10 +39,10 @@
   function withVariant(raw) {
     if (!raw || !VARIANT) return raw;
     try {
-      var u = new URL(raw);
+      var u = new URL(raw, location.href);
       u.searchParams.set('passthrough[variant]', VARIANT);
       u.searchParams.set('utm_content', 'variant-' + VARIANT);
-      return u.toString();
+      return raw.charAt(0) === '/' ? u.pathname + u.search + u.hash : u.toString();
     } catch (e) {
       return raw;
     }
@@ -36,8 +51,8 @@
   // Preview mode, or a missing cart link, always routes to the preview page.
   // A CTA on this site is never a dead link and never a broken cart.
   function target(kind) {
-    if (PREVIEW) return PREVIEW_PATH;
-    return withVariant(CART[kind]) || PREVIEW_PATH;
+    if (PREVIEW) return withVariant(withAttribution(PREVIEW_PATH));
+    return withVariant(withAttribution(CART[kind])) || withVariant(withAttribution(PREVIEW_PATH));
   }
 
   /* ------------------------------------------------------------- prices */
