@@ -454,10 +454,13 @@ export default {
     }
 
     if (method === 'POST') {
+      if (path === '/api/checkout' && isPreviewMode(env)) {
+        return json({ ok: false, error: 'preview_locked' }, 423);
+      }
       if (path === '/api/lead') return handleLead(request, env, ctx);
     }
 
-    const known = ['/', '/thanks', '/preview-checkout', '/health', '/api/lead', '/api/stats'];
+    const known = ['/', '/thanks', '/preview-checkout', '/health', '/api/checkout', '/api/lead', '/api/stats'];
     if (known.includes(path)) return json({ ok: false, error: 'method_not_allowed' }, 405);
 
     return json({ ok: false, error: 'not_found' }, 404);

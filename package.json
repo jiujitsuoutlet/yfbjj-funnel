@@ -11,6 +11,7 @@
     "db:migrate:remote": "wrangler d1 migrations apply yfbjj_funnel --remote",
     "tail": "wrangler tail",
     "preflight": "node scripts/preflight.mjs",
+    "test": "node --test",
     "build:tc": "node scripts/build-thrivecart.mjs",
     "build:img": "node scripts/build-images.mjs",
     "visual:audit": "node scripts/visual-audit.mjs"
