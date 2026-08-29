@@ -87,7 +87,9 @@
   function recall() { try { return sessionStorage.getItem('yfbjj_email') || ''; } catch (_) { return ''; } }
 
   function capture(email, source) {
-    if (captured || !email) return Promise.resolve();
+    // Preview has no D1 by design. Skip the request so the review flow stays
+    // mutation-free without generating a failed-resource console error.
+    if (PREVIEW || captured || !email) return Promise.resolve();
     return fetch('/api/lead', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
