@@ -1,0 +1,43 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> yfbjj-funnel@1.0.0 preflight
+> node scripts/preflight.mjs
+
+  note: ASSET_BASE_URL is unset, so image URLs stay as placeholders
+  ok    8 ThriveCart URL placeholders left unfilled on purpose (wired inside ThriveCart)
+  ok    4 ThriveCart pages built and current
+  ok    variant A renders complete (CTA, price, form, all 8 collections)
+  ok    variant B renders complete (CTA, price, form, all 8 collections)
+  ok    variant passthrough present in _page.js (not exercised while PREVIEW_MODE is on)
+  ok    certification page ships without the video slot: VSL_EMBED_URL is unset, hero photo carries it
+  ok    48 referenced image files all present in public/img
+  ok    secrets scan clean
+
+PREFLIGHT FAILED - 5 blockers, do not deploy:
+
+  1. THRIVECART_BUNDLE_URL is empty in wrangler.toml. Paste the real ThriveCart link for the $14 bundle.
+  2. OFFER_DEADLINE is empty in wrangler.toml. Set the offer deadline as ISO 8601, e.g. "2026-09-01T23:59:00Z".
+  3. PREVIEW_MODE is "true". Set PREVIEW_MODE = "false" or every CTA routes to /preview-checkout instead of the cart.
+  4. database_id is still the placeholder in wrangler.toml. Run `wrangler d1 create yfbjj_funnel` and paste the real id.
+  5. 19 unfilled copy placeholders would render on a live page:
+      landing-a.html: [[TERMS_URL]]
+      landing-a.html: [[PRIVACY_URL]]
+      landing-a.html: [[SUPPORT_EMAIL]]
+      landing-b.html: [[SEBASTIAN_ANECDOTE ... the specific moment, in his words. Leave this out
+      entirely rather than have anyone write it for him.]]
+      landing-b.html: [[TERMS_URL]]
+      landing-b.html: [[PRIVACY_URL]]
+      landing-b.html: [[SUPPORT_EMAIL]]
+      thanks.html: [[SUPPORT_EMAIL]]
+      thanks.html: [[TERMS_URL]]
+      thanks.html: [[PRIVACY_URL]]
+      thrivecart/downsell-2-trial.html: [[ASSET_BASE_URL]]
+      thrivecart/downsell-2-trial.html: [[TRIAL_RENEWAL_TERMS ... what happens at the end of the two months, in one sentence]]
+      thrivecart/upsell-1-head-to-toes.html: [[ASSET_BASE_URL]]
+      thrivecart/upsell-1-head-to-toes.html: [[HTT_SCOPE_DETAIL ... what the sessions cover, from the product page]]
+      thrivecart/upsell-2-lifetime.html: [[ASSET_BASE_URL]]
+      thrivecart/upsell-3-certification.html: [[ASSET_BASE_URL]]
+      thrivecart/upsell-3-certification.html: [[CERT_LEVEL_1_DETAIL ... scope, format and requirements, from the certification page]]
+      thrivecart/upsell-3-certification.html: [[CERT_LEVEL_2_DETAIL]]
+      thrivecart/upsell-3-certification.html: [[CERT_LEVEL_3_DETAIL]]
+

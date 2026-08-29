@@ -1,0 +1,588 @@
+{
+  "testedAt": "2026-08-29T11:01:14.240Z",
+  "base": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev",
+  "cases": [
+    {
+      "variant": "a",
+      "width": 375,
+      "height": 667,
+      "url": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/?v=a&utm_source=qa&utm_medium=linear&gclid=gclid123&utm_content=incoming&evil=dropme",
+      "title": "The Guard Retention Bundle | Yoga for BJJ",
+      "metrics": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "scrollHeight": 667,
+        "clientHeight": 667,
+        "bodyRect": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 667,
+          "top": 0,
+          "right": 375,
+          "bottom": 667,
+          "left": 0
+        },
+        "visible": 30,
+        "smallText": []
+      },
+      "ctas": [
+        {
+          "text": "Get the bundle · $14",
+          "box": {
+            "x": 54.59375,
+            "y": 464.953125,
+            "width": 265.8125,
+            "height": 44.796875,
+            "top": 464.953125,
+            "right": 320.40625,
+            "bottom": 509.75,
+            "left": 54.59375
+          }
+        }
+      ],
+      "consoleErrors": [],
+      "requestFailures": [],
+      "httpErrors": []
+    },
+    {
+      "variant": "a",
+      "width": 375,
+      "height": 812,
+      "url": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/?v=a&utm_source=qa&utm_medium=linear&gclid=gclid123&utm_content=incoming&evil=dropme",
+      "title": "The Guard Retention Bundle | Yoga for BJJ",
+      "metrics": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "scrollHeight": 812,
+        "clientHeight": 812,
+        "bodyRect": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 812,
+          "top": 0,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "visible": 30,
+        "smallText": []
+      },
+      "ctas": [
+        {
+          "text": "Get the bundle · $14",
+          "box": {
+            "x": 57,
+            "y": 569.984375,
+            "width": 261,
+            "height": 49.59375,
+            "top": 569.984375,
+            "right": 318,
+            "bottom": 619.578125,
+            "left": 57
+          }
+        }
+      ],
+      "consoleErrors": [],
+      "requestFailures": [],
+      "httpErrors": []
+    },
+    {
+      "variant": "a",
+      "width": 768,
+      "height": 1024,
+      "url": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/?v=a&utm_source=qa&utm_medium=linear&gclid=gclid123&utm_content=incoming&evil=dropme",
+      "title": "The Guard Retention Bundle | Yoga for BJJ",
+      "metrics": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "scrollHeight": 1024,
+        "clientHeight": 1024,
+        "bodyRect": {
+          "x": 0,
+          "y": 0,
+          "width": 768,
+          "height": 1024,
+          "top": 0,
+          "right": 768,
+          "bottom": 1024,
+          "left": 0
+        },
+        "visible": 30,
+        "smallText": []
+      },
+      "ctas": [
+        {
+          "text": "Get the bundle · $14",
+          "box": {
+            "x": 310.59375,
+            "y": 559.375,
+            "width": 354.8125,
+            "height": 49.59375,
+            "top": 559.375,
+            "right": 665.40625,
+            "bottom": 608.96875,
+            "left": 310.59375
+          }
+        }
+      ],
+      "consoleErrors": [],
+      "requestFailures": [],
+      "httpErrors": []
+    },
+    {
+      "variant": "a",
+      "width": 1024,
+      "height": 768,
+      "url": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/?v=a&utm_source=qa&utm_medium=linear&gclid=gclid123&utm_content=incoming&evil=dropme",
+      "title": "The Guard Retention Bundle | Yoga for BJJ",
+      "metrics": {
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "scrollHeight": 768,
+        "clientHeight": 768,
+        "bodyRect": {
+          "x": 0,
+          "y": 0,
+          "width": 1024,
+          "height": 768,
+          "top": 0,
+          "right": 1024,
+          "bottom": 768,
+          "left": 0
+        },
+        "visible": 30,
+        "smallText": []
+      },
+      "ctas": [
+        {
+          "text": "Get the bundle · $14",
+          "box": {
+            "x": 564.1875,
+            "y": 431.375,
+            "width": 359.625,
+            "height": 49.59375,
+            "top": 431.375,
+            "right": 923.8125,
+            "bottom": 480.96875,
+            "left": 564.1875
+          }
+        }
+      ],
+      "consoleErrors": [],
+      "requestFailures": [],
+      "httpErrors": []
+    },
+    {
+      "variant": "a",
+      "width": 1440,
+      "height": 900,
+      "url": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/?v=a&utm_source=qa&utm_medium=linear&gclid=gclid123&utm_content=incoming&evil=dropme",
+      "title": "The Guard Retention Bundle | Yoga for BJJ",
+      "metrics": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "bodyRect": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900,
+          "top": 0,
+          "right": 1440,
+          "bottom": 900,
+          "left": 0
+        },
+        "visible": 30,
+        "smallText": []
+      },
+      "ctas": [
+        {
+          "text": "Get the bundle · $14",
+          "box": {
+            "x": 822.59375,
+            "y": 497.375,
+            "width": 354.8125,
+            "height": 49.59375,
+            "top": 497.375,
+            "right": 1177.40625,
+            "bottom": 546.96875,
+            "left": 822.59375
+          }
+        }
+      ],
+      "consoleErrors": [],
+      "requestFailures": [],
+      "httpErrors": []
+    },
+    {
+      "variant": "b",
+      "width": 375,
+      "height": 667,
+      "url": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/?v=b&utm_source=qa&utm_medium=linear&gclid=gclid123&utm_content=incoming&evil=dropme",
+      "title": "The Guard Retention Bundle | Yoga for BJJ",
+      "metrics": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "scrollHeight": 667,
+        "clientHeight": 667,
+        "bodyRect": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 667,
+          "top": 0,
+          "right": 375,
+          "bottom": 667,
+          "left": 0
+        },
+        "visible": 30,
+        "smallText": []
+      },
+      "ctas": [
+        {
+          "text": "Get the bundle · $14",
+          "box": {
+            "x": 54.59375,
+            "y": 502.390625,
+            "width": 265.8125,
+            "height": 44.796875,
+            "top": 502.390625,
+            "right": 320.40625,
+            "bottom": 547.1875,
+            "left": 54.59375
+          }
+        }
+      ],
+      "consoleErrors": [],
+      "requestFailures": [],
+      "httpErrors": []
+    },
+    {
+      "variant": "b",
+      "width": 375,
+      "height": 812,
+      "url": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/?v=b&utm_source=qa&utm_medium=linear&gclid=gclid123&utm_content=incoming&evil=dropme",
+      "title": "The Guard Retention Bundle | Yoga for BJJ",
+      "metrics": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "scrollHeight": 812,
+        "clientHeight": 812,
+        "bodyRect": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 812,
+          "top": 0,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "visible": 30,
+        "smallText": []
+      },
+      "ctas": [
+        {
+          "text": "Get the bundle · $14",
+          "box": {
+            "x": 57,
+            "y": 603.96875,
+            "width": 261,
+            "height": 49.59375,
+            "top": 603.96875,
+            "right": 318,
+            "bottom": 653.5625,
+            "left": 57
+          }
+        }
+      ],
+      "consoleErrors": [],
+      "requestFailures": [],
+      "httpErrors": []
+    },
+    {
+      "variant": "b",
+      "width": 768,
+      "height": 1024,
+      "url": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/?v=b&utm_source=qa&utm_medium=linear&gclid=gclid123&utm_content=incoming&evil=dropme",
+      "title": "The Guard Retention Bundle | Yoga for BJJ",
+      "metrics": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "scrollHeight": 1024,
+        "clientHeight": 1024,
+        "bodyRect": {
+          "x": 0,
+          "y": 0,
+          "width": 768,
+          "height": 1024,
+          "top": 0,
+          "right": 768,
+          "bottom": 1024,
+          "left": 0
+        },
+        "visible": 30,
+        "smallText": []
+      },
+      "ctas": [
+        {
+          "text": "Get the bundle · $14",
+          "box": {
+            "x": 310.59375,
+            "y": 559.375,
+            "width": 354.8125,
+            "height": 49.59375,
+            "top": 559.375,
+            "right": 665.40625,
+            "bottom": 608.96875,
+            "left": 310.59375
+          }
+        }
+      ],
+      "consoleErrors": [],
+      "requestFailures": [],
+      "httpErrors": []
+    },
+    {
+      "variant": "b",
+      "width": 1024,
+      "height": 768,
+      "url": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/?v=b&utm_source=qa&utm_medium=linear&gclid=gclid123&utm_content=incoming&evil=dropme",
+      "title": "The Guard Retention Bundle | Yoga for BJJ",
+      "metrics": {
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "scrollHeight": 768,
+        "clientHeight": 768,
+        "bodyRect": {
+          "x": 0,
+          "y": 0,
+          "width": 1024,
+          "height": 768,
+          "top": 0,
+          "right": 1024,
+          "bottom": 768,
+          "left": 0
+        },
+        "visible": 30,
+        "smallText": []
+      },
+      "ctas": [
+        {
+          "text": "Get the bundle · $14",
+          "box": {
+            "x": 564.1875,
+            "y": 431.375,
+            "width": 359.625,
+            "height": 49.59375,
+            "top": 431.375,
+            "right": 923.8125,
+            "bottom": 480.96875,
+            "left": 564.1875
+          }
+        }
+      ],
+      "consoleErrors": [],
+      "requestFailures": [],
+      "httpErrors": []
+    },
+    {
+      "variant": "b",
+      "width": 1440,
+      "height": 900,
+      "url": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/?v=b&utm_source=qa&utm_medium=linear&gclid=gclid123&utm_content=incoming&evil=dropme",
+      "title": "The Guard Retention Bundle | Yoga for BJJ",
+      "metrics": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "bodyRect": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900,
+          "top": 0,
+          "right": 1440,
+          "bottom": 900,
+          "left": 0
+        },
+        "visible": 30,
+        "smallText": []
+      },
+      "ctas": [
+        {
+          "text": "Get the bundle · $14",
+          "box": {
+            "x": 822.59375,
+            "y": 497.375,
+            "width": 354.8125,
+            "height": 49.59375,
+            "top": 497.375,
+            "right": 1177.40625,
+            "bottom": 546.96875,
+            "left": 822.59375
+          }
+        }
+      ],
+      "consoleErrors": [],
+      "requestFailures": [],
+      "httpErrors": []
+    }
+  ],
+  "cookies": {
+    "naturalUrl": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/",
+    "assigned": {
+      "name": "yfbjj_v",
+      "value": "b",
+      "domain": "yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev",
+      "path": "/",
+      "expires": 1803553294.062491,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    "afterReload": {
+      "name": "yfbjj_v",
+      "value": "b",
+      "domain": "yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev",
+      "path": "/",
+      "expires": 1803553294.062491,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    "forced": "a",
+    "afterForced": {
+      "name": "yfbjj_v",
+      "value": "b",
+      "domain": "yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev",
+      "path": "/",
+      "expires": 1803553294.062491,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    }
+  },
+  "handoff": {
+    "a": {
+      "href": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/preview-checkout?utm_source=source+value&utm_medium=medium%2Fvalue&gclid=abc%2B123&passthrough%5Bvariant%5D=a&utm_content=variant-a",
+      "pathname": "/preview-checkout",
+      "params": {
+        "utm_source": "source value",
+        "utm_medium": "medium/value",
+        "gclid": "abc+123",
+        "passthrough[variant]": "a",
+        "utm_content": "variant-a"
+      }
+    },
+    "b": {
+      "href": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/preview-checkout?utm_source=source+value&utm_medium=medium%2Fvalue&gclid=abc%2B123&passthrough%5Bvariant%5D=b&utm_content=variant-b",
+      "pathname": "/preview-checkout",
+      "params": {
+        "utm_source": "source value",
+        "utm_medium": "medium/value",
+        "gclid": "abc+123",
+        "passthrough[variant]": "b",
+        "utm_content": "variant-b"
+      }
+    }
+  },
+  "routes": {
+    "/api/checkout": {
+      "status": 423,
+      "body": "{\"ok\":false,\"error\":\"preview_locked\"}"
+    },
+    "/api/lead": {
+      "status": 503,
+      "body": "{\"ok\":false,\"error\":\"preview_state_disabled\"}"
+    },
+    "/api/stats": {
+      "status": 503,
+      "body": "{\"ok\":false,\"error\":\"preview_state_disabled\"}"
+    },
+    "/health": {
+      "status": 503,
+      "body": "{\"ok\":false,\"d1\":\"intentionally_unbound\",\"preview\":true,\"at\":\"2026-08-29T11:01:38.453Z\"}"
+    }
+  },
+  "legal": {
+    "/?v=a": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "/?v=b": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "/thanks": [
+      {
+        "text": "Sebastian@yogaforbjj.net",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      },
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      }
+    ],
+    "https://yfbjj.autocreator.ai/legal/terms": {
+      "status": 200,
+      "finalUrl": "https://yfbjj.autocreator.ai/legal/terms",
+      "title": "Yoga For BJJ",
+      "bodyTextLength": 2650
+    },
+    "https://yfbjj.autocreator.ai/legal/privacy": {
+      "status": 200,
+      "finalUrl": "https://yfbjj.autocreator.ai/legal/privacy",
+      "title": "Yoga For BJJ",
+      "bodyTextLength": 2613
+    }
+  },
+  "auxErrors": {
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 423 (Locked)",
+      "Failed to load resource: the server responded with a status of 503 (Service Unavailable)",
+      "Failed to load resource: the server responded with a status of 503 (Service Unavailable)",
+      "Failed to load resource: the server responded with a status of 503 (Service Unavailable)",
+      "Refused to load the script 'https://www.googletagmanager.com/gtm.js?id=GTM-KWPK2GGX' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n",
+      "Refused to load the script 'https://www.googletagmanager.com/gtm.js?id=GTM-KWPK2GGX' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    ],
+    "requestFailures": [
+      {
+        "url": "https://www.googletagmanager.com/gtm.js?id=GTM-KWPK2GGX",
+        "error": "csp"
+      },
+      {
+        "url": "https://www.googletagmanager.com/gtm.js?id=GTM-KWPK2GGX",
+        "error": "csp"
+      }
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mProxy environment variables detected. We'll use your proxy for fetch requests.[0m
+
+
+
+ ⛅️ wrangler 4.127.1
+────────────────────
+Version ID:  8dcb708f-ac76-4ea9-bb52-d2101074b0f4
+Created:     2026-08-29T10:08:25.356Z
+Author:      sebastian.brosche@gmail.com
+Source:      Unknown (version_upload)
+Tag:         -
+Message:     EXC-97 revision 80e1a7d2b7a3fc0b9285fd41cfe9a5a72ba92dba
+
+Handlers:            fetch
+Compatibility Date:  2026-05-01
+Your Worker has access to the following bindings:
+Binding                                 Resource                  
+env.ASSET_BASE_URL ("")                 Environment Variable      
+env.BUNDLE_PRICE_CENTS ("1400")         Environment Variable      
+env.OFFER_DEADLINE ("")                 Environment Variable      
+env.PREVIEW_MODE ("true")               Environment Variable      
+env.PREVIEW_NO_D1 ("true")              Environment Variable      
+env.THRIVECART_BUNDLE_URL ("")          Environment Variable      
+env.VSL_EMBED_URL ("")                  Environment Variable      
+

@@ -1,0 +1,17 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+Running 11 tests using 1 worker
+
+  ✓   1 evidence/exc-98/exc98.spec.cjs:15:70 › a-375x667 (1.9s)
+  ✓   2 evidence/exc-98/exc98.spec.cjs:15:70 › a-375x812 (1.8s)
+  ✓   3 evidence/exc-98/exc98.spec.cjs:15:70 › a-768x1024 (1.8s)
+  ✓   4 evidence/exc-98/exc98.spec.cjs:15:70 › a-1024x768 (2.1s)
+  ✓   5 evidence/exc-98/exc98.spec.cjs:15:70 › a-1440x900 (2.0s)
+  ✓   6 evidence/exc-98/exc98.spec.cjs:15:70 › b-375x667 (1.5s)
+  ✓   7 evidence/exc-98/exc98.spec.cjs:15:70 › b-375x812 (1.4s)
+  ✓   8 evidence/exc-98/exc98.spec.cjs:15:70 › b-768x1024 (2.1s)
+  ✓   9 evidence/exc-98/exc98.spec.cjs:15:70 › b-1024x768 (1.8s)
+  ✓  10 evidence/exc-98/exc98.spec.cjs:15:70 › b-1440x900 (1.8s)
+  ✓  11 evidence/exc-98/exc98.spec.cjs:25:1 › cookies-handoff-routes-legal (9.9s)
+
+  11 passed (32.5s)
