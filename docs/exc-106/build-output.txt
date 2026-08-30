@@ -1,0 +1,12 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> yfbjj-funnel@1.0.0 build:tc
+> node scripts/build-thrivecart.mjs
+
+  note: ASSET_BASE_URL is unset, so image URLs stay as placeholders
+  built  src/thrivecart/downsell-2-trial.html  26.5 KB
+  built  src/thrivecart/upsell-1-head-to-toes.html  27.6 KB
+  built  src/thrivecart/upsell-2-lifetime.html  27.3 KB
+  built  src/thrivecart/upsell-3-certification.html  27.3 KB
+4 page(s) built. Paste each file into ThriveCart as raw HTML.
+  video: VSL_EMBED_URL unset, so the slot is omitted and the hero photo carries the page

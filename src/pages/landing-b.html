@@ -10,19 +10,23 @@
 <link rel="preload" as="image" href="/img/guard-pass-800.webp" imagesrcset="/img/guard-pass-400.webp 400w, /img/guard-pass-800.webp 800w, /img/guard-pass-1600.webp 1600w" imagesizes="100vw" type="image/webp">
 <style>{{BASE_CSS}}</style>
 <style>
-html,body{height:100%;overflow:hidden}
-body{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;min-height:100svh}
+html,body{min-height:100%}
+body{display:grid;grid-template-rows:auto auto 1fr auto;min-height:100svh}
 .announce{padding:.35rem 1rem;font-size:.6875rem}
 .preview-banner{position:static;padding:.3rem 1rem;font-size:.6875rem}
 .one-screen{min-height:0;display:grid;position:relative;isolation:isolate;background:#0d0d10;overflow:hidden}
 .one-screen>picture,.one-screen::after{position:absolute;inset:0}
 .one-screen>picture img{width:100%;height:100%;object-fit:cover;object-position:58% 45%}
 .one-screen::after{content:"";z-index:1;background:linear-gradient(90deg,rgba(10,10,10,.97),rgba(10,10,10,.84) 55%,rgba(10,10,10,.35))}
-.one-screen .inner{z-index:2;width:100%;max-width:70rem;margin:auto;padding:clamp(.85rem,3vh,2rem) var(--pad);display:grid;grid-template-columns:minmax(0,1fr) minmax(18rem,25rem);gap:clamp(1.25rem,5vw,4rem);align-items:center}
+.one-screen .inner{z-index:2;width:100%;max-width:76rem;margin:auto;padding:clamp(1.5rem,4vh,3rem) var(--pad);display:grid;grid-template-columns:minmax(0,1.35fr) minmax(18rem,25rem);gap:clamp(1.25rem,5vw,4rem);align-items:center}
 .identity{margin:0 0 .55rem;font-size:.75rem;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:#fff}
 .identity::before{content:"";display:inline-block;width:1.4rem;height:.22rem;margin-right:.55rem;vertical-align:.18rem;background:var(--red)}
-.one-screen h1{max-width:11ch;margin:0 0 .65rem;font-size:clamp(2.65rem,5.8vw,5rem);line-height:.88}
-.one-screen .lede{max-width:34rem;margin:0;font-size:clamp(1rem,1.8vw,1.2rem);line-height:1.45;color:rgba(255,255,255,.78)}
+.one-screen h1{max-width:13ch;margin:0 0 .65rem;font-size:clamp(2.4rem,5vw,4.5rem);line-height:.88}
+.one-screen .lede{max-width:38rem;margin:0 0 1rem;font-size:clamp(1rem,1.8vw,1.2rem);line-height:1.45;color:rgba(255,255,255,.78)}
+.value-list{max-width:43rem;margin:0;padding:0;list-style:none;display:grid;gap:.55rem;font-size:1rem;line-height:1.35;font-weight:500;color:rgba(255,255,255,.9)}
+.value-list li{position:relative;padding-left:1.15rem}.value-list li::before{content:"";position:absolute;left:0;top:.5em;width:.42rem;height:.42rem;border-radius:50%;background:var(--red)}
+.bonus-transition{margin:1rem 0 .55rem;font-size:1rem;line-height:1.4;font-weight:700;color:#fff}
+.bonus-line{max-width:43rem;margin:0;padding:.8rem 1rem;border-left:.25rem solid var(--red);background:rgba(255,255,255,.08);font-size:1rem;line-height:1.4;font-weight:700;color:#fff}
 .hero-offer{width:100%;padding:clamp(.9rem,2.5vh,1.35rem);background:rgba(10,10,10,.9);border:1px solid rgba(255,255,255,.16);border-radius:1rem;backdrop-filter:blur(8px)}
 .offer-summary{margin-bottom:.7rem}
 .offer-summary strong{font-size:2.5rem}
@@ -33,16 +37,12 @@ body{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;min-height:100
 @media(max-width:47.99rem){
  .one-screen::after{background:linear-gradient(180deg,rgba(10,10,10,.72),rgba(10,10,10,.96) 52%,#0a0a0a)}
  .one-screen>picture img{object-position:58% 35%;opacity:.62}
- .one-screen .inner{grid-template-columns:1fr;gap:.85rem;align-content:center;padding-top:.65rem;padding-bottom:.65rem}
- .identity{margin-bottom:.35rem}.one-screen h1{font-size:clamp(2rem,10.3vw,2.55rem);margin-bottom:.45rem}.one-screen .lede{font-size:.9375rem;line-height:1.35}
+ .one-screen .inner{grid-template-columns:1fr;gap:1.25rem;align-content:start;padding-top:1.25rem;padding-bottom:1.5rem}
+ .identity{margin-bottom:.35rem}.one-screen h1{font-size:clamp(2rem,10.3vw,2.55rem);margin-bottom:.45rem}.one-screen .lede{font-size:1rem;line-height:1.4}
  .hero-offer{padding:.75rem}.hero-offer label{font-size:.8125rem}.offer-summary{margin-bottom:.5rem}.offer-summary strong{font-size:2rem}.offer-count b{font-size:1.25rem}
  .site-footer{padding-left:.75rem;padding-right:.75rem}
 }
-@media(max-height:700px) and (max-width:47.99rem){
- .announce{padding:.25rem .75rem}.preview-banner{padding:.2rem .75rem}
- .one-screen .inner{gap:.55rem;padding-top:.4rem;padding-bottom:.4rem}.identity{font-size:.6875rem;margin-bottom:.25rem}.one-screen h1{font-size:1.95rem}.one-screen .lede{font-size:.875rem}
- .hero-offer{padding:.6rem}.hero-offer form{gap:.4rem}.hero-offer input[type=email]{min-height:2.75rem;padding:.6rem 1rem}.hero-offer .cta{min-height:2.8rem;padding:.65rem 1rem}.cta-note{margin-top:.35rem}
-}
+
 </style>
 </head>
 <body>
@@ -58,6 +58,17 @@ body{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;min-height:100
       <p class="identity">Yoga for BJJ</p>
       <h1>Your guard isn't the problem. Your hips are.</h1>
       <p class="lede">This isn't another technique instructional. It's mobility work built around keeping your guard.</p>
+      <ul class="value-list">
+        <li>Never get your guard passed again with our Guard Flexibility program</li>
+        <li>Master every guard position in our Guard Program</li>
+        <li>Achieve flexibility you never thought you could with our Inverted Guard program</li>
+        <li>Unlock the hips that every single one of those positions runs through with our Hip Program</li>
+        <li>Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program</li>
+        <li>Kill that pinch in the front of your hip with our Hip Flexor Rehab program</li>
+        <li>Touch your toes for the first time since high school with our Stiffest Legs program</li>
+      </ul>
+      <p class="bonus-transition">And for those of you who think you're too busy to do any of this?</p>
+      <p class="bonus-line">We are also giving you access to our &quot;Im too busy for Yoga... but i need it!&quot; program</p>
     </div>
     <div class="hero-offer" aria-label="Guard Retention Bundle offer">
       <div class="offer-summary">
