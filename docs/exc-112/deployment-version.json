@@ -1,0 +1,69 @@
+{
+  "id": "f8a8fc0e-8801-4474-b0db-4d32965fb07b",
+  "number": 13,
+  "metadata": {
+    "created_on": "2026-08-30T18:03:30.138707Z",
+    "source": "wrangler",
+    "author_id": "dcf753d83ebf39d37570e17f7724f585",
+    "author_email": "sebastian.brosche@gmail.com",
+    "has_preview": true
+  },
+  "annotations": {
+    "workers/message": "EXC-111 git 20afebd527e49775ad8288298bb9023891424d00",
+    "workers/triggered_by": "version_upload"
+  },
+  "resources": {
+    "script": {
+      "etag": "23b09ecfc5b32ee93a2bc3ffbd04ffa0a4660e2db87bdbc73cc611ae8d538454",
+      "handlers": [
+        "fetch"
+      ],
+      "last_deployed_from": "wrangler"
+    },
+    "script_runtime": {
+      "assets": {
+        "serve_directly": true,
+        "raw_run_worker_first": false
+      },
+      "compatibility_date": "2026-05-01",
+      "usage_model": "standard"
+    },
+    "bindings": [
+      {
+        "name": "ASSET_BASE_URL",
+        "text": "",
+        "type": "plain_text"
+      },
+      {
+        "name": "BUNDLE_PRICE_CENTS",
+        "text": "1400",
+        "type": "plain_text"
+      },
+      {
+        "name": "OFFER_DEADLINE",
+        "text": "",
+        "type": "plain_text"
+      },
+      {
+        "name": "PREVIEW_MODE",
+        "text": "true",
+        "type": "plain_text"
+      },
+      {
+        "name": "PREVIEW_NO_D1",
+        "text": "true",
+        "type": "plain_text"
+      },
+      {
+        "name": "THRIVECART_BUNDLE_URL",
+        "text": "",
+        "type": "plain_text"
+      },
+      {
+        "name": "VSL_EMBED_URL",
+        "text": "",
+        "type": "plain_text"
+      }
+    ]
+  }
+}

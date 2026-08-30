@@ -1,0 +1,6 @@
+$ git clone https://github.com/jiujitsuoutlet/yfbjj-funnel.git /tmp/yfbjj-funnel-fresh
+fresh clone completed before QA
+$ git -C /tmp/yfbjj-funnel-fresh rev-parse HEAD
+0d360e26cfe7415cad0994f69d0e654ae9fa891c
+$ gh pr view 3 --repo jiujitsuoutlet/yfbjj-funnel --json headRefOid,state,url
+{"headRefOid":"20afebd527e49775ad8288298bb9023891424d00","state":"OPEN","url":"https://github.com/jiujitsuoutlet/yfbjj-funnel/pull/3"}

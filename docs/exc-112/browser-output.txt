@@ -1,0 +1,3839 @@
+[
+  {
+    "kind": "visual",
+    "variant": "a",
+    "width": 375,
+    "height": 667,
+    "status": 200,
+    "targetSha": "20afebd527e49775ad8288298bb9023891424d00",
+    "workerVersion": "f8a8fc0e-8801-4474-b0db-4d32965fb07b",
+    "scroll": {
+      "width": 375,
+      "height": 667,
+      "clientWidth": 375,
+      "clientHeight": 667,
+      "bodyWidth": 375,
+      "bodyHeight": 667
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "text": "Yoga for BJJ",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 87.890625,
+          "width": 308.625,
+          "height": 13.9375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "text": "Keep your guard. Get your hips back.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 104.21875,
+          "width": 231.484375,
+          "height": 97.625
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "text": "This isn't another technique instructional. It's mobility work built around keeping your guard.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 205.03125,
+          "width": 308.625,
+          "height": 26.75
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "text": "",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 45.015625,
+          "width": 375,
+          "height": 581.984375
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "text": "Never get your guard passed again with our Guard Flexibility program\n        Master every guard position in our Guard Program\n        Achieve flexibility you never thought you could with our Inverted Guard program\n        Unlock the hips that every single one of those positions runs through with our Hip Program\n        Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\n        Kill that pinch in the front of your hip with our Hip Flexor Rehab program\n        Touch your toes for the first time since high school with our Stiffest Legs program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 236.578125,
+          "width": 308.625,
+          "height": 159.40625
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 400.78125,
+          "width": 308.625,
+          "height": 22.375
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 425.546875,
+          "width": 308.625,
+          "height": 30.375
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "text": "8mobility collections",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 228.78125,
+          "y": 471.96875,
+          "width": 103.234375,
+          "height": 38.25
+        }
+      },
+      "price": {
+        "exists": true,
+        "text": "$14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 179.453125,
+          "y": 467.84375,
+          "width": 33.328125,
+          "height": 19.03125
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "text": "Where should we send it?\n        \n        Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 42.984375,
+          "y": 517.53125,
+          "width": 289.03125,
+          "height": 59.234375
+        }
+      },
+      "cta": {
+        "exists": true,
+        "text": "Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 189.25,
+          "y": 537.890625,
+          "width": 142.765625,
+          "height": 38.875
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "text": "Preview · checkout not connected",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 21.21875,
+          "width": 375,
+          "height": 23.796875
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "text": "Terms · Privacy · Support",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 210.109375,
+          "y": 631,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 142.75,
+        "height": 38.875
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 142.765625,
+        "height": 38.875
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "a"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nKEEP YOUR GUARD. GET YOUR HIPS BACK.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10
+    ],
+    "approvedLines": [
+      {
+        "text": "Never get your guard passed again with our Guard Flexibility program",
+        "rect": {
+          "left": 33.1875,
+          "top": 236.578125,
+          "right": 341.8125,
+          "bottom": 258.953125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Master every guard position in our Guard Program",
+        "rect": {
+          "left": 33.1875,
+          "top": 261.28125,
+          "right": 341.8125,
+          "bottom": 272.46875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Achieve flexibility you never thought you could with our Inverted Guard program",
+        "rect": {
+          "left": 33.1875,
+          "top": 274.796875,
+          "right": 341.8125,
+          "bottom": 297.171875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Unlock the hips that every single one of those positions runs through with our Hip Program",
+        "rect": {
+          "left": 33.1875,
+          "top": 299.5,
+          "right": 341.8125,
+          "bottom": 321.875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program",
+        "rect": {
+          "left": 33.1875,
+          "top": 324.203125,
+          "right": 341.8125,
+          "bottom": 346.578125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Kill that pinch in the front of your hip with our Hip Flexor Rehab program",
+        "rect": {
+          "left": 33.1875,
+          "top": 348.90625,
+          "right": 341.8125,
+          "bottom": 371.28125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Touch your toes for the first time since high school with our Stiffest Legs program",
+        "rect": {
+          "left": 33.1875,
+          "top": 373.609375,
+          "right": 341.8125,
+          "bottom": 395.984375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "rect": {
+          "left": 33.1875,
+          "top": 400.78125,
+          "right": 341.8125,
+          "bottom": 423.15625
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "rect": {
+          "left": 33.1875,
+          "top": 425.546875,
+          "right": 341.8125,
+          "bottom": 455.921875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      }
+    ],
+    "backgrounds": [
+      {
+        "tag": "MAIN",
+        "backgroundImage": "none",
+        "currentSrc": null,
+        "naturalWidth": null
+      },
+      {
+        "tag": "IMG",
+        "backgroundImage": "none",
+        "currentSrc": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/img/guard-pass-400.webp",
+        "naturalWidth": 374
+      }
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "badResponses": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "visual",
+    "variant": "a",
+    "width": 375,
+    "height": 812,
+    "status": 200,
+    "targetSha": "20afebd527e49775ad8288298bb9023891424d00",
+    "workerVersion": "f8a8fc0e-8801-4474-b0db-4d32965fb07b",
+    "scroll": {
+      "width": 375,
+      "height": 812,
+      "clientWidth": 375,
+      "clientHeight": 812,
+      "bodyWidth": 375,
+      "bodyHeight": 812
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "text": "Yoga for BJJ",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 127.375,
+          "width": 308.625,
+          "height": 16.84375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "text": "Keep your guard. Get your hips back.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 146.609375,
+          "width": 231.484375,
+          "height": 97.625
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "text": "This isn't another technique instructional. It's mobility work built around keeping your guard.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 247.421875,
+          "width": 308.625,
+          "height": 30.96875
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "text": "",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 45.015625,
+          "width": 375,
+          "height": 726.984375
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "text": "Never get your guard passed again with our Guard Flexibility program\n        Master every guard position in our Guard Program\n        Achieve flexibility you never thought you could with our Inverted Guard program\n        Unlock the hips that every single one of those positions runs through with our Hip Program\n        Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\n        Kill that pinch in the front of your hip with our Hip Flexor Rehab program\n        Touch your toes for the first time since high school with our Stiffest Legs program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 283.1875,
+          "width": 308.625,
+          "height": 191.65625
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 479.640625,
+          "width": 308.625,
+          "height": 26.875
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 508.90625,
+          "width": 308.625,
+          "height": 34.875
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "text": "8mobility collections",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 228.78125,
+          "y": 600.484375,
+          "width": 103.234375,
+          "height": 38.25
+        }
+      },
+      "price": {
+        "exists": true,
+        "text": "$14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 179.453125,
+          "y": 596.359375,
+          "width": 33.328125,
+          "height": 19.03125
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "text": "Where should we send it?\n        \n        Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 42.984375,
+          "y": 646.046875,
+          "width": 289.03125,
+          "height": 59.234375
+        }
+      },
+      "cta": {
+        "exists": true,
+        "text": "Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 189.25,
+          "y": 666.40625,
+          "width": 142.765625,
+          "height": 38.875
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "text": "Preview · checkout not connected",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 21.21875,
+          "width": 375,
+          "height": 23.796875
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "text": "Terms · Privacy · Support",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 210.109375,
+          "y": 776,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 142.75,
+        "height": 38.875
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 142.765625,
+        "height": 38.875
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "a"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nKEEP YOUR GUARD. GET YOUR HIPS BACK.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12
+    ],
+    "approvedLines": [
+      {
+        "text": "Never get your guard passed again with our Guard Flexibility program",
+        "rect": {
+          "left": 33.1875,
+          "top": 283.1875,
+          "right": 341.8125,
+          "bottom": 310.0625
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Master every guard position in our Guard Program",
+        "rect": {
+          "left": 33.1875,
+          "top": 312.890625,
+          "right": 341.8125,
+          "bottom": 326.328125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Achieve flexibility you never thought you could with our Inverted Guard program",
+        "rect": {
+          "left": 33.1875,
+          "top": 329.15625,
+          "right": 341.8125,
+          "bottom": 356.03125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Unlock the hips that every single one of those positions runs through with our Hip Program",
+        "rect": {
+          "left": 33.1875,
+          "top": 358.859375,
+          "right": 341.8125,
+          "bottom": 385.734375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program",
+        "rect": {
+          "left": 33.1875,
+          "top": 388.5625,
+          "right": 341.8125,
+          "bottom": 415.4375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Kill that pinch in the front of your hip with our Hip Flexor Rehab program",
+        "rect": {
+          "left": 33.1875,
+          "top": 418.265625,
+          "right": 341.8125,
+          "bottom": 445.140625
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Touch your toes for the first time since high school with our Stiffest Legs program",
+        "rect": {
+          "left": 33.1875,
+          "top": 447.96875,
+          "right": 341.8125,
+          "bottom": 474.84375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "rect": {
+          "left": 33.1875,
+          "top": 479.640625,
+          "right": 341.8125,
+          "bottom": 506.515625
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "rect": {
+          "left": 33.1875,
+          "top": 508.90625,
+          "right": 341.8125,
+          "bottom": 543.78125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      }
+    ],
+    "backgrounds": [
+      {
+        "tag": "MAIN",
+        "backgroundImage": "none",
+        "currentSrc": null,
+        "naturalWidth": null
+      },
+      {
+        "tag": "IMG",
+        "backgroundImage": "none",
+        "currentSrc": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/img/guard-pass-400.webp",
+        "naturalWidth": 374
+      }
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "badResponses": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "visual",
+    "variant": "a",
+    "width": 768,
+    "height": 1024,
+    "status": 200,
+    "targetSha": "20afebd527e49775ad8288298bb9023891424d00",
+    "workerVersion": "f8a8fc0e-8801-4474-b0db-4d32965fb07b",
+    "scroll": {
+      "width": 768,
+      "height": 1024,
+      "clientWidth": 768,
+      "clientHeight": 1024,
+      "bodyWidth": 768,
+      "bodyHeight": 1024
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "text": "Yoga for BJJ",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 162.921875,
+          "width": 184.96875,
+          "height": 18.59375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "text": "Keep your guard. Get your hips back.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 190.3125,
+          "width": 184.96875,
+          "height": 194.53125
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "text": "This isn't another technique instructional. It's mobility work built around keeping your guard.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 390.4375,
+          "width": 184.96875,
+          "height": 47.953125
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "text": "",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 53.671875,
+          "width": 768,
+          "height": 930.328125
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "text": "Never get your guard passed again with our Guard Flexibility program\n        Master every guard position in our Guard Program\n        Achieve flexibility you never thought you could with our Inverted Guard program\n        Unlock the hips that every single one of those positions runs through with our Hip Program\n        Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\n        Kill that pinch in the front of your hip with our Hip Flexor Rehab program\n        Touch your toes for the first time since high school with our Stiffest Legs program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 445.578125,
+          "width": 184.96875,
+          "height": 320.71875
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 773.484375,
+          "width": 184.96875,
+          "height": 27.625
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 805.109375,
+          "width": 184.96875,
+          "height": 69.625
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "text": "8mobility collections",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 516.65625,
+          "y": 402.84375,
+          "width": 148.75,
+          "height": 56.5
+        }
+      },
+      "price": {
+        "exists": true,
+        "text": "$14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 310.59375,
+          "y": 425.34375,
+          "width": 160.953125,
+          "height": 34
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "text": "Where should we send it?\n        \n        Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 310.59375,
+          "y": 470.53125,
+          "width": 354.8125,
+          "height": 138.4375
+        }
+      },
+      "cta": {
+        "exists": true,
+        "text": "Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 310.59375,
+          "y": 559.375,
+          "width": 354.8125,
+          "height": 49.59375
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "text": "Preview · checkout not connected",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 26.03125,
+          "width": 768,
+          "height": 27.640625
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "text": "Terms · Privacy · Support",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 575.109375,
+          "y": 988,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 354.8125,
+        "height": 48
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 354.8125,
+        "height": 49.59375
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "a"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nKEEP YOUR GUARD. GET YOUR HIPS BACK.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      11.52,
+      11.52,
+      11.52,
+      11.52,
+      11.52,
+      11.52,
+      11.52,
+      11.52,
+      11.52
+    ],
+    "approvedLines": [
+      {
+        "text": "Never get your guard passed again with our Guard Flexibility program",
+        "rect": {
+          "left": 80,
+          "top": 445.578125,
+          "right": 264.96875,
+          "bottom": 487.015625
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Master every guard position in our Guard Program",
+        "rect": {
+          "left": 80,
+          "top": 492.125,
+          "right": 264.96875,
+          "bottom": 519.75
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Achieve flexibility you never thought you could with our Inverted Guard program",
+        "rect": {
+          "left": 80,
+          "top": 524.859375,
+          "right": 264.96875,
+          "bottom": 566.296875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Unlock the hips that every single one of those positions runs through with our Hip Program",
+        "rect": {
+          "left": 80,
+          "top": 571.40625,
+          "right": 264.96875,
+          "bottom": 612.84375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program",
+        "rect": {
+          "left": 80,
+          "top": 617.953125,
+          "right": 264.96875,
+          "bottom": 673.203125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Kill that pinch in the front of your hip with our Hip Flexor Rehab program",
+        "rect": {
+          "left": 80,
+          "top": 678.3125,
+          "right": 264.96875,
+          "bottom": 719.75
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Touch your toes for the first time since high school with our Stiffest Legs program",
+        "rect": {
+          "left": 80,
+          "top": 724.859375,
+          "right": 264.96875,
+          "bottom": 766.296875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "rect": {
+          "left": 80,
+          "top": 773.484375,
+          "right": 264.96875,
+          "bottom": 801.109375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "rect": {
+          "left": 80,
+          "top": 805.109375,
+          "right": 264.96875,
+          "bottom": 874.734375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      }
+    ],
+    "backgrounds": [
+      {
+        "tag": "MAIN",
+        "backgroundImage": "none",
+        "currentSrc": null,
+        "naturalWidth": null
+      },
+      {
+        "tag": "IMG",
+        "backgroundImage": "none",
+        "currentSrc": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/img/guard-pass-800.webp",
+        "naturalWidth": 768
+      }
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "badResponses": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "visual",
+    "variant": "a",
+    "width": 1024,
+    "height": 768,
+    "status": 200,
+    "targetSha": "20afebd527e49775ad8288298bb9023891424d00",
+    "workerVersion": "f8a8fc0e-8801-4474-b0db-4d32965fb07b",
+    "scroll": {
+      "width": 1024,
+      "height": 768,
+      "clientWidth": 1024,
+      "clientHeight": 768,
+      "bodyWidth": 1024,
+      "bodyHeight": 768
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "text": "Yoga for BJJ",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 149.625,
+          "width": 433.28125,
+          "height": 18.59375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "text": "Keep your guard. Get your hips back.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 177.015625,
+          "width": 355.28125,
+          "height": 173
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "text": "This isn't another technique instructional. It's mobility work built around keeping your guard.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 355.609375,
+          "width": 433.28125,
+          "height": 37.09375
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "text": "",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 53.671875,
+          "width": 1024,
+          "height": 674.328125
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "text": "Never get your guard passed again with our Guard Flexibility program\n        Master every guard position in our Guard Program\n        Achieve flexibility you never thought you could with our Inverted Guard program\n        Unlock the hips that every single one of those positions runs through with our Hip Program\n        Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\n        Kill that pinch in the front of your hip with our Hip Flexor Rehab program\n        Touch your toes for the first time since high school with our Stiffest Legs program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 399.890625,
+          "width": 433.28125,
+          "height": 164.21875
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 571.296875,
+          "width": 433.28125,
+          "height": 14.125
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 589.421875,
+          "width": 433.28125,
+          "height": 42.625
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "text": "8mobility collections",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 775.0625,
+          "y": 274.84375,
+          "width": 148.75,
+          "height": 56.5
+        }
+      },
+      "price": {
+        "exists": true,
+        "text": "$14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 564.1875,
+          "y": 297.34375,
+          "width": 160.953125,
+          "height": 34
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "text": "Where should we send it?\n        \n        Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 564.1875,
+          "y": 342.53125,
+          "width": 359.625,
+          "height": 138.4375
+        }
+      },
+      "cta": {
+        "exists": true,
+        "text": "Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 564.1875,
+          "y": 431.375,
+          "width": 359.625,
+          "height": 49.59375
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "text": "Preview · checkout not connected",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 26.03125,
+          "width": 1024,
+          "height": 27.640625
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "text": "Terms · Privacy · Support",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 831.109375,
+          "y": 732,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 359.625,
+        "height": 48
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 359.625,
+        "height": 49.59375
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "a"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nKEEP YOUR GUARD. GET YOUR HIPS BACK.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      11.776,
+      11.776,
+      11.776,
+      11.776,
+      11.776,
+      11.776,
+      11.776,
+      11.776,
+      11.776
+    ],
+    "approvedLines": [
+      {
+        "text": "Never get your guard passed again with our Guard Flexibility program",
+        "rect": {
+          "left": 80,
+          "top": 399.890625,
+          "right": 513.28125,
+          "bottom": 414.015625
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Master every guard position in our Guard Program",
+        "rect": {
+          "left": 80,
+          "top": 417.84375,
+          "right": 513.28125,
+          "bottom": 431.96875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Achieve flexibility you never thought you could with our Inverted Guard program",
+        "rect": {
+          "left": 80,
+          "top": 435.796875,
+          "right": 513.28125,
+          "bottom": 449.921875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Unlock the hips that every single one of those positions runs through with our Hip Program",
+        "rect": {
+          "left": 80,
+          "top": 453.75,
+          "right": 513.28125,
+          "bottom": 482
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program",
+        "rect": {
+          "left": 80,
+          "top": 485.828125,
+          "right": 513.28125,
+          "bottom": 514.078125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Kill that pinch in the front of your hip with our Hip Flexor Rehab program",
+        "rect": {
+          "left": 80,
+          "top": 517.90625,
+          "right": 513.28125,
+          "bottom": 532.03125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Touch your toes for the first time since high school with our Stiffest Legs program",
+        "rect": {
+          "left": 80,
+          "top": 535.859375,
+          "right": 513.28125,
+          "bottom": 564.109375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "rect": {
+          "left": 80,
+          "top": 571.296875,
+          "right": 513.28125,
+          "bottom": 585.421875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "rect": {
+          "left": 80,
+          "top": 589.421875,
+          "right": 513.28125,
+          "bottom": 632.046875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      }
+    ],
+    "backgrounds": [
+      {
+        "tag": "MAIN",
+        "backgroundImage": "none",
+        "currentSrc": null,
+        "naturalWidth": null
+      },
+      {
+        "tag": "IMG",
+        "backgroundImage": "none",
+        "currentSrc": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/img/guard-pass-1600.webp",
+        "naturalWidth": 1024
+      }
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "badResponses": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "visual",
+    "variant": "a",
+    "width": 1440,
+    "height": 900,
+    "status": 200,
+    "targetSha": "20afebd527e49775ad8288298bb9023891424d00",
+    "workerVersion": "f8a8fc0e-8801-4474-b0db-4d32965fb07b",
+    "scroll": {
+      "width": 1440,
+      "height": 900,
+      "clientWidth": 1440,
+      "clientHeight": 900,
+      "bodyWidth": 1440,
+      "bodyHeight": 900
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "text": "Yoga for BJJ",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 170.96875,
+          "width": 520,
+          "height": 18.59375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "text": "Keep your guard. Get your hips back.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 198.359375,
+          "width": 404.875,
+          "height": 197.0625
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "text": "This isn't another technique instructional. It's mobility work built around keeping your guard.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 401.015625,
+          "width": 520,
+          "height": 40
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "text": "",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 160,
+          "y": 53.671875,
+          "width": 1120,
+          "height": 806.328125
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "text": "Never get your guard passed again with our Guard Flexibility program\n        Master every guard position in our Guard Program\n        Achieve flexibility you never thought you could with our Inverted Guard program\n        Unlock the hips that every single one of those positions runs through with our Hip Program\n        Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\n        Kill that pinch in the front of your hip with our Hip Flexor Rehab program\n        Touch your toes for the first time since high school with our Stiffest Legs program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 448.203125,
+          "width": 520,
+          "height": 217.09375
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 672.484375,
+          "width": 520,
+          "height": 17.28125
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 693.765625,
+          "width": 520,
+          "height": 48.9375
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "text": "8mobility collections",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 1028.65625,
+          "y": 340.84375,
+          "width": 148.75,
+          "height": 56.5
+        }
+      },
+      "price": {
+        "exists": true,
+        "text": "$14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 822.59375,
+          "y": 363.34375,
+          "width": 160.953125,
+          "height": 34
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "text": "Where should we send it?\n        \n        Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 822.59375,
+          "y": 408.53125,
+          "width": 354.8125,
+          "height": 138.4375
+        }
+      },
+      "cta": {
+        "exists": true,
+        "text": "Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 822.59375,
+          "y": 497.375,
+          "width": 354.8125,
+          "height": 49.59375
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "text": "Preview · checkout not connected",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 26.03125,
+          "width": 1440,
+          "height": 27.640625
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "text": "Terms · Privacy · Support",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 1247.109375,
+          "y": 864,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 354.8125,
+        "height": 48
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 354.8125,
+        "height": 49.59375
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "a"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nKEEP YOUR GUARD. GET YOUR HIPS BACK.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      14.4,
+      14.4,
+      14.4,
+      14.4,
+      14.4,
+      14.4,
+      14.4,
+      14.4,
+      14.4
+    ],
+    "approvedLines": [
+      {
+        "text": "Never get your guard passed again with our Guard Flexibility program",
+        "rect": {
+          "left": 240,
+          "top": 448.203125,
+          "right": 760,
+          "bottom": 465.484375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Master every guard position in our Guard Program",
+        "rect": {
+          "left": 240,
+          "top": 469.984375,
+          "right": 760,
+          "bottom": 487.265625
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Achieve flexibility you never thought you could with our Inverted Guard program",
+        "rect": {
+          "left": 240,
+          "top": 491.765625,
+          "right": 760,
+          "bottom": 526.328125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Unlock the hips that every single one of those positions runs through with our Hip Program",
+        "rect": {
+          "left": 240,
+          "top": 530.828125,
+          "right": 760,
+          "bottom": 565.390625
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program",
+        "rect": {
+          "left": 240,
+          "top": 569.890625,
+          "right": 760,
+          "bottom": 604.453125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Kill that pinch in the front of your hip with our Hip Flexor Rehab program",
+        "rect": {
+          "left": 240,
+          "top": 608.953125,
+          "right": 760,
+          "bottom": 626.234375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Touch your toes for the first time since high school with our Stiffest Legs program",
+        "rect": {
+          "left": 240,
+          "top": 630.734375,
+          "right": 760,
+          "bottom": 665.296875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "rect": {
+          "left": 240,
+          "top": 672.484375,
+          "right": 760,
+          "bottom": 689.765625
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "rect": {
+          "left": 240,
+          "top": 693.765625,
+          "right": 760,
+          "bottom": 742.703125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      }
+    ],
+    "backgrounds": [
+      {
+        "tag": "MAIN",
+        "backgroundImage": "none",
+        "currentSrc": null,
+        "naturalWidth": null
+      },
+      {
+        "tag": "IMG",
+        "backgroundImage": "none",
+        "currentSrc": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/img/guard-pass-1600.webp",
+        "naturalWidth": 1440
+      }
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "badResponses": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "visual",
+    "variant": "b",
+    "width": 375,
+    "height": 667,
+    "status": 200,
+    "targetSha": "20afebd527e49775ad8288298bb9023891424d00",
+    "workerVersion": "f8a8fc0e-8801-4474-b0db-4d32965fb07b",
+    "scroll": {
+      "width": 375,
+      "height": 667,
+      "clientWidth": 375,
+      "clientHeight": 667,
+      "bodyWidth": 375,
+      "bodyHeight": 667
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "text": "Yoga for BJJ",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 87.890625,
+          "width": 308.625,
+          "height": 13.9375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "text": "Your guard isn't the problem. Your hips are.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 104.21875,
+          "width": 231.484375,
+          "height": 97.625
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "text": "This isn't another technique instructional. It's mobility work built around keeping your guard.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 205.03125,
+          "width": 308.625,
+          "height": 26.75
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "text": "",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 45.015625,
+          "width": 375,
+          "height": 581.984375
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "text": "Never get your guard passed again with our Guard Flexibility program\n        Master every guard position in our Guard Program\n        Achieve flexibility you never thought you could with our Inverted Guard program\n        Unlock the hips that every single one of those positions runs through with our Hip Program\n        Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\n        Kill that pinch in the front of your hip with our Hip Flexor Rehab program\n        Touch your toes for the first time since high school with our Stiffest Legs program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 236.578125,
+          "width": 308.625,
+          "height": 159.40625
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 400.78125,
+          "width": 308.625,
+          "height": 22.375
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 425.546875,
+          "width": 308.625,
+          "height": 30.375
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "text": "8mobility collections",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 228.78125,
+          "y": 471.96875,
+          "width": 103.234375,
+          "height": 38.25
+        }
+      },
+      "price": {
+        "exists": true,
+        "text": "$14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 179.453125,
+          "y": 467.84375,
+          "width": 33.328125,
+          "height": 19.03125
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "text": "Where should we send it?\n        \n        Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 42.984375,
+          "y": 517.53125,
+          "width": 289.03125,
+          "height": 59.234375
+        }
+      },
+      "cta": {
+        "exists": true,
+        "text": "Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 189.25,
+          "y": 537.890625,
+          "width": 142.765625,
+          "height": 38.875
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "text": "Preview · checkout not connected",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 21.21875,
+          "width": 375,
+          "height": 23.796875
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "text": "Terms · Privacy · Support",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 210.109375,
+          "y": 631,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 142.75,
+        "height": 38.875
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 142.765625,
+        "height": 38.875
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "b"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nYOUR GUARD ISN'T THE PROBLEM. YOUR HIPS ARE.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10
+    ],
+    "approvedLines": [
+      {
+        "text": "Never get your guard passed again with our Guard Flexibility program",
+        "rect": {
+          "left": 33.1875,
+          "top": 236.578125,
+          "right": 341.8125,
+          "bottom": 258.953125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Master every guard position in our Guard Program",
+        "rect": {
+          "left": 33.1875,
+          "top": 261.28125,
+          "right": 341.8125,
+          "bottom": 272.46875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Achieve flexibility you never thought you could with our Inverted Guard program",
+        "rect": {
+          "left": 33.1875,
+          "top": 274.796875,
+          "right": 341.8125,
+          "bottom": 297.171875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Unlock the hips that every single one of those positions runs through with our Hip Program",
+        "rect": {
+          "left": 33.1875,
+          "top": 299.5,
+          "right": 341.8125,
+          "bottom": 321.875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program",
+        "rect": {
+          "left": 33.1875,
+          "top": 324.203125,
+          "right": 341.8125,
+          "bottom": 346.578125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Kill that pinch in the front of your hip with our Hip Flexor Rehab program",
+        "rect": {
+          "left": 33.1875,
+          "top": 348.90625,
+          "right": 341.8125,
+          "bottom": 371.28125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Touch your toes for the first time since high school with our Stiffest Legs program",
+        "rect": {
+          "left": 33.1875,
+          "top": 373.609375,
+          "right": 341.8125,
+          "bottom": 395.984375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "rect": {
+          "left": 33.1875,
+          "top": 400.78125,
+          "right": 341.8125,
+          "bottom": 423.15625
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "rect": {
+          "left": 33.1875,
+          "top": 425.546875,
+          "right": 341.8125,
+          "bottom": 455.921875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      }
+    ],
+    "backgrounds": [
+      {
+        "tag": "MAIN",
+        "backgroundImage": "none",
+        "currentSrc": null,
+        "naturalWidth": null
+      },
+      {
+        "tag": "IMG",
+        "backgroundImage": "none",
+        "currentSrc": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/img/guard-pass-400.webp",
+        "naturalWidth": 374
+      }
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "badResponses": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "visual",
+    "variant": "b",
+    "width": 375,
+    "height": 812,
+    "status": 200,
+    "targetSha": "20afebd527e49775ad8288298bb9023891424d00",
+    "workerVersion": "f8a8fc0e-8801-4474-b0db-4d32965fb07b",
+    "scroll": {
+      "width": 375,
+      "height": 812,
+      "clientWidth": 375,
+      "clientHeight": 812,
+      "bodyWidth": 375,
+      "bodyHeight": 812
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "text": "Yoga for BJJ",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 127.375,
+          "width": 308.625,
+          "height": 16.84375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "text": "Your guard isn't the problem. Your hips are.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 146.609375,
+          "width": 231.484375,
+          "height": 97.625
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "text": "This isn't another technique instructional. It's mobility work built around keeping your guard.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 247.421875,
+          "width": 308.625,
+          "height": 30.96875
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "text": "",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 45.015625,
+          "width": 375,
+          "height": 726.984375
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "text": "Never get your guard passed again with our Guard Flexibility program\n        Master every guard position in our Guard Program\n        Achieve flexibility you never thought you could with our Inverted Guard program\n        Unlock the hips that every single one of those positions runs through with our Hip Program\n        Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\n        Kill that pinch in the front of your hip with our Hip Flexor Rehab program\n        Touch your toes for the first time since high school with our Stiffest Legs program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 283.1875,
+          "width": 308.625,
+          "height": 191.65625
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 479.640625,
+          "width": 308.625,
+          "height": 26.875
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 33.1875,
+          "y": 508.90625,
+          "width": 308.625,
+          "height": 34.875
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "text": "8mobility collections",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 228.78125,
+          "y": 600.484375,
+          "width": 103.234375,
+          "height": 38.25
+        }
+      },
+      "price": {
+        "exists": true,
+        "text": "$14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 179.453125,
+          "y": 596.359375,
+          "width": 33.328125,
+          "height": 19.03125
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "text": "Where should we send it?\n        \n        Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 42.984375,
+          "y": 646.046875,
+          "width": 289.03125,
+          "height": 59.234375
+        }
+      },
+      "cta": {
+        "exists": true,
+        "text": "Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 189.25,
+          "y": 666.40625,
+          "width": 142.765625,
+          "height": 38.875
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "text": "Preview · checkout not connected",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 21.21875,
+          "width": 375,
+          "height": 23.796875
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "text": "Terms · Privacy · Support",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 210.109375,
+          "y": 776,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 142.75,
+        "height": 38.875
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 142.765625,
+        "height": 38.875
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "b"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nYOUR GUARD ISN'T THE PROBLEM. YOUR HIPS ARE.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12
+    ],
+    "approvedLines": [
+      {
+        "text": "Never get your guard passed again with our Guard Flexibility program",
+        "rect": {
+          "left": 33.1875,
+          "top": 283.1875,
+          "right": 341.8125,
+          "bottom": 310.0625
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Master every guard position in our Guard Program",
+        "rect": {
+          "left": 33.1875,
+          "top": 312.890625,
+          "right": 341.8125,
+          "bottom": 326.328125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Achieve flexibility you never thought you could with our Inverted Guard program",
+        "rect": {
+          "left": 33.1875,
+          "top": 329.15625,
+          "right": 341.8125,
+          "bottom": 356.03125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Unlock the hips that every single one of those positions runs through with our Hip Program",
+        "rect": {
+          "left": 33.1875,
+          "top": 358.859375,
+          "right": 341.8125,
+          "bottom": 385.734375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program",
+        "rect": {
+          "left": 33.1875,
+          "top": 388.5625,
+          "right": 341.8125,
+          "bottom": 415.4375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Kill that pinch in the front of your hip with our Hip Flexor Rehab program",
+        "rect": {
+          "left": 33.1875,
+          "top": 418.265625,
+          "right": 341.8125,
+          "bottom": 445.140625
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Touch your toes for the first time since high school with our Stiffest Legs program",
+        "rect": {
+          "left": 33.1875,
+          "top": 447.96875,
+          "right": 341.8125,
+          "bottom": 474.84375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "rect": {
+          "left": 33.1875,
+          "top": 479.640625,
+          "right": 341.8125,
+          "bottom": 506.515625
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "rect": {
+          "left": 33.1875,
+          "top": 508.90625,
+          "right": 341.8125,
+          "bottom": 543.78125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      }
+    ],
+    "backgrounds": [
+      {
+        "tag": "MAIN",
+        "backgroundImage": "none",
+        "currentSrc": null,
+        "naturalWidth": null
+      },
+      {
+        "tag": "IMG",
+        "backgroundImage": "none",
+        "currentSrc": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/img/guard-pass-400.webp",
+        "naturalWidth": 374
+      }
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "badResponses": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "visual",
+    "variant": "b",
+    "width": 768,
+    "height": 1024,
+    "status": 200,
+    "targetSha": "20afebd527e49775ad8288298bb9023891424d00",
+    "workerVersion": "f8a8fc0e-8801-4474-b0db-4d32965fb07b",
+    "scroll": {
+      "width": 768,
+      "height": 1024,
+      "clientWidth": 768,
+      "clientHeight": 1024,
+      "bodyWidth": 768,
+      "bodyHeight": 1024
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "text": "Yoga for BJJ",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 162.921875,
+          "width": 184.96875,
+          "height": 18.59375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "text": "Your guard isn't the problem. Your hips are.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 190.3125,
+          "width": 184.96875,
+          "height": 194.53125
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "text": "This isn't another technique instructional. It's mobility work built around keeping your guard.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 390.4375,
+          "width": 184.96875,
+          "height": 47.953125
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "text": "",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 53.671875,
+          "width": 768,
+          "height": 930.328125
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "text": "Never get your guard passed again with our Guard Flexibility program\n        Master every guard position in our Guard Program\n        Achieve flexibility you never thought you could with our Inverted Guard program\n        Unlock the hips that every single one of those positions runs through with our Hip Program\n        Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\n        Kill that pinch in the front of your hip with our Hip Flexor Rehab program\n        Touch your toes for the first time since high school with our Stiffest Legs program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 445.578125,
+          "width": 184.96875,
+          "height": 320.71875
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 773.484375,
+          "width": 184.96875,
+          "height": 27.625
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 805.109375,
+          "width": 184.96875,
+          "height": 69.625
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "text": "8mobility collections",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 516.65625,
+          "y": 402.84375,
+          "width": 148.75,
+          "height": 56.5
+        }
+      },
+      "price": {
+        "exists": true,
+        "text": "$14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 310.59375,
+          "y": 425.34375,
+          "width": 160.953125,
+          "height": 34
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "text": "Where should we send it?\n        \n        Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 310.59375,
+          "y": 470.53125,
+          "width": 354.8125,
+          "height": 138.4375
+        }
+      },
+      "cta": {
+        "exists": true,
+        "text": "Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 310.59375,
+          "y": 559.375,
+          "width": 354.8125,
+          "height": 49.59375
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "text": "Preview · checkout not connected",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 26.03125,
+          "width": 768,
+          "height": 27.640625
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "text": "Terms · Privacy · Support",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 575.109375,
+          "y": 988,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 354.8125,
+        "height": 48
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 354.8125,
+        "height": 49.59375
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "b"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nYOUR GUARD ISN'T THE PROBLEM. YOUR HIPS ARE.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      11.52,
+      11.52,
+      11.52,
+      11.52,
+      11.52,
+      11.52,
+      11.52,
+      11.52,
+      11.52
+    ],
+    "approvedLines": [
+      {
+        "text": "Never get your guard passed again with our Guard Flexibility program",
+        "rect": {
+          "left": 80,
+          "top": 445.578125,
+          "right": 264.96875,
+          "bottom": 487.015625
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Master every guard position in our Guard Program",
+        "rect": {
+          "left": 80,
+          "top": 492.125,
+          "right": 264.96875,
+          "bottom": 519.75
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Achieve flexibility you never thought you could with our Inverted Guard program",
+        "rect": {
+          "left": 80,
+          "top": 524.859375,
+          "right": 264.96875,
+          "bottom": 566.296875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Unlock the hips that every single one of those positions runs through with our Hip Program",
+        "rect": {
+          "left": 80,
+          "top": 571.40625,
+          "right": 264.96875,
+          "bottom": 612.84375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program",
+        "rect": {
+          "left": 80,
+          "top": 617.953125,
+          "right": 264.96875,
+          "bottom": 673.203125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Kill that pinch in the front of your hip with our Hip Flexor Rehab program",
+        "rect": {
+          "left": 80,
+          "top": 678.3125,
+          "right": 264.96875,
+          "bottom": 719.75
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Touch your toes for the first time since high school with our Stiffest Legs program",
+        "rect": {
+          "left": 80,
+          "top": 724.859375,
+          "right": 264.96875,
+          "bottom": 766.296875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "rect": {
+          "left": 80,
+          "top": 773.484375,
+          "right": 264.96875,
+          "bottom": 801.109375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "rect": {
+          "left": 80,
+          "top": 805.109375,
+          "right": 264.96875,
+          "bottom": 874.734375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      }
+    ],
+    "backgrounds": [
+      {
+        "tag": "MAIN",
+        "backgroundImage": "none",
+        "currentSrc": null,
+        "naturalWidth": null
+      },
+      {
+        "tag": "IMG",
+        "backgroundImage": "none",
+        "currentSrc": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/img/guard-pass-800.webp",
+        "naturalWidth": 768
+      }
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "badResponses": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "visual",
+    "variant": "b",
+    "width": 1024,
+    "height": 768,
+    "status": 200,
+    "targetSha": "20afebd527e49775ad8288298bb9023891424d00",
+    "workerVersion": "f8a8fc0e-8801-4474-b0db-4d32965fb07b",
+    "scroll": {
+      "width": 1024,
+      "height": 768,
+      "clientWidth": 1024,
+      "clientHeight": 768,
+      "bodyWidth": 1024,
+      "bodyHeight": 768
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "text": "Yoga for BJJ",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 140.703125,
+          "width": 433.28125,
+          "height": 18.59375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "text": "Your guard isn't the problem. Your hips are.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 168.09375,
+          "width": 355.28125,
+          "height": 216.25
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "text": "This isn't another technique instructional. It's mobility work built around keeping your guard.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 389.9375,
+          "width": 433.28125,
+          "height": 37.09375
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "text": "",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 53.671875,
+          "width": 1024,
+          "height": 674.328125
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "text": "Never get your guard passed again with our Guard Flexibility program\n        Master every guard position in our Guard Program\n        Achieve flexibility you never thought you could with our Inverted Guard program\n        Unlock the hips that every single one of those positions runs through with our Hip Program\n        Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\n        Kill that pinch in the front of your hip with our Hip Flexor Rehab program\n        Touch your toes for the first time since high school with our Stiffest Legs program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 434.21875,
+          "width": 433.28125,
+          "height": 164.21875
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 605.625,
+          "width": 433.28125,
+          "height": 14.125
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 623.75,
+          "width": 433.28125,
+          "height": 42.625
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "text": "8mobility collections",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 775.0625,
+          "y": 287.546875,
+          "width": 148.75,
+          "height": 56.5
+        }
+      },
+      "price": {
+        "exists": true,
+        "text": "$14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 564.1875,
+          "y": 310.046875,
+          "width": 160.953125,
+          "height": 34
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "text": "Where should we send it?\n        \n        Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 564.1875,
+          "y": 355.234375,
+          "width": 359.625,
+          "height": 138.4375
+        }
+      },
+      "cta": {
+        "exists": true,
+        "text": "Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 564.1875,
+          "y": 444.078125,
+          "width": 359.625,
+          "height": 49.59375
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "text": "Preview · checkout not connected",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 26.03125,
+          "width": 1024,
+          "height": 27.640625
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "text": "Terms · Privacy · Support",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 831.109375,
+          "y": 732,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 359.625,
+        "height": 48
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 359.625,
+        "height": 49.59375
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "b"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nYOUR GUARD ISN'T THE PROBLEM. YOUR HIPS ARE.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      11.776,
+      11.776,
+      11.776,
+      11.776,
+      11.776,
+      11.776,
+      11.776,
+      11.776,
+      11.776
+    ],
+    "approvedLines": [
+      {
+        "text": "Never get your guard passed again with our Guard Flexibility program",
+        "rect": {
+          "left": 80,
+          "top": 434.21875,
+          "right": 513.28125,
+          "bottom": 448.34375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Master every guard position in our Guard Program",
+        "rect": {
+          "left": 80,
+          "top": 452.171875,
+          "right": 513.28125,
+          "bottom": 466.296875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Achieve flexibility you never thought you could with our Inverted Guard program",
+        "rect": {
+          "left": 80,
+          "top": 470.125,
+          "right": 513.28125,
+          "bottom": 484.25
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Unlock the hips that every single one of those positions runs through with our Hip Program",
+        "rect": {
+          "left": 80,
+          "top": 488.078125,
+          "right": 513.28125,
+          "bottom": 516.328125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program",
+        "rect": {
+          "left": 80,
+          "top": 520.15625,
+          "right": 513.28125,
+          "bottom": 548.40625
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Kill that pinch in the front of your hip with our Hip Flexor Rehab program",
+        "rect": {
+          "left": 80,
+          "top": 552.234375,
+          "right": 513.28125,
+          "bottom": 566.359375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Touch your toes for the first time since high school with our Stiffest Legs program",
+        "rect": {
+          "left": 80,
+          "top": 570.1875,
+          "right": 513.28125,
+          "bottom": 598.4375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "rect": {
+          "left": 80,
+          "top": 605.625,
+          "right": 513.28125,
+          "bottom": 619.75
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "rect": {
+          "left": 80,
+          "top": 623.75,
+          "right": 513.28125,
+          "bottom": 666.375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      }
+    ],
+    "backgrounds": [
+      {
+        "tag": "MAIN",
+        "backgroundImage": "none",
+        "currentSrc": null,
+        "naturalWidth": null
+      },
+      {
+        "tag": "IMG",
+        "backgroundImage": "none",
+        "currentSrc": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/img/guard-pass-1600.webp",
+        "naturalWidth": 1024
+      }
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "badResponses": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "visual",
+    "variant": "b",
+    "width": 1440,
+    "height": 900,
+    "status": 200,
+    "targetSha": "20afebd527e49775ad8288298bb9023891424d00",
+    "workerVersion": "f8a8fc0e-8801-4474-b0db-4d32965fb07b",
+    "scroll": {
+      "width": 1440,
+      "height": 900,
+      "clientWidth": 1440,
+      "clientHeight": 900,
+      "bodyWidth": 1440,
+      "bodyHeight": 900
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "text": "Yoga for BJJ",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 167.671875,
+          "width": 520,
+          "height": 18.59375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "text": "Your guard isn't the problem. Your hips are.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 195.0625,
+          "width": 404.875,
+          "height": 246.328125
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "text": "This isn't another technique instructional. It's mobility work built around keeping your guard.",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 446.984375,
+          "width": 520,
+          "height": 40
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "text": "",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 160,
+          "y": 53.671875,
+          "width": 1120,
+          "height": 806.328125
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "text": "Never get your guard passed again with our Guard Flexibility program\n        Master every guard position in our Guard Program\n        Achieve flexibility you never thought you could with our Inverted Guard program\n        Unlock the hips that every single one of those positions runs through with our Hip Program\n        Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\n        Kill that pinch in the front of your hip with our Hip Flexor Rehab program\n        Touch your toes for the first time since high school with our Stiffest Legs program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 494.171875,
+          "width": 520,
+          "height": 217.09375
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 718.453125,
+          "width": 520,
+          "height": 17.28125
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 739.734375,
+          "width": 520,
+          "height": 48.9375
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "text": "8mobility collections",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 1028.65625,
+          "y": 362.1875,
+          "width": 148.75,
+          "height": 56.5
+        }
+      },
+      "price": {
+        "exists": true,
+        "text": "$14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 822.59375,
+          "y": 384.6875,
+          "width": 160.953125,
+          "height": 34
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "text": "Where should we send it?\n        \n        Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 822.59375,
+          "y": 429.875,
+          "width": 354.8125,
+          "height": 138.4375
+        }
+      },
+      "cta": {
+        "exists": true,
+        "text": "Get the bundle · $14",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 822.59375,
+          "y": 518.71875,
+          "width": 354.8125,
+          "height": 49.59375
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "text": "Preview · checkout not connected",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 26.03125,
+          "width": 1440,
+          "height": 27.640625
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "text": "Terms · Privacy · Support",
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 1247.109375,
+          "y": 864,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 354.8125,
+        "height": 48
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 354.8125,
+        "height": 49.59375
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "b"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nYOUR GUARD ISN'T THE PROBLEM. YOUR HIPS ARE.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      14.4,
+      14.4,
+      14.4,
+      14.4,
+      14.4,
+      14.4,
+      14.4,
+      14.4,
+      14.4
+    ],
+    "approvedLines": [
+      {
+        "text": "Never get your guard passed again with our Guard Flexibility program",
+        "rect": {
+          "left": 240,
+          "top": 494.171875,
+          "right": 760,
+          "bottom": 511.453125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Master every guard position in our Guard Program",
+        "rect": {
+          "left": 240,
+          "top": 515.953125,
+          "right": 760,
+          "bottom": 533.234375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Achieve flexibility you never thought you could with our Inverted Guard program",
+        "rect": {
+          "left": 240,
+          "top": 537.734375,
+          "right": 760,
+          "bottom": 572.296875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Unlock the hips that every single one of those positions runs through with our Hip Program",
+        "rect": {
+          "left": 240,
+          "top": 576.796875,
+          "right": 760,
+          "bottom": 611.359375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Start exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program",
+        "rect": {
+          "left": 240,
+          "top": 615.859375,
+          "right": 760,
+          "bottom": 650.421875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Kill that pinch in the front of your hip with our Hip Flexor Rehab program",
+        "rect": {
+          "left": 240,
+          "top": 654.921875,
+          "right": 760,
+          "bottom": 672.203125
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "Touch your toes for the first time since high school with our Stiffest Legs program",
+        "rect": {
+          "left": 240,
+          "top": 676.703125,
+          "right": 760,
+          "bottom": 711.265625
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "And for those of you who think you're too busy to do any of this?",
+        "rect": {
+          "left": 240,
+          "top": 718.453125,
+          "right": 760,
+          "bottom": 735.734375
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      },
+      {
+        "text": "We are also giving you access to our \"Im too busy for Yoga... but i need it!\" program",
+        "rect": {
+          "left": 240,
+          "top": 739.734375,
+          "right": 760,
+          "bottom": 788.671875
+        },
+        "inViewport": true,
+        "unclipped": true,
+        "visible": true,
+        "centerTopmost": true
+      }
+    ],
+    "backgrounds": [
+      {
+        "tag": "MAIN",
+        "backgroundImage": "none",
+        "currentSrc": null,
+        "naturalWidth": null
+      },
+      {
+        "tag": "IMG",
+        "backgroundImage": "none",
+        "currentSrc": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/img/guard-pass-1600.webp",
+        "naturalWidth": 1440
+      }
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "badResponses": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "variant-content",
+    "headlineA": "Keep your guard. Get your hips back.",
+    "headlineB": "Your guard isn't the problem. Your hips are.",
+    "pass": true
+  },
+  {
+    "kind": "functional",
+    "naturalVariant": "a",
+    "reloadVariant": "a",
+    "firstCookie": "a",
+    "forcedVariant": "b",
+    "cookieAfterForce": "a",
+    "afterForceVariant": "a",
+    "handoffUrl": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/preview-checkout?utm_source=qa&utm_medium=linear&gclid=test-click&passthrough%5Bvariant%5D=a&utm_content=variant-a",
+    "leadPosts": [],
+    "cookiePersists": true,
+    "forcedWorks": true,
+    "handoffIsPreview": true,
+    "attributionSurvives": true,
+    "previewMadeNoWrite": true,
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "backend",
+    "name": "checkout",
+    "method": "POST",
+    "path": "/api/checkout",
+    "status": 423,
+    "body": {
+      "ok": false,
+      "error": "preview_locked"
+    },
+    "pass": true
+  },
+  {
+    "kind": "backend",
+    "name": "lead",
+    "method": "POST",
+    "path": "/api/lead",
+    "status": 503,
+    "body": {
+      "ok": false,
+      "error": "preview_state_disabled"
+    },
+    "pass": true
+  },
+  {
+    "kind": "backend",
+    "name": "stats",
+    "method": "GET",
+    "path": "/api/stats",
+    "status": 503,
+    "body": {
+      "ok": false,
+      "error": "preview_state_disabled"
+    },
+    "pass": true
+  },
+  {
+    "kind": "backend",
+    "name": "health",
+    "method": "GET",
+    "path": "/health",
+    "status": 503,
+    "body": {
+      "ok": false,
+      "d1": "intentionally_unbound",
+      "preview": true,
+      "at": "2026-08-30T19:09:02.011Z"
+    },
+    "pass": true
+  },
+  {
+    "kind": "destination",
+    "name": "terms",
+    "url": "https://yfbjj.autocreator.ai/legal/terms",
+    "status": 200,
+    "finalUrl": "https://yfbjj.autocreator.ai/legal/terms",
+    "pass": true
+  },
+  {
+    "kind": "destination",
+    "name": "privacy",
+    "url": "https://yfbjj.autocreator.ai/legal/privacy",
+    "status": 200,
+    "finalUrl": "https://yfbjj.autocreator.ai/legal/privacy",
+    "pass": true
+  },
+  {
+    "kind": "destination",
+    "name": "support",
+    "url": "mailto:Sebastian@yogaforbjj.net",
+    "pass": true,
+    "basis": "Rendered mailto link with a syntactically valid address and accessible name"
+  }
+]
