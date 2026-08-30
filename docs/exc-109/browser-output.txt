@@ -1,0 +1,2327 @@
+[
+  {
+    "kind": "visual",
+    "variant": "a",
+    "width": 375,
+    "height": 667,
+    "status": 200,
+    "scroll": {
+      "width": 375,
+      "height": 1380,
+      "clientWidth": 375,
+      "clientHeight": 667
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 44,
+          "y": 113.671875,
+          "width": 287,
+          "height": 18.59375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 44,
+          "y": 137.859375,
+          "width": 279.140625,
+          "height": 135.9375
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 44,
+          "y": 280.984375,
+          "width": 287,
+          "height": 67.171875
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 0,
+          "y": 53.671875,
+          "width": 375,
+          "height": 1286.5
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 44,
+          "y": 364.15625,
+          "width": 287,
+          "height": 441.46875
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 44,
+          "y": 821.625,
+          "width": 287,
+          "height": 44.78125
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 44,
+          "y": 875.203125,
+          "width": 287,
+          "height": 92.765625
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 199.34375,
+          "y": 1023.15625,
+          "width": 118.65625,
+          "height": 51.5
+        }
+      },
+      "price": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 57,
+          "y": 1047.46875,
+          "width": 126.34375,
+          "height": 27.1875
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 57,
+          "y": 1082.65625,
+          "width": 261,
+          "height": 135.328125
+        }
+      },
+      "cta": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 57,
+          "y": 1168.390625,
+          "width": 261,
+          "height": 49.59375
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 26.03125,
+          "width": 375,
+          "height": 27.640625
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 210.109375,
+          "y": 1344.171875,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 261,
+        "height": 48
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 261,
+        "height": 49.59375
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "a"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nKEEP YOUR GUARD. GET YOUR HIPS BACK.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "visual",
+    "variant": "a",
+    "width": 375,
+    "height": 812,
+    "status": 200,
+    "scroll": {
+      "width": 375,
+      "height": 1380,
+      "clientWidth": 375,
+      "clientHeight": 812
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 44,
+          "y": 113.671875,
+          "width": 287,
+          "height": 18.59375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 44,
+          "y": 137.859375,
+          "width": 279.140625,
+          "height": 135.9375
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 44,
+          "y": 280.984375,
+          "width": 287,
+          "height": 67.171875
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 0,
+          "y": 53.671875,
+          "width": 375,
+          "height": 1286.5
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 44,
+          "y": 364.15625,
+          "width": 287,
+          "height": 441.46875
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 44,
+          "y": 821.625,
+          "width": 287,
+          "height": 44.78125
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 44,
+          "y": 875.203125,
+          "width": 287,
+          "height": 92.765625
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 199.34375,
+          "y": 1023.15625,
+          "width": 118.65625,
+          "height": 51.5
+        }
+      },
+      "price": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 57,
+          "y": 1047.46875,
+          "width": 126.34375,
+          "height": 27.1875
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 57,
+          "y": 1082.65625,
+          "width": 261,
+          "height": 135.328125
+        }
+      },
+      "cta": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 57,
+          "y": 1168.390625,
+          "width": 261,
+          "height": 49.59375
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 26.03125,
+          "width": 375,
+          "height": 27.640625
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 210.109375,
+          "y": 1344.171875,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 261,
+        "height": 48
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 261,
+        "height": 49.59375
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "a"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nKEEP YOUR GUARD. GET YOUR HIPS BACK.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "visual",
+    "variant": "a",
+    "width": 768,
+    "height": 1024,
+    "status": 200,
+    "scroll": {
+      "width": 768,
+      "height": 1686,
+      "clientWidth": 768,
+      "clientHeight": 1024
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 148.375,
+          "width": 169.609375,
+          "height": 18.59375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 175.765625,
+          "width": 169.609375,
+          "height": 236.578125
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 422.734375,
+          "width": 169.609375,
+          "height": 115.9375
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 0,
+          "y": 53.671875,
+          "width": 768,
+          "height": 1592.1875
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 80,
+          "y": 554.671875,
+          "width": 169.609375,
+          "height": 722.1875
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 80,
+          "y": 1292.859375,
+          "width": 169.609375,
+          "height": 89.5625
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 80,
+          "y": 1391.21875,
+          "width": 169.609375,
+          "height": 159.9375
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 516.65625,
+          "y": 733.78125,
+          "width": 148.75,
+          "height": 56.5
+        }
+      },
+      "price": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 310.59375,
+          "y": 756.28125,
+          "width": 160.953125,
+          "height": 34
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 310.59375,
+          "y": 801.46875,
+          "width": 354.8125,
+          "height": 138.4375
+        }
+      },
+      "cta": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 310.59375,
+          "y": 890.3125,
+          "width": 354.8125,
+          "height": 49.59375
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 26.03125,
+          "width": 768,
+          "height": 27.640625
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 575.109375,
+          "y": 1649.859375,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 354.8125,
+        "height": 48
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 354.8125,
+        "height": 49.59375
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "a"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nKEEP YOUR GUARD. GET YOUR HIPS BACK.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "visual",
+    "variant": "a",
+    "width": 1024,
+    "height": 768,
+    "status": 200,
+    "scroll": {
+      "width": 1024,
+      "height": 1059,
+      "clientWidth": 1024,
+      "clientHeight": 768
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 156.0625,
+          "width": 412.796875,
+          "height": 18.59375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 183.453125,
+          "width": 370.078125,
+          "height": 180.1875
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 374.03125,
+          "width": 412.796875,
+          "height": 53.46875
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 0,
+          "y": 53.671875,
+          "width": 1024,
+          "height": 965.671875
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 80,
+          "y": 443.5,
+          "width": 412.796875,
+          "height": 333.5
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 80,
+          "y": 793,
+          "width": 412.796875,
+          "height": 44.78125
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 80,
+          "y": 846.578125,
+          "width": 412.796875,
+          "height": 70.375
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 775.046875,
+          "y": 420.515625,
+          "width": 148.75,
+          "height": 56.5
+        }
+      },
+      "price": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 564.171875,
+          "y": 443.015625,
+          "width": 160.953125,
+          "height": 34
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 564.171875,
+          "y": 488.203125,
+          "width": 359.625,
+          "height": 138.4375
+        }
+      },
+      "cta": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 564.171875,
+          "y": 577.046875,
+          "width": 359.625,
+          "height": 49.59375
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 26.03125,
+          "width": 1024,
+          "height": 27.640625
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 831.109375,
+          "y": 1023.34375,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 359.625,
+        "height": 48
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 359.625,
+        "height": 49.59375
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "a"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nKEEP YOUR GUARD. GET YOUR HIPS BACK.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "visual",
+    "variant": "a",
+    "width": 1440,
+    "height": 900,
+    "status": 200,
+    "scroll": {
+      "width": 1440,
+      "height": 1194,
+      "clientWidth": 1440,
+      "clientHeight": 900
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 185.671875,
+          "width": 496,
+          "height": 18.59375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 213.0625,
+          "width": 496,
+          "height": 253.4375
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 476.890625,
+          "width": 496,
+          "height": 55.6875
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 160,
+          "y": 53.671875,
+          "width": 1120,
+          "height": 1100.359375
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 548.578125,
+          "width": 496,
+          "height": 333.5
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 240,
+          "y": 898.078125,
+          "width": 496,
+          "height": 44.78125
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 240,
+          "y": 951.65625,
+          "width": 496,
+          "height": 70.375
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 1028.65625,
+          "y": 487.859375,
+          "width": 148.75,
+          "height": 56.5
+        }
+      },
+      "price": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 822.59375,
+          "y": 510.359375,
+          "width": 160.953125,
+          "height": 34
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 822.59375,
+          "y": 555.546875,
+          "width": 354.8125,
+          "height": 138.4375
+        }
+      },
+      "cta": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 822.59375,
+          "y": 644.390625,
+          "width": 354.8125,
+          "height": 49.59375
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 26.03125,
+          "width": 1440,
+          "height": 27.640625
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 1247.109375,
+          "y": 1158.03125,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 354.8125,
+        "height": 48
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 354.8125,
+        "height": 49.59375
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "a"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nKEEP YOUR GUARD. GET YOUR HIPS BACK.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "visual",
+    "variant": "b",
+    "width": 375,
+    "height": 667,
+    "status": 200,
+    "scroll": {
+      "width": 375,
+      "height": 1414,
+      "clientWidth": 375,
+      "clientHeight": 667
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 44,
+          "y": 113.671875,
+          "width": 287,
+          "height": 18.59375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 44,
+          "y": 137.859375,
+          "width": 279.140625,
+          "height": 169.921875
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 44,
+          "y": 314.96875,
+          "width": 287,
+          "height": 67.171875
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 0,
+          "y": 53.671875,
+          "width": 375,
+          "height": 1320.484375
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 44,
+          "y": 398.140625,
+          "width": 287,
+          "height": 441.46875
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 44,
+          "y": 855.609375,
+          "width": 287,
+          "height": 44.78125
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 44,
+          "y": 909.1875,
+          "width": 287,
+          "height": 92.765625
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 199.34375,
+          "y": 1057.140625,
+          "width": 118.65625,
+          "height": 51.5
+        }
+      },
+      "price": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 57,
+          "y": 1081.453125,
+          "width": 126.34375,
+          "height": 27.1875
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 57,
+          "y": 1116.640625,
+          "width": 261,
+          "height": 135.328125
+        }
+      },
+      "cta": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 57,
+          "y": 1202.375,
+          "width": 261,
+          "height": 49.59375
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 26.03125,
+          "width": 375,
+          "height": 27.640625
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 210.109375,
+          "y": 1378.15625,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 261,
+        "height": 48
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 261,
+        "height": 49.59375
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "b"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nYOUR GUARD ISN'T THE PROBLEM. YOUR HIPS ARE.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "visual",
+    "variant": "b",
+    "width": 375,
+    "height": 812,
+    "status": 200,
+    "scroll": {
+      "width": 375,
+      "height": 1414,
+      "clientWidth": 375,
+      "clientHeight": 812
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 44,
+          "y": 113.671875,
+          "width": 287,
+          "height": 18.59375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 44,
+          "y": 137.859375,
+          "width": 279.140625,
+          "height": 169.921875
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 44,
+          "y": 314.96875,
+          "width": 287,
+          "height": 67.171875
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 0,
+          "y": 53.671875,
+          "width": 375,
+          "height": 1320.484375
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 44,
+          "y": 398.140625,
+          "width": 287,
+          "height": 441.46875
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 44,
+          "y": 855.609375,
+          "width": 287,
+          "height": 44.78125
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 44,
+          "y": 909.1875,
+          "width": 287,
+          "height": 92.765625
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 199.34375,
+          "y": 1057.140625,
+          "width": 118.65625,
+          "height": 51.5
+        }
+      },
+      "price": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 57,
+          "y": 1081.453125,
+          "width": 126.34375,
+          "height": 27.1875
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 57,
+          "y": 1116.640625,
+          "width": 261,
+          "height": 135.328125
+        }
+      },
+      "cta": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 57,
+          "y": 1202.375,
+          "width": 261,
+          "height": 49.59375
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 26.03125,
+          "width": 375,
+          "height": 27.640625
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 210.109375,
+          "y": 1378.15625,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 261,
+        "height": 48
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 261,
+        "height": 49.59375
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "b"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nYOUR GUARD ISN'T THE PROBLEM. YOUR HIPS ARE.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "visual",
+    "variant": "b",
+    "width": 768,
+    "height": 1024,
+    "status": 200,
+    "scroll": {
+      "width": 768,
+      "height": 1720,
+      "clientWidth": 768,
+      "clientHeight": 1024
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 148.375,
+          "width": 169.609375,
+          "height": 18.59375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 175.765625,
+          "width": 169.609375,
+          "height": 270.375
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 456.53125,
+          "width": 169.609375,
+          "height": 115.9375
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 0,
+          "y": 53.671875,
+          "width": 768,
+          "height": 1625.984375
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 80,
+          "y": 588.46875,
+          "width": 169.609375,
+          "height": 722.1875
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 80,
+          "y": 1326.65625,
+          "width": 169.609375,
+          "height": 89.5625
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 80,
+          "y": 1425.015625,
+          "width": 169.609375,
+          "height": 159.9375
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 516.65625,
+          "y": 750.671875,
+          "width": 148.75,
+          "height": 56.5
+        }
+      },
+      "price": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 310.59375,
+          "y": 773.171875,
+          "width": 160.953125,
+          "height": 34
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 310.59375,
+          "y": 818.359375,
+          "width": 354.8125,
+          "height": 138.4375
+        }
+      },
+      "cta": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 310.59375,
+          "y": 907.203125,
+          "width": 354.8125,
+          "height": 49.59375
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 26.03125,
+          "width": 768,
+          "height": 27.640625
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 575.109375,
+          "y": 1683.65625,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 354.8125,
+        "height": 48
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 354.8125,
+        "height": 49.59375
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "b"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nYOUR GUARD ISN'T THE PROBLEM. YOUR HIPS ARE.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "visual",
+    "variant": "b",
+    "width": 1024,
+    "height": 768,
+    "status": 200,
+    "scroll": {
+      "width": 1024,
+      "height": 1104,
+      "clientWidth": 1024,
+      "clientHeight": 768
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 156.0625,
+          "width": 412.796875,
+          "height": 18.59375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 183.453125,
+          "width": 370.078125,
+          "height": 225.234375
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 80,
+          "y": 419.078125,
+          "width": 412.796875,
+          "height": 53.46875
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 0,
+          "y": 53.671875,
+          "width": 1024,
+          "height": 1010.71875
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 80,
+          "y": 488.546875,
+          "width": 412.796875,
+          "height": 333.5
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 80,
+          "y": 838.046875,
+          "width": 412.796875,
+          "height": 44.78125
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 80,
+          "y": 891.625,
+          "width": 412.796875,
+          "height": 70.375
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 775.046875,
+          "y": 443.046875,
+          "width": 148.75,
+          "height": 56.5
+        }
+      },
+      "price": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 564.171875,
+          "y": 465.546875,
+          "width": 160.953125,
+          "height": 34
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 564.171875,
+          "y": 510.734375,
+          "width": 359.625,
+          "height": 138.4375
+        }
+      },
+      "cta": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 564.171875,
+          "y": 599.578125,
+          "width": 359.625,
+          "height": 49.59375
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 26.03125,
+          "width": 1024,
+          "height": 27.640625
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 831.109375,
+          "y": 1068.390625,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 359.625,
+        "height": 48
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 359.625,
+        "height": 49.59375
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "b"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nYOUR GUARD ISN'T THE PROBLEM. YOUR HIPS ARE.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "visual",
+    "variant": "b",
+    "width": 1440,
+    "height": 900,
+    "status": 200,
+    "scroll": {
+      "width": 1440,
+      "height": 1257,
+      "clientWidth": 1440,
+      "clientHeight": 900
+    },
+    "elements": {
+      "identity": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 185.671875,
+          "width": 496,
+          "height": 18.59375
+        }
+      },
+      "headline": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 213.0625,
+          "width": 496,
+          "height": 316.796875
+        }
+      },
+      "supportCopy": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 240,
+          "y": 540.25,
+          "width": 496,
+          "height": 55.6875
+        }
+      },
+      "approvedVisual": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 160,
+          "y": 53.671875,
+          "width": 1120,
+          "height": 1163.71875
+        }
+      },
+      "valueBullets": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 240,
+          "y": 611.9375,
+          "width": 496,
+          "height": 333.5
+        }
+      },
+      "bonusTransition": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 240,
+          "y": 961.4375,
+          "width": 496,
+          "height": 44.78125
+        }
+      },
+      "bonusLine": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 240,
+          "y": 1015.015625,
+          "width": 496,
+          "height": 70.375
+        }
+      },
+      "collectionSummary": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 1028.65625,
+          "y": 519.546875,
+          "width": 148.75,
+          "height": 56.5
+        }
+      },
+      "price": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 822.59375,
+          "y": 542.046875,
+          "width": 160.953125,
+          "height": 34
+        }
+      },
+      "leadForm": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 822.59375,
+          "y": 587.234375,
+          "width": 354.8125,
+          "height": 138.4375
+        }
+      },
+      "cta": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 822.59375,
+          "y": 676.078125,
+          "width": 354.8125,
+          "height": 49.59375
+        }
+      },
+      "previewNotice": {
+        "exists": true,
+        "visible": true,
+        "inViewport": true,
+        "rect": {
+          "x": 0,
+          "y": 26.03125,
+          "width": 1440,
+          "height": 27.640625
+        }
+      },
+      "legalSupport": {
+        "exists": true,
+        "visible": true,
+        "inViewport": false,
+        "rect": {
+          "x": 1247.109375,
+          "y": 1221.390625,
+          "width": 152.890625,
+          "height": 32
+        }
+      }
+    },
+    "links": [
+      {
+        "text": "Terms",
+        "href": "https://yfbjj.autocreator.ai/legal/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "https://yfbjj.autocreator.ai/legal/privacy"
+      },
+      {
+        "text": "Support",
+        "href": "mailto:Sebastian@yogaforbjj.net"
+      }
+    ],
+    "controls": [
+      {
+        "name": "email",
+        "width": 354.8125,
+        "height": 48
+      },
+      {
+        "name": "Get the bundle · $14",
+        "width": 354.8125,
+        "height": 49.59375
+      },
+      {
+        "name": "Terms",
+        "width": 39.546875,
+        "height": 32
+      },
+      {
+        "name": "Privacy",
+        "width": 45.65625,
+        "height": 32
+      },
+      {
+        "name": "Support",
+        "width": 48.125,
+        "height": 32
+      }
+    ],
+    "brokenImages": [],
+    "config": {
+      "PREVIEW_MODE": true,
+      "THRIVECART_BUNDLE_URL": "",
+      "OFFER_DEADLINE": "",
+      "BUNDLE_PRICE_CENTS": "1400",
+      "VARIANT": "b"
+    },
+    "bodyText": "Mobility for Brazilian Jiu-Jitsu athletes.\nPREVIEW · CHECKOUT NOT CONNECTED\n\nYOGA FOR BJJ\n\nYOUR GUARD ISN'T THE PROBLEM. YOUR HIPS ARE.\n\nThis isn't another technique instructional. It's mobility work built around keeping your guard.\n\nNever get your guard passed again with our Guard Flexibility program\nMaster every guard position in our Guard Program\nAchieve flexibility you never thought you could with our Inverted Guard program\nUnlock the hips that every single one of those positions runs through with our Hip Program\nStart exactly where you are, even if you can't sit cross-legged, with our Stiffest Hips program\nKill that pinch in the front of your hip with our Hip Flexor Rehab program\nTouch your toes for the first time since high school with our Stiffest Legs program\n\nAnd for those of you who think you're too busy to do any of this?\n\nWe are also giving you access to our \"Im too busy for Yoga... but i need it!\" program\n\nGuard Retention Bundle\n$14\n8\nmobility collections\nWhere should we send it?\nGET THE BUNDLE · $14\n\nOne payment. Not a subscription. Optional offers come next.\n\nYoga for BJJ\n\nTerms · Privacy · Support",
+    "valueFontSizes": [
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16,
+      16
+    ],
+    "errors": [],
+    "failedRequests": [],
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "functional",
+    "naturalVariant": "b",
+    "reloadVariant": "b",
+    "firstCookie": "b",
+    "forcedVariant": "a",
+    "cookieAfterForce": "b",
+    "afterForceVariant": "b",
+    "handoffUrl": "https://yfbjj-funnel-visual-staging.sebastian-brosche.workers.dev/preview-checkout?utm_source=qa&utm_medium=linear&gclid=test-click&passthrough%5Bvariant%5D=a&utm_content=variant-a",
+    "leadPosts": [],
+    "cookiePersists": true,
+    "forcedWorks": true,
+    "handoffIsPreview": true,
+    "attributionSurvives": true,
+    "previewMadeNoWrite": true,
+    "failures": [],
+    "pass": true
+  },
+  {
+    "kind": "destination",
+    "name": "terms",
+    "url": "https://yfbjj.autocreator.ai/legal/terms",
+    "status": 200,
+    "finalUrl": "https://yfbjj.autocreator.ai/legal/terms",
+    "title": "Yoga For BJJ",
+    "errors": [],
+    "pass": true
+  },
+  {
+    "kind": "destination",
+    "name": "privacy",
+    "url": "https://yfbjj.autocreator.ai/legal/privacy",
+    "status": 200,
+    "finalUrl": "https://yfbjj.autocreator.ai/legal/privacy",
+    "title": "Yoga For BJJ",
+    "errors": [],
+    "pass": true
+  },
+  {
+    "kind": "destination",
+    "name": "support",
+    "url": "mailto:Sebastian@yogaforbjj.net",
+    "pass": true,
+    "note": "Verified as a syntactically valid mail destination. No email was sent."
+  },
+  {
+    "kind": "backend",
+    "name": "checkout",
+    "method": "POST",
+    "path": "/api/checkout",
+    "status": 423,
+    "body": {
+      "ok": false,
+      "error": "preview_locked"
+    },
+    "pass": true
+  },
+  {
+    "kind": "backend",
+    "name": "lead",
+    "method": "POST",
+    "path": "/api/lead",
+    "status": 503,
+    "body": {
+      "ok": false,
+      "error": "preview_state_disabled"
+    },
+    "pass": true
+  },
+  {
+    "kind": "backend",
+    "name": "stats",
+    "method": "GET",
+    "path": "/api/stats",
+    "status": 503,
+    "body": {
+      "ok": false,
+      "error": "preview_state_disabled"
+    },
+    "pass": true
+  },
+  {
+    "kind": "backend",
+    "name": "health",
+    "method": "GET",
+    "path": "/health",
+    "status": 503,
+    "body": {
+      "ok": false,
+      "d1": "intentionally_unbound",
+      "preview": true,
+      "at": "2026-08-30T16:23:19.252Z"
+    },
+    "pass": true
+  }
+]

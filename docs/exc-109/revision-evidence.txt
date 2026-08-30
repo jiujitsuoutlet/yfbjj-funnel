@@ -1,0 +1,11 @@
+$ git remote -v
+origin	https://github.com/jiujitsuoutlet/yfbjj-funnel.git (fetch)
+origin	https://github.com/jiujitsuoutlet/yfbjj-funnel.git (push)
+$ git rev-parse refs/remotes/origin/pr/3
+ecbe24c72ca248cf9d689db26a010a8a5d3e65e4
+$ git rev-parse refs/remotes/origin/work
+ecbe24c72ca248cf9d689db26a010a8a5d3e65e4
+$ git rev-parse HEAD
+ecbe24c72ca248cf9d689db26a010a8a5d3e65e4
+$ gh pr view 3 --repo jiujitsuoutlet/yfbjj-funnel --json number,state,headRefName,headRefOid,url,title
+{"headRefName":"work","headRefOid":"ecbe24c72ca248cf9d689db26a010a8a5d3e65e4","number":3,"state":"OPEN","title":"Restore Paul's exact first-page value bullets","url":"https://github.com/jiujitsuoutlet/yfbjj-funnel/pull/3"}

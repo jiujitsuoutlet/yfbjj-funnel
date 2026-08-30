@@ -1,0 +1,171 @@
+[
+  {
+    "id": "444499b3-584b-491e-a261-9262c3abde03",
+    "source": "wrangler",
+    "strategy": "percentage",
+    "author_email": "sebastian.brosche@gmail.com",
+    "annotations": {
+      "workers/triggered_by": "deployment"
+    },
+    "versions": [
+      {
+        "version_id": "83069840-b06c-408c-a5d3-494e6fb32b48",
+        "percentage": 100
+      }
+    ],
+    "created_on": "2026-08-29T02:27:09.709021Z"
+  },
+  {
+    "id": "c7c8e924-bdc5-4235-8520-a5ab249d75eb",
+    "source": "wrangler",
+    "strategy": "percentage",
+    "author_email": "sebastian.brosche@gmail.com",
+    "annotations": {
+      "workers/message": "EXC-76 visual staging revision 63155286f202d85e104a1d7cf8c66c4813c57cf9",
+      "workers/triggered_by": "deployment"
+    },
+    "versions": [
+      {
+        "version_id": "6e7574b4-f08a-4ee8-9042-b52815f85923",
+        "percentage": 100
+      }
+    ],
+    "created_on": "2026-08-29T04:02:32.644237Z"
+  },
+  {
+    "id": "1fdc0da5-01be-4711-99b3-fa3ad3ad0f27",
+    "source": "wrangler",
+    "strategy": "percentage",
+    "author_email": "sebastian.brosche@gmail.com",
+    "annotations": {
+      "workers/message": "EXC-93 741f8df441fe79e470f023bd5e8880951df21128",
+      "workers/triggered_by": "deployment"
+    },
+    "versions": [
+      {
+        "version_id": "a2f97d55-2c31-43a7-b99e-775b6ed8da0f",
+        "percentage": 100
+      }
+    ],
+    "created_on": "2026-08-29T05:49:47.561937Z"
+  },
+  {
+    "id": "dc437b35-a70d-42d8-bba6-ac7a431bfc47",
+    "source": "wrangler",
+    "strategy": "percentage",
+    "author_email": "sebastian.brosche@gmail.com",
+    "annotations": {
+      "workers/message": "EXC-93 revision 741f8df9a887b646ff25544541ee4d123478bf0d",
+      "workers/triggered_by": "deployment"
+    },
+    "versions": [
+      {
+        "version_id": "c149bf12-547f-4f50-996b-42039671e48c",
+        "percentage": 100
+      }
+    ],
+    "created_on": "2026-08-29T05:55:48.48147Z"
+  },
+  {
+    "id": "f8c67c00-0d50-40fe-8ea6-95a8feb3eee2",
+    "source": "wrangler",
+    "strategy": "percentage",
+    "author_email": "sebastian.brosche@gmail.com",
+    "annotations": {
+      "workers/message": "EXC-95 revision bd9b705a2d78f32d1ca5a1879568471fa568d042",
+      "workers/triggered_by": "deployment"
+    },
+    "versions": [
+      {
+        "version_id": "49272ddb-e5e6-467f-8be4-532f367358eb",
+        "percentage": 100
+      }
+    ],
+    "created_on": "2026-08-29T07:59:04.737425Z"
+  },
+  {
+    "id": "16dc6673-0445-4e02-888e-b88ef6642b36",
+    "source": "wrangler",
+    "strategy": "percentage",
+    "author_email": "sebastian.brosche@gmail.com",
+    "annotations": {
+      "workers/message": "EXC-95 revision d323d792cc2f0b4b8171f2b4bf04604b8b8d5276",
+      "workers/triggered_by": "deployment"
+    },
+    "versions": [
+      {
+        "version_id": "51febbf4-abe8-413d-b0ba-5a2171239a97",
+        "percentage": 100
+      }
+    ],
+    "created_on": "2026-08-29T08:00:57.53422Z"
+  },
+  {
+    "id": "a0d51ce6-9126-458a-8551-045df52fe0b3",
+    "source": "wrangler",
+    "strategy": "percentage",
+    "author_email": "sebastian.brosche@gmail.com",
+    "annotations": {
+      "workers/message": "EXC-97 revision 80e1a7d2b7a3fc0b9285fd41cfe9a5a72ba92dba",
+      "workers/triggered_by": "deployment"
+    },
+    "versions": [
+      {
+        "version_id": "8dcb708f-ac76-4ea9-bb52-d2101074b0f4",
+        "percentage": 100
+      }
+    ],
+    "created_on": "2026-08-29T10:08:39.914205Z"
+  },
+  {
+    "id": "43f89683-bae5-41a5-9dd6-cee8217d3023",
+    "source": "wrangler",
+    "strategy": "percentage",
+    "author_email": "sebastian.brosche@gmail.com",
+    "annotations": {
+      "workers/message": "EXC-99 approved value bullets at fe4e5db",
+      "workers/triggered_by": "deployment"
+    },
+    "versions": [
+      {
+        "version_id": "19947d4f-25b5-4fd2-bde3-5c6282d6b87d",
+        "percentage": 100
+      }
+    ],
+    "created_on": "2026-08-30T05:18:18.73736Z"
+  },
+  {
+    "id": "6b2e1327-5638-4a5a-9aef-0932a28f298f",
+    "source": "wrangler",
+    "strategy": "percentage",
+    "author_email": "sebastian.brosche@gmail.com",
+    "annotations": {
+      "workers/message": "EXC-99 approved value bullets at 58d163d",
+      "workers/triggered_by": "deployment"
+    },
+    "versions": [
+      {
+        "version_id": "aa9fbbef-fd1a-4297-8697-6093ceb0951f",
+        "percentage": 100
+      }
+    ],
+    "created_on": "2026-08-30T05:19:36.837738Z"
+  },
+  {
+    "id": "b2becb88-d409-4ace-bf8e-a3fbef98c9d6",
+    "source": "wrangler",
+    "strategy": "percentage",
+    "author_email": "sebastian.brosche@gmail.com",
+    "annotations": {
+      "workers/message": "EXC-106 pushed revision ecbe24c72ca248cf9d689db26a010a8a5d3e65e4",
+      "workers/triggered_by": "deployment"
+    },
+    "versions": [
+      {
+        "version_id": "d64d9b5f-3147-4798-8a2d-d098dcf44f3d",
+        "percentage": 100
+      }
+    ],
+    "created_on": "2026-08-30T05:50:17.127178Z"
+  }
+]
