@@ -18,7 +18,7 @@ directory = "./public"
 
 [[rules]]
 type = "Text"
-globs = ["**/*.html", "**/*.css", "**/_page.js"]
+globs = ["**/*.html", "**/*.css", "**/_page.js", "**/_admin.js", "**/_admin-login.js"]
 fallthrough = true
 
 # Burst limiter: in-memory at the edge, no D1 write, no extra resource.
@@ -92,6 +92,7 @@ migrations_dir = "migrations"
 
 [env.staging.vars]
 PREVIEW_MODE = "true"
+PREVIEW_NO_D1 = "false"
 BUNDLE_PRICE_CENTS = "1400"
 OFFER_DEADLINE = ""
 STRIPE_PRICE_BUNDLE = "price_1U9IkNIwpEtt4FIedvXFb9tC"

@@ -1,0 +1,120 @@
+(() => {
+  const pageKeys = ['landing-a','landing-b','offer-head-to-toes','offer-lifetime','offer-two-month','thanks-preview','thanks-pending','thanks-failed','thanks-granted','thanks-activation','preview-checkout'];
+  const functional = new Set(['checkoutForm','offerActions','price','legalFooter','previewBanner','announcement','backgroundImage']);
+  const colors = { black:'#080808',black2:'#111114',cream:'#f4efe5',white:'#fff',dim:'#aaa',red:'#d9321e' };
+  const fonts = { brandSans:'Inter,Arial,sans-serif',systemSans:'Arial,Helvetica,sans-serif',serif:'Georgia,serif' };
+  const preset = { landingHero:'editor-preset-landing-hero',heroCopy:'editor-preset-hero-copy',heroOffer:'editor-preset-hero-offer',identity:'editor-preset-identity',lede:'lede',valueList:'checks',bonusLine:'editor-preset-bonus',offerSummary:'editor-preset-offer-summary',support:'editor-preset-support',none:'' };
+  const $ = (id) => document.getElementById(id);
+  const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  let csrf = '', pageKey = 'landing-a', revision = 0, doc, selected, selectedColumn, past = [], future = [], dirty = false, timer, generation = 0, savePromise = Promise.resolve();
+
+  async function api(path, options = {}) {
+    const headers = { ...(options.headers || {}) };
+    if (options.body !== undefined) { headers['content-type'] = 'application/json'; headers['x-csrf-token'] = csrf; }
+    const response = await fetch(path, { ...options, headers });
+    if (response.status === 401) { location.href = '/admin/login'; throw new Error('unauthorized'); }
+    const body = await response.json().catch(() => ({ error: 'invalid_response' }));
+    if (!response.ok) throw Object.assign(new Error(body.error || 'request_failed'), { status: response.status, body });
+    return body;
+  }
+  function elements() { return doc.sections.flatMap((section) => section.rows.flatMap((row) => row.columns.flatMap((column) => column.elements))); }
+  function findElement(id) { return elements().find((element) => element.id === id); }
+  function findColumn(id) { for (const section of doc.sections) for (const row of section.rows) for (const column of row.columns) if (column.id === id) return column; }
+  function owningColumn(elementId) { for (const section of doc.sections) for (const row of section.rows) for (const column of row.columns) if (column.elements.some((element) => element.id === elementId)) return column; }
+  function hasLocked(node) { return JSON.stringify(node).match(/"type":"(checkoutForm|offerActions|price|legalFooter|previewBanner)"/); }
+  function remember() { past = [...past, structuredClone(doc)].slice(-50); future = []; }
+  function markChanged(fullRender = true) { dirty = true; $('save-state').textContent = 'Unsaved'; if (fullRender) render(); else renderCanvas(); clearTimeout(timer); timer = setTimeout(() => save(), 900); }
+  function id(prefix) { return `${prefix}-${crypto.randomUUID().slice(0, 8)}`; }
+  function style(node = {}) {
+    const source = node.style || {}, css = [];
+    const px = (name, value) => { if (value !== undefined) css.push(`${name}:${Number(value)}px`); };
+    if (source.fontFamily) css.push(`font-family:${fonts[source.fontFamily]}`); px('font-size',source.fontSize);
+    if (source.fontWeight) css.push(`font-weight:${source.fontWeight}`); if (source.lineHeight) css.push(`line-height:${source.lineHeight}`); px('letter-spacing',source.letterSpacing);
+    if (source.textAlign) css.push(`text-align:${source.textAlign}`); if (source.textTransform) css.push(`text-transform:${source.textTransform}`);
+    if (source.color) css.push(`color:${colors[source.color]}`); if (source.backgroundColor) css.push(`background-color:${colors[source.backgroundColor]}`);
+    for (const side of ['Top','Right','Bottom','Left']) { px(`padding-${side.toLowerCase()}`,source[`padding${side}`]); px(`margin-${side.toLowerCase()}`,source[`margin${side}`]); }
+    px('gap',source.gap); px('border-radius',source.radius); px('max-width',source.maxWidth); px('min-height',source.minHeight);
+    const align={start:'flex-start',center:'center',end:'flex-end',stretch:'stretch'},justify={start:'flex-start',center:'center',end:'flex-end',between:'space-between'};
+    if (source.opacity !== undefined) css.push(`opacity:${source.opacity}`); if (source.alignItems) css.push(`align-items:${align[source.alignItems]}`); if (source.justifyContent) css.push(`justify-content:${justify[source.justifyContent]}`);
+    return css.join(';');
+  }
+  function elementMarkup(element) {
+    let body = '';
+    if (element.type === 'heading') body = `<h${element.level}>${esc(element.content)}</h${element.level}>`;
+    else if (element.type === 'text') body = `<p>${esc(element.content)}</p>`;
+    else if (element.type === 'list') body = `<ul>${element.items.map((item) => `<li>${esc(item)}</li>`).join('')}</ul>`;
+    else if (element.type === 'image') body = `<img src="${esc(element.src)}" alt="${esc(element.alt)}">`;
+    else if (element.type === 'divider') body = '<hr>'; else if (element.type === 'spacer') body = `<div style="height:${Number(element.size)}px"></div>`;
+    else if (element.type === 'price') body = '<p class="offer-price">Price from server configuration</p>';
+    else if (element.type === 'checkoutForm') body = `<label>${esc(element.label)}</label><input disabled placeholder="${esc(element.placeholder)}"><button disabled>${esc(element.buttonText)}</button><small>${esc(element.note)}</small>`;
+    else if (element.type === 'offerActions') body = `<button disabled>${esc(element.acceptText)}</button> <button disabled>${esc(element.skipText)}</button>`;
+    else if (element.type === 'previewBanner') body = '<div>Preview status from server</div>'; else if (element.type === 'announcement') body = `<div>${esc(element.content)}</div>`; else if (element.type === 'backgroundImage') body = `<img src="${esc(element.src)}" alt="${esc(element.alt)}">`; else body = '<footer>Legal and support links from server</footer>';
+    return `<div class="editor-element ${esc(preset[element.preset] || '')} ${selected === element.id ? 'selected' : ''}" data-element="${esc(element.id)}" draggable="true" style="${style(element)}">${body}</div>`;
+  }
+  function renderCanvas() {
+    const global = doc.globalStyles;
+    const all=elements(),announcement=all.find((element)=>element.type==='announcement'),legal=all.find((element)=>element.type==='legalFooter'),preview=all.find((element)=>element.type==='previewBanner');
+    $('canvas').innerHTML = `<div class="editor-page" style="--editor-page-bg:${colors[global.backgroundColor]};--editor-body-color:${colors[global.bodyColor]};--editor-heading-color:${colors[global.headingColor]};--editor-accent-color:${colors[global.accentColor]};--editor-page-font:${fonts[global.fontFamily]};--editor-page-width:${global.maxWidth}px;--editor-button-radius:${global.buttonRadius}px">${announcement?`<div class="announce" data-element="${announcement.id}">${esc(announcement.content)}</div>`:''}${preview?`<div class="preview-banner" data-element="${preview.id}">Preview status from server</div>`:''}${doc.sections.map((section) => {const sectionElements=section.rows.flatMap((row)=>row.columns.flatMap((column)=>column.elements)),background=sectionElements.find((element)=>element.type==='backgroundImage');return `<section class="${esc(preset[section.preset] || '')}" style="${style(section)}">${background?`<picture class="editor-background" data-element="${background.id}"><img src="${esc(background.src)}" alt="${esc(background.alt)}"></picture>`:''}<div class="editor-section-inner">${section.rows.map((row) => `<div class="editor-row" style="${style(row)}">${row.columns.map((column) => `<div class="editor-column" data-column="${column.id}" style="--editor-column:${column.width};${style(column)}">${column.elements.filter((element)=>!['announcement','backgroundImage','previewBanner','legalFooter'].includes(element.type)).map(elementMarkup).join('')}</div>`).join('')}</div>`).join('')}</div></section>`;}).join('')}${legal?`<footer data-element="${legal.id}">Legal and support links from server</footer>`:''}</div>`;
+    document.querySelectorAll('[data-element]').forEach((node) => {
+      node.onclick = () => { selected = node.dataset.element; const columnNode=node.closest('[data-column]'),column=owningColumn(selected); selectedColumn = columnNode ? columnNode.dataset.column : column && column.id; render(); };
+      node.ondragstart = (event) => event.dataTransfer.setData('text/plain', node.dataset.element);
+    });
+    document.querySelectorAll('[data-column]').forEach((columnNode) => {
+      columnNode.ondragover = (event) => event.preventDefault();
+      columnNode.ondrop = (event) => { event.preventDefault(); moveElement(event.dataTransfer.getData('text/plain'), columnNode.dataset.column, columnNode.children.length); };
+    });
+  }
+  function control(kind, idValue) { return `<span class="layout-controls"><button data-layout="up" data-kind="${kind}" data-id="${idValue}" aria-label="Move ${kind} up">Up</button><button data-layout="down" data-kind="${kind}" data-id="${idValue}" aria-label="Move ${kind} down">Down</button><button data-layout="duplicate" data-kind="${kind}" data-id="${idValue}">Duplicate</button><button data-layout="delete" data-kind="${kind}" data-id="${idValue}">Delete</button></span>`; }
+  function renderLayers() {
+    $('layers').innerHTML = doc.sections.map((section) => `<div class="layout"><b>Section: ${esc(section.name || section.id)}</b>${control('section',section.id)}${section.rows.map((row) => `<div class="layout"><b>Row: ${esc(row.name || row.id)}</b>${control('row',row.id)}<button data-add-column="${row.id}">Add column</button>${row.columns.map((column) => `<div class="layout"><b>Column ${column.width}/12</b>${control('column',column.id)}<button data-column-select="${column.id}">Add here</button>${column.elements.map((element) => `<button class="layer ${functional.has(element.type) ? 'locked' : ''}" data-select="${element.id}">${esc(element.type)}: ${esc(element.content || element.label || element.id)}</button>`).join('')}</div>`).join('')}</div>`).join('')}</div>`).join('');
+    document.querySelectorAll('[data-select]').forEach((button) => button.onclick = () => { selected = button.dataset.select; const column=owningColumn(selected); selectedColumn=column&&column.id; render(); });
+    document.querySelectorAll('[data-column-select]').forEach((button) => button.onclick = () => { selectedColumn = button.dataset.columnSelect; $('add-tools').scrollIntoView({ block:'nearest' }); });
+    document.querySelectorAll('[data-layout]').forEach((button) => button.onclick = () => layoutAction(button.dataset.kind,button.dataset.id,button.dataset.layout));
+    document.querySelectorAll('[data-add-column]').forEach((button) => button.onclick = () => addColumn(button.dataset.addColumn));
+  }
+  function field(label, key, value, options) { return `<label class="field">${label}<select data-style="${key}"><option value="">Default</option>${options.map((item) => `<option ${String(value) === String(item) ? 'selected' : ''}>${item}</option>`).join('')}</select></label>`; }
+  function renderInspector() {
+    const element = findElement(selected);
+    if (!element) { $('inspector').innerHTML = `${field('Page font','globalFont',doc.globalStyles.fontFamily,Object.keys(fonts))}<p>Select an element.</p>`; bindInspector(); return; }
+    let output = `<p><strong>${esc(element.type)}</strong>${functional.has(element.type) ? ' (behavior locked)' : ''}</p>`;
+    if ('content' in element) output += `<label class="field">Text<textarea data-field="content">${esc(element.content)}</textarea></label>`;
+    if ('items' in element) output += `<label class="field">List items<textarea data-field="items">${esc(element.items.join('\n'))}</textarea></label>`;
+    for (const key of ['label','placeholder','note','buttonText','acceptText','skipText','alt']) if (key in element) output += `<label class="field">${key}<input data-field="${key}" value="${esc(element[key])}"></label>`;
+    if ('src' in element) output += `<label class="field">Checked-in image<select data-field="src"><option value="/img/guard-pass-400.webp">guard-pass-400.webp</option><option value="/img/guard-pass-800.webp" ${element.src==='/img/guard-pass-800.webp'?'selected':''}>guard-pass-800.webp</option><option value="/img/guard-pass-1600.webp" ${element.src==='/img/guard-pass-1600.webp'?'selected':''}>guard-pass-1600.webp</option></select></label>`;
+    output += field('Font','fontFamily',element.style?.fontFamily,Object.keys(fonts)) + field('Weight','fontWeight',element.style?.fontWeight,[400,500,700,900]) + field('Alignment','textAlign',element.style?.textAlign,['left','center','right']) + field('Color','color',element.style?.color,Object.keys(colors));
+    output += `<label class="field">Font size<input data-style="fontSize" type="number" min="10" max="96" value="${element.style?.fontSize || ''}"></label><label class="field">Line height<input data-style="lineHeight" type="number" min="0.8" max="2" step="0.1" value="${element.style?.lineHeight || ''}"></label><label class="field">Top spacing<input data-style="marginTop" type="number" min="-40" max="160" value="${element.style?.marginTop || ''}"></label><label class="field">Bottom spacing<input data-style="marginBottom" type="number" min="-40" max="160" value="${element.style?.marginBottom || ''}"></label>`;
+    const columnOptions = doc.sections.flatMap((section) => section.rows.flatMap((row) => row.columns.map((column) => `<option value="${column.id}" ${column.id === selectedColumn ? 'selected' : ''}>${esc(column.name || column.id)}</option>`))).join('');
+    output += `<label class="field">Move to column<select id="move-column">${columnOptions}</select></label><div class="row-actions"><button id="move-up">Move up</button><button id="move-down">Move down</button><button id="duplicate" ${functional.has(element.type) ? 'disabled' : ''}>Duplicate</button><button id="delete" ${functional.has(element.type) ? 'disabled' : ''}>Delete</button></div>`;
+    $('inspector').innerHTML = output; bindInspector();
+  }
+  function bindInspector() {
+    const element = findElement(selected); let editing = false;
+    document.querySelectorAll('[data-field]').forEach((input) => { input.onfocus = () => { if (!editing) { remember(); editing = true; } }; input.onblur = () => { editing = false; render(); }; input.oninput = () => { element[input.dataset.field] = input.dataset.field === 'items' ? input.value.split('\n').filter(Boolean) : input.value; markChanged(false); }; });
+    document.querySelectorAll('[data-style]').forEach((input) => input.onchange = () => { remember(); if (input.dataset.style === 'globalFont') doc.globalStyles.fontFamily = input.value; else { element.style = element.style || {}; if (!input.value) delete element.style[input.dataset.style]; else element.style[input.dataset.style] = input.type === 'number' ? Number(input.value) : /^\d+$/.test(input.value) ? Number(input.value) : input.value; } markChanged(); });
+    if (!element) return;
+    $('move-column').onchange = (event) => moveElement(element.id,event.target.value,findColumn(event.target.value).elements.length);
+    $('move-up').onclick = () => moveRelative(element.id,-1); $('move-down').onclick = () => moveRelative(element.id,1);
+    $('delete').onclick = () => changeElement(element.id,'delete'); $('duplicate').onclick = () => changeElement(element.id,'duplicate');
+  }
+  function moveElement(elementId, targetColumnId, targetIndex) { if (!elementId) return; remember(); let moving; for (const section of doc.sections) for (const row of section.rows) for (const column of row.columns) { const index = column.elements.findIndex((item) => item.id === elementId); if (index >= 0) [moving] = column.elements.splice(index,1); } const target = findColumn(targetColumnId); if (!moving || !target) { doc = past.pop(); return; } target.elements.splice(Math.min(targetIndex,target.elements.length),0,moving); selectedColumn=targetColumnId; markChanged(); }
+  function moveRelative(elementId, amount) { for (const section of doc.sections) for (const row of section.rows) for (const column of row.columns) { const index=column.elements.findIndex((item)=>item.id===elementId),target=index+amount;if(index>=0&&target>=0&&target<column.elements.length){remember();[column.elements[index],column.elements[target]]=[column.elements[target],column.elements[index]];markChanged();return;} } }
+  function changeElement(elementId, action) { for (const section of doc.sections) for (const row of section.rows) for (const column of row.columns) { const index=column.elements.findIndex((item)=>item.id===elementId); if(index<0||functional.has(column.elements[index].type))continue;remember();if(action==='delete'){column.elements.splice(index,1);selected=null;}else{const copy=structuredClone(column.elements[index]);copy.id=id(copy.type);column.elements.splice(index+1,0,copy);selected=copy.id;}markChanged();return;} }
+  function locate(kind,idValue){const lists=kind==='section'?[doc.sections]:kind==='row'?doc.sections.map((section)=>section.rows):doc.sections.flatMap((section)=>section.rows.map((row)=>row.columns));for(const list of lists){const index=list.findIndex((item)=>item.id===idValue);if(index>=0)return{list,index};}}
+  function layoutAction(kind,idValue,action){const found=locate(kind,idValue);if(!found)return;const{list,index}=found;remember();if(action==='up'||action==='down'){const target=index+(action==='up'?-1:1);if(target<0||target>=list.length){past.pop();return;}[list[index],list[target]]=[list[target],list[index]];}else if(action==='delete'){if(list.length<=1||hasLocked(list[index])){past.pop();return;}list.splice(index,1);}else{if(hasLocked(list[index])){past.pop();return;}const copy=structuredClone(list[index]);const rekey=(node)=>{if(node.id)node.id=id(node.id.split('-')[0]);for(const key of['rows','columns','elements'])for(const child of node[key]||[])rekey(child);};rekey(copy);list.splice(index+1,0,copy);}markChanged();}
+  function addColumn(rowId){for(const section of doc.sections)for(const row of section.rows)if(row.id===rowId&&row.columns.length<4){remember();const count=row.columns.length+1,base=Math.floor(12/count),extra=12-base*count;row.columns.forEach((column,index)=>column.width=base+(index<extra?1:0));row.columns.push({id:id('column'),name:'Column',width:base+(count-1<extra?1:0),elements:[]});markChanged();return;}}
+  function addSection(){remember();doc.sections.push({id:id('section'),name:'New section',preset:'none',rows:[{id:id('row'),name:'New row',columns:[{id:id('column'),name:'Column',width:12,elements:[{id:id('text'),type:'text',content:'New section'}]}]}]});markChanged();}
+  function render(){if(!doc)return;renderCanvas();renderLayers();renderInspector();}
+  async function load(key=pageKey){clearTimeout(timer);const current=++generation,page=await api(`/api/admin/pages/${key}`);if(current!==generation)return;pageKey=key;doc=page.page.document;revision=page.page.draft_revision;dirty=false;past=[];future=[];selected=null;selectedColumn=doc.sections[0].rows[0].columns[0].id;$('save-state').textContent=`Draft ${revision}`;render();}
+  function save(){clearTimeout(timer);if(!dirty)return savePromise;const requestedGeneration=generation,requestedPage=pageKey;$('save-state').textContent='Saving';savePromise=savePromise.catch(()=>null).then(async()=>{if(requestedGeneration!==generation||requestedPage!==pageKey||!dirty)return null;const captured=structuredClone(doc),serialized=JSON.stringify(captured),expectedRevision=revision;const result=await api(`/api/admin/pages/${requestedPage}/draft`,{method:'PUT',body:JSON.stringify({document:captured,expectedRevision})});if(requestedGeneration===generation&&requestedPage===pageKey){revision=result.revision;dirty=JSON.stringify(doc)!==serialized;$('save-state').textContent=dirty?'Unsaved':`Saved ${revision}`;if(dirty)setTimeout(()=>save(),0);}return result;}).catch((error)=>{if(requestedGeneration===generation){$('save-state').textContent=error.status===409?'Changed elsewhere. Reload.':'Save failed';}return null;});return savePromise;}
+  async function flushSave(){do{await save();}while(dirty&&$('save-state').textContent!=='Save failed'&&!$('save-state').textContent.startsWith('Changed elsewhere'));}
+  async function publish(){await flushSave();if(dirty)return;await api(`/api/admin/pages/${pageKey}/publish`,{method:'POST',body:JSON.stringify({expectedRevision:revision})});$('save-state').textContent=`Published ${revision}`;}
+  async function switchPage(key){try{await flushSave();if(dirty)throw new Error('unsaved');await load(key);}catch{$('page-select').value=pageKey;}}
+  async function versions(){const data=await api(`/api/admin/pages/${pageKey}/versions`),panel=$('history-panel');panel.hidden=false;panel.innerHTML='<h2>Version history</h2>'+data.versions.map((version)=>`<button data-restore="${version.id}">Restore draft ${version.revision}</button>`).join('');panel.querySelectorAll('[data-restore]').forEach((button)=>button.onclick=async()=>{await save();await api(`/api/admin/pages/${pageKey}/restore`,{method:'POST',body:JSON.stringify({versionId:button.dataset.restore,expectedRevision:revision})});await load(pageKey);});}
+
+  pageKeys.forEach((key)=>$('page-select').append(new Option(key,key)));$('page-select').onchange=(event)=>switchPage(event.target.value);document.querySelectorAll('[data-device]').forEach((button)=>button.onclick=()=>$('canvas').className=`canvas ${button.dataset.device}`);
+  $('undo').onclick=()=>{if(!past.length)return;future=[structuredClone(doc),...future];doc=past.pop();markChanged();};$('redo').onclick=()=>{if(!future.length)return;past.push(structuredClone(doc));doc=future.shift();markChanged();};$('save').onclick=()=>save();$('publish').onclick=publish;$('versions').onclick=versions;$('add-section').onclick=addSection;
+  $('logout').onclick=async()=>{await flushSave();if(dirty)return;await api('/api/admin/logout',{method:'POST',body:'{}'});location.href='/admin/login';};
+  $('add-tools').innerHTML=['heading','text','list','image','divider','spacer'].map((type)=>`<button data-add="${type}">${type}</button>`).join('');document.querySelectorAll('[data-add]').forEach((button)=>button.onclick=()=>{remember();const type=button.dataset.add,node={id:id(type),type};if(type==='heading')Object.assign(node,{level:2,content:'New heading'});if(type==='text')node.content='New text';if(type==='list')node.items=['New item'];if(type==='image')Object.assign(node,{src:'/img/guard-pass-800.webp',alt:'Yoga for BJJ'});if(type==='spacer')node.size=24;const column=findColumn(selectedColumn)||doc.sections[0].rows[0].columns[0];column.elements.push(node);selected=node.id;selectedColumn=column.id;markChanged();});
+  document.addEventListener('keydown',(event)=>{if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='s'){event.preventDefault();save();}if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='z'){event.preventDefault();event.shiftKey?$('redo').click():$('undo').click();}});
+  api('/api/admin/session').then((session)=>{csrf=session.csrf;return load();}).catch(()=>location.href='/admin/login');
+})();

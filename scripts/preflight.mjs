@@ -102,6 +102,7 @@ if (!readinessMigration.includes('fulfillment_readiness') || !readinessMigration
   fail('migration 0006 does not contain both the readiness sentinel and durable entitlement outbox.');
 } else pass('readiness sentinel and durable entitlement outbox migration present');
 const flowMigration = readFileSync(join(ROOT, 'migrations', '0007_offer_journey.sql'), 'utf8');
+const editorMigration = readFileSync(join(ROOT, 'migrations', '0008_content_editor.sql'), 'utf8');
 const autoCreatorSource = readFileSync(join(ROOT, 'src', 'autocreator.js'), 'utf8');
 if (!flowMigration.includes('checkout_flows') || !flowMigration.includes('offer_transitions')) {
   fail('migration 0007 does not contain the cookie-bound offer state machine.');
@@ -115,6 +116,12 @@ if (!autoCreatorSource.includes('members.grantBundleEntitlement')
 if (!stripeSource.includes("offerKey !== 'bundle'") || !stripeSource.includes('FLOW_COOKIE')) {
   fail('initial Checkout is not locked to Guard or the child sequence is not cookie-bound.');
 } else pass('initial Checkout is Guard-only and child sequence is cookie-bound');
+if (!editorMigration.includes('editor_pages') || !editorMigration.includes('editor_sessions') || !editorMigration.includes('editor_page_versions')) {
+  fail('migration 0008 does not contain the editor page, session, and version tables.');
+} else pass('editor migration contains page, session, and version tables');
+if (Object.hasOwn(cfg, 'ADMIN_PASSWORD')) {
+  fail('ADMIN_PASSWORD must be a Cloudflare Secret, not a wrangler.toml variable.');
+} else pass('ADMIN_PASSWORD is absent from non-secret Wrangler variables');
 
 /* 2. deadline set and still in the future */
 const deadline = (cfg.OFFER_DEADLINE || '').trim();
