@@ -38,8 +38,8 @@ Never "fix" a broken CTA by relaxing this check.
 **Never bypass preflight.** `npm run deploy` runs `npm run preflight` first
 and stops on any failure — that chain is load-bearing, don't break it or run
 `wrangler deploy` directly. Preflight is the deploy gate, not a lint
-suggestion: all verified Stripe Price IDs set, every exact AutoCreator
-entitlement ID set, fulfillment implemented, deadline set and future, preview
+suggestion: all verified Stripe Price IDs set, every exact AutoCreator grant
+key set, fulfillment implemented, deadline set and future, preview
 off, real D1 id, no unfilled served-page placeholders, both variants complete,
 variant survives into Checkout metadata, images present, secrets scan clean.
 
@@ -64,18 +64,26 @@ any deploy; it fails non-zero on a secret-shaped key in served output. See
 personal detail about a real person that wasn't given to you. If a fact is
 missing, write a marked `[[PLACEHOLDER]]` and say out loud what's missing —
 `npm run preflight` will catch an unfilled one before it ships. This
-especially includes AutoCreator object IDs. Confirmed entitlement names are not
-IDs. Leave the strict mapping value empty and let preflight fail until the exact
-authenticated ID is retrieved.
+especially includes AutoCreator grant keys. Confirmed names and UUIDs are not
+bundle slugs. Leave the strict mapping value empty and let preflight fail until
+the exact authenticated key is retrieved.
 
 **Which prices live where.** The four existing Stripe Price IDs in
 `wrangler.toml` own billing. `BUNDLE_PRICE_CENTS` is display-only for the landing
 page. Never create or duplicate Stripe Products or Prices as a shortcut.
 
 **Payment must never outrun access.** `src/stripe.js` keeps Checkout blocked
-while `FULFILLMENT_IMPLEMENTED` is false or any offer lacks its exact
-AutoCreator entitlement ID. Do not flip that constant until authenticated grant,
-retry, cancellation, and revocation behavior exists and is tested.
+while either implementation constant is false, a required secret is absent, a
+readiness flag is not the exact string `true`, the D1 readiness sentinel is
+missing, or any offer lacks its exact AutoCreator grant key. Do not flip
+the implementation constants until authenticated grant, read-back, retry, and
+an approved lifecycle policy exist and are tested.
+
+**Webhook work is leased and idempotent.** Fresh `processing` events return a
+retryable error. Stale event and entitlement leases may be reclaimed. Every
+AutoCreator call must remain behind the stable D1 outbox operation key. Do not
+invent an HTTP idempotency header; the two confirmed grant tools are themselves
+idempotent. Durable `granted` state must be written before `/thanks` claims access.
 
 ## Verification discipline
 

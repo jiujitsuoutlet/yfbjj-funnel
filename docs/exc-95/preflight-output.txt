@@ -36,4 +36,3 @@ PREFLIGHT FAILED - 5 blockers, do not deploy:
       thrivecart/upsell-3-certification.html: [[CERT_LEVEL_1_DETAIL ... scope, format and requirements, from the certification page]]
       thrivecart/upsell-3-certification.html: [[CERT_LEVEL_2_DETAIL]]
       thrivecart/upsell-3-certification.html: [[CERT_LEVEL_3_DETAIL]]
-

@@ -15,7 +15,7 @@ import thanksHtml from './pages/thanks.html';
 import previewCheckoutHtml from './pages/preview-checkout.html';
 import baseCss from './pages/_base.css';
 import pageJs from './pages/_page.js';
-import { handleCheckout, handlePortal, handleWebhook, verifyCompletedCheckout } from './stripe.js';
+import { getOrderFulfillmentState, handleCheckout, handlePortal, handleWebhook } from './stripe.js';
 
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
@@ -178,6 +178,37 @@ function renderPage(template, env, variant) {
     .replace(/\{\{PAGE_CONFIG_JSON\}\}/g, () => payload);
 }
 
+function renderThanksPage(env, state) {
+  const copy = {
+    preview: {
+      title: 'Checkout preview', kicker: 'Preview', headline: 'Checkout is locked.',
+      message: 'No payment or access change happened in this preview.',
+      support: 'This page will report the durable order state after checkout is connected.',
+    },
+    pending: {
+      title: 'Order processing', kicker: 'Order processing', headline: 'We are checking your order.',
+      message: 'Access has not been confirmed yet. This page will only say you are in after the entitlement grant is durably recorded.',
+      support: 'If this is still pending after 15 minutes, write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your Stripe receipt.',
+    },
+    failed: {
+      title: 'Payment not completed', kicker: 'Payment not completed', headline: 'Your order needs attention.',
+      message: 'Access was not granted. Return to the offer and try checkout again.',
+      support: 'Questions? Write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a>.',
+    },
+    granted: {
+      title: 'Access granted', kicker: 'Order confirmed', headline: "You're in.",
+      message: 'Payment is complete and your access grant is durably recorded. Your receipt and access details are on the way by email.',
+      support: 'Nothing in your inbox after 15 minutes? Check spam and promotions, then write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your receipt.',
+    },
+  }[state];
+  return renderPage(thanksHtml, env, null)
+    .replace(/\{\{THANKS_TITLE\}\}/g, () => copy.title)
+    .replace(/\{\{THANKS_KICKER\}\}/g, () => copy.kicker)
+    .replace(/\{\{THANKS_HEADLINE\}\}/g, () => copy.headline)
+    .replace(/\{\{THANKS_MESSAGE\}\}/g, () => copy.message)
+    .replace(/\{\{THANKS_SUPPORT\}\}/g, () => copy.support);
+}
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 function normalizeEmail(raw) {
@@ -291,10 +322,10 @@ async function handleHealth(env) {
   try {
     const row = await env.DB.prepare(
       `SELECT count(*) AS n FROM sqlite_master
-        WHERE type = 'table' AND name IN ('leads', 'rate_limits', 'variant_visits', 'stripe_events', 'stripe_orders')`
+        WHERE type = 'table' AND name IN ('leads', 'rate_limits', 'variant_visits', 'stripe_events', 'stripe_orders', 'fulfillment_readiness', 'entitlement_outbox')`
     ).first();
     const tables = row ? row.n : 0;
-    if (tables < 5) {
+    if (tables < 7) {
       return json(
         { ok: false, d1: 'connected', schema: 'incomplete', tables_found: tables, at: nowIso() },
         503
@@ -450,10 +481,11 @@ export default {
     if (method === 'HEAD' || method === 'GET') {
       if (path === '/') return handleLanding(request, env, ctx);
       if (path === '/thanks') {
-        if (!isPreviewMode(env) && !(await verifyCompletedCheckout(request, env))) {
-          return json({ ok: false, error: 'unverified_session' }, 403);
-        }
-        return html(renderPage(thanksHtml, env, null));
+        if (isPreviewMode(env)) return html(renderThanksPage(env, 'preview'));
+        const order = await getOrderFulfillmentState(request, env);
+        if (!order.valid) return json({ ok: false, error: 'invalid_session' }, 400);
+        const state = order.fulfillment === 'granted' ? 'granted' : order.payment === 'failed' ? 'failed' : 'pending';
+        return html(renderThanksPage(env, state), state === 'pending' ? 202 : 200);
       }
       if (path === '/preview-checkout') return html(renderPage(previewCheckoutHtml, env, null));
       if (path === '/health') return handleHealth(env);

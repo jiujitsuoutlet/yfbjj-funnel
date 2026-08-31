@@ -47,10 +47,10 @@ const STRIPE_PRICE_VARS = [
   'STRIPE_PRICE_TWO_MONTH',
 ];
 const AUTOCREATOR_ENTITLEMENT_VARS = [
-  'AUTOCREATOR_ENTITLEMENT_GUARD_RETENTION_ID',
-  'AUTOCREATOR_ENTITLEMENT_HEAD_TO_TOES_ID',
-  'AUTOCREATOR_ENTITLEMENT_LIFETIME_ID',
-  'AUTOCREATOR_ENTITLEMENT_TWO_MONTH_ID',
+  'AUTOCREATOR_GUARD_RETENTION_BUNDLE_SLUG',
+  'AUTOCREATOR_HEAD_TO_TOES_BUNDLE_SLUG',
+  'AUTOCREATOR_LIFETIME_ENTITLEMENT_TARGET',
+  'AUTOCREATOR_MONTHLY_ENTITLEMENT_TARGET',
 ];
 
 const priceIds = [];
@@ -74,17 +74,33 @@ else pass(`STRIPE_PRODUCT_TWO_MONTH set (${twoMonthProduct})`);
 
 for (const key of AUTOCREATOR_ENTITLEMENT_VARS) {
   const value = String(cfg[key] || '').trim();
-  if (!value) fail(`${key} is empty. Retrieve the exact entitlement ID from authenticated AutoCreator before enabling payment.`);
+  if (!value) fail(`${key} is empty. Retrieve the exact grant key from authenticated AutoCreator before enabling payment.`);
   else if (/PLACEHOLDER|REPLACE_ME|\[\[/i.test(value)) fail(`${key} is still a placeholder: "${value}"`);
   else pass(`${key} set (${value})`);
 }
 
+for (const key of ['STRIPE_WEBHOOK_READY', 'AUTOCREATOR_FULFILLMENT_READY']) {
+  if (cfg[key] !== 'true') fail(`${key} is not the exact string "true". Complete and record the live readiness proof first.`);
+  else pass(`${key} = "true"`);
+}
+
 const stripeSource = readFileSync(join(ROOT, 'src', 'stripe.js'), 'utf8');
 if (!/export const FULFILLMENT_IMPLEMENTED\s*=\s*true\b/.test(stripeSource)) {
-  fail('AutoCreator fulfillment is not implemented. Checkout remains fail-closed until authenticated grant, retry, and revocation behavior is built and tested.');
+  fail('AutoCreator fulfillment is not implemented. Checkout remains fail-closed until authenticated grant, read-back, retry, and lifecycle behavior is built and tested.');
 } else {
   pass('AutoCreator fulfillment implementation is enabled');
 }
+if (!/export const AUTOCREATOR_CLIENT_IMPLEMENTED\s*=\s*true\b/.test(stripeSource)) {
+  fail('The authenticated AutoCreator client is not implemented. Checkout remains fail-closed.');
+} else pass('authenticated AutoCreator client implementation is enabled');
+for (const key of ['STRIPE_WEBHOOK_SECRET', 'AUTOCREATOR_API_KEY']) {
+  if (!stripeSource.includes(`env.${key}`)) fail(`runtime readiness no longer requires the ${key} Cloudflare Secret.`);
+  else pass(`runtime readiness requires ${key} without exposing its value`);
+}
+const readinessMigration = readFileSync(join(ROOT, 'migrations', '0006_fulfillment_outbox.sql'), 'utf8');
+if (!readinessMigration.includes('fulfillment_readiness') || !readinessMigration.includes('entitlement_outbox')) {
+  fail('migration 0006 does not contain both the readiness sentinel and durable entitlement outbox.');
+} else pass('readiness sentinel and durable entitlement outbox migration present');
 
 /* 2. deadline set and still in the future */
 const deadline = (cfg.OFFER_DEADLINE || '').trim();
@@ -173,9 +189,9 @@ else pass('landing page starts Stripe Checkout through the guarded first-party e
 if (!pageJs.includes('variant: VARIANT') || !pageJs.includes("utm_content: VARIANT ? 'variant-' + VARIANT")) {
   fail('src/pages/_page.js does not send the assigned variant in Stripe Checkout metadata. The A/B test would measure leads, not purchases.');
 } else pass('variant rides into Stripe Checkout metadata');
-if (!stripeSource.includes("entitlement_id: entitlementId")) {
+if (!stripeSource.includes("entitlement_key: entitlementKey")) {
   fail('src/stripe.js does not snapshot the configured AutoCreator entitlement in Checkout metadata.');
-} else pass('Checkout metadata snapshots the configured AutoCreator entitlement');
+} else pass('Checkout metadata snapshots the configured AutoCreator grant key');
 
 /* 5e. every image a page references actually exists */
 // A renamed original or a skipped `npm run build:img` would otherwise ship a

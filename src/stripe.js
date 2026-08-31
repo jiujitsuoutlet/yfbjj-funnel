@@ -3,22 +3,22 @@ import Stripe from 'stripe';
 export const OFFERS = Object.freeze({
   bundle: {
     priceVar: 'STRIPE_PRICE_BUNDLE',
-    entitlementVar: 'AUTOCREATOR_ENTITLEMENT_GUARD_RETENTION_ID',
+    entitlementKeyVar: 'AUTOCREATOR_GUARD_RETENTION_BUNDLE_SLUG',
     mode: 'payment',
   },
   head_to_toes: {
     priceVar: 'STRIPE_PRICE_HEAD_TO_TOES',
-    entitlementVar: 'AUTOCREATOR_ENTITLEMENT_HEAD_TO_TOES_ID',
+    entitlementKeyVar: 'AUTOCREATOR_HEAD_TO_TOES_BUNDLE_SLUG',
     mode: 'payment',
   },
   lifetime: {
     priceVar: 'STRIPE_PRICE_LIFETIME',
-    entitlementVar: 'AUTOCREATOR_ENTITLEMENT_LIFETIME_ID',
+    entitlementKeyVar: 'AUTOCREATOR_LIFETIME_ENTITLEMENT_TARGET',
     mode: 'payment',
   },
   two_month: {
     priceVar: 'STRIPE_PRICE_TWO_MONTH',
-    entitlementVar: 'AUTOCREATOR_ENTITLEMENT_TWO_MONTH_ID',
+    entitlementKeyVar: 'AUTOCREATOR_MONTHLY_ENTITLEMENT_TARGET',
     mode: 'subscription',
   },
 });
@@ -26,6 +26,9 @@ export const OFFERS = Object.freeze({
 // AutoCreator's authenticated write contract is not present in this repository.
 // Keep Checkout closed until that integration and its retry tests actually exist.
 export const FULFILLMENT_IMPLEMENTED = false;
+export const AUTOCREATOR_CLIENT_IMPLEMENTED = false;
+const READINESS_SCHEMA_VERSION = 1;
+const PROCESSING_LEASE_MS = 5 * 60 * 1000;
 
 const ATTRIBUTION_KEYS = ['variant', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'gclid'];
 
@@ -66,7 +69,7 @@ function stripeClient(env) {
 export function resolveOffer(env, offerKey) {
   const offer = OFFERS[offerKey];
   if (!offer) return { ok: false, error: 'invalid_offer', missing: [] };
-  const missing = [offer.priceVar, offer.entitlementVar].filter((key) => !String(env[key] || '').trim());
+  const missing = [offer.priceVar, offer.entitlementKeyVar].filter((key) => !String(env[key] || '').trim());
   if (offerKey === 'two_month' && !String(env.STRIPE_PRODUCT_TWO_MONTH || '').trim()) {
     missing.push('STRIPE_PRODUCT_TWO_MONTH');
   }
@@ -75,15 +78,45 @@ export function resolveOffer(env, offerKey) {
     ok: true,
     offer,
     priceId: env[offer.priceVar],
-    entitlementId: env[offer.entitlementVar],
+    entitlementKey: env[offer.entitlementKeyVar],
   };
+}
+
+function fulfillmentImplemented(deps) {
+  return deps.fulfillmentImplemented === true
+    || (FULFILLMENT_IMPLEMENTED && AUTOCREATOR_CLIENT_IMPLEMENTED);
+}
+
+function clock(deps) {
+  return deps.now ? new Date(deps.now()) : new Date();
+}
+
+export async function checkRuntimeReadiness(env, deps = {}) {
+  if (!fulfillmentImplemented(deps)) return { ok: false, reason: 'fulfillment_not_implemented' };
+  if (!env.STRIPE_SECRET_KEY || !env.STRIPE_WEBHOOK_SECRET || !env.AUTOCREATOR_API_KEY) {
+    return { ok: false, reason: 'required_secret_missing' };
+  }
+  if (env.STRIPE_WEBHOOK_READY !== 'true' || env.AUTOCREATOR_FULFILLMENT_READY !== 'true') {
+    return { ok: false, reason: 'runtime_not_approved' };
+  }
+  if (!env.DB) return { ok: false, reason: 'database_missing' };
+  try {
+    const row = await env.DB.prepare(
+      "SELECT schema_version FROM fulfillment_readiness WHERE singleton = 'runtime'"
+    ).bind().first();
+    if (!row || Number(row.schema_version) < READINESS_SCHEMA_VERSION) {
+      return { ok: false, reason: 'schema_not_ready' };
+    }
+  } catch {
+    return { ok: false, reason: 'schema_not_ready' };
+  }
+  return { ok: true };
 }
 
 export async function handleCheckout(request, env, deps = {}) {
   // This check must precede body parsing and Stripe construction. Unset,
   // misspelled, and every value except the exact string "false" stay locked.
   if (isPreviewMode(env)) return response({ ok: false, error: 'preview_locked' }, 423);
-  if (!env.STRIPE_SECRET_KEY) return response({ ok: false, error: 'stripe_not_configured' }, 503);
 
   let body;
   try {
@@ -97,12 +130,11 @@ export async function handleCheckout(request, env, deps = {}) {
     const status = mapping.error === 'invalid_offer' ? 400 : 503;
     return response({ ok: false, error: mapping.error, missing: mapping.missing }, status);
   }
-  if (!FULFILLMENT_IMPLEMENTED && deps.allowUnimplementedFulfillment !== true) {
-    return response({ ok: false, error: 'fulfillment_not_ready' }, 503);
-  }
-  const { offer, priceId, entitlementId } = mapping;
+  const readiness = await checkRuntimeReadiness(env, deps);
+  if (!readiness.ok) return response({ ok: false, error: 'checkout_not_ready' }, 503);
+  const { offer, priceId, entitlementKey } = mapping;
 
-  const metadata = { ...cleanAttribution(body.attribution), offer: offerKey, price_id: priceId, entitlement_id: entitlementId };
+  const metadata = { ...cleanAttribution(body.attribution), offer: offerKey, price_id: priceId, entitlement_key: entitlementKey };
   const origin = new URL(request.url).origin;
   const params = {
     mode: offer.mode,
@@ -151,7 +183,7 @@ export async function handlePortal(request, env, deps = {}) {
     if (checkout.status !== 'complete' || !checkout.customer) return response({ ok: false, error: 'unverified_session' }, 403);
     const portal = await stripe.billingPortal.sessions.create({
       customer: checkout.customer,
-      return_url: new URL(request.url).origin + '/thanks',
+      return_url: `${new URL(request.url).origin}/thanks?session_id=${encodeURIComponent(body.session_id)}`,
     });
     return response({ ok: true, url: portal.url });
   } catch {
@@ -159,17 +191,125 @@ export async function handlePortal(request, env, deps = {}) {
   }
 }
 
-export async function verifyCompletedCheckout(request, env, deps = {}) {
-  if (isPreviewMode(env)) return false;
-  if (!env.STRIPE_SECRET_KEY) return false;
+export async function getOrderFulfillmentState(request, env) {
   const sessionId = new URL(request.url).searchParams.get('session_id');
-  if (!sessionId || !sessionId.startsWith('cs_')) return false;
+  if (!sessionId || !sessionId.startsWith('cs_')) return { valid: false };
   try {
-    const stripe = deps.stripe || stripeClient(env);
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-    return session.status === 'complete' && ['paid', 'no_payment_required'].includes(session.payment_status);
+    const row = await env.DB.prepare(
+      'SELECT status, fulfillment_status FROM stripe_orders WHERE session_id = ?1'
+    ).bind(sessionId).first();
+    if (!row) return { valid: true, payment: 'pending', fulfillment: 'pending' };
+    return {
+      valid: true,
+      payment: row.status || 'pending',
+      fulfillment: row.fulfillment_status || 'pending',
+    };
   } catch {
-    return false;
+    return { valid: true, payment: 'pending', fulfillment: 'pending' };
+  }
+}
+
+async function claimStripeEvent(env, event, now) {
+  const staleBefore = new Date(now.getTime() - PROCESSING_LEASE_MS).toISOString();
+  const claim = await env.DB.prepare(
+    `INSERT INTO stripe_events (id, type, status, attempts, updated_at)
+     VALUES (?1, ?2, 'processing', 1, ?3)
+     ON CONFLICT(id) DO UPDATE SET status = 'processing', attempts = attempts + 1,
+       last_error = NULL, updated_at = excluded.updated_at
+     WHERE stripe_events.status = 'failed'
+        OR (stripe_events.status = 'processing' AND stripe_events.updated_at <= ?4)
+     RETURNING status`
+  ).bind(event.id, event.type, now.toISOString(), staleBefore).first();
+  if (claim) return { claimed: true };
+  const existing = await env.DB.prepare(
+    'SELECT status FROM stripe_events WHERE id = ?1'
+  ).bind(event.id).first();
+  if (existing && existing.status === 'processed') return { claimed: false, duplicate: true };
+  return { claimed: false, busy: true };
+}
+
+async function runBatch(env, statements) {
+  if (typeof env.DB.batch === 'function') return env.DB.batch(statements);
+  const results = [];
+  for (const statement of statements) results.push(await statement.run());
+  return results;
+}
+
+function orderStatement(env, session, mapping, status, now) {
+  return env.DB.prepare(
+    `INSERT INTO stripe_orders (session_id, customer_id, payment_intent_id, subscription_id, offer, price_id, entitlement_key, amount_cents, email, status, metadata, updated_at)
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)
+     ON CONFLICT(session_id) DO UPDATE SET status = excluded.status,
+       customer_id = excluded.customer_id, payment_intent_id = excluded.payment_intent_id,
+       subscription_id = excluded.subscription_id, amount_cents = excluded.amount_cents,
+       email = excluded.email, metadata = excluded.metadata, updated_at = excluded.updated_at`
+  ).bind(session.id, session.customer || null, session.payment_intent || null, session.subscription || null,
+    session.metadata.offer, mapping.priceId, mapping.entitlementKey, session.amount_total || null,
+    session.customer_details && session.customer_details.email || null, status,
+    JSON.stringify(cleanAttribution(session.metadata)), now.toISOString());
+}
+
+export async function processEntitlementOperation(env, session, mapping, deps = {}) {
+  const now = clock(deps);
+  const operationKey = `grant:${session.id}:${mapping.entitlementKey}`;
+  const leaseExpires = new Date(now.getTime() + PROCESSING_LEASE_MS).toISOString();
+  await env.DB.prepare(
+    `INSERT INTO entitlement_outbox
+       (operation_key, session_id, entitlement_key, action, status, attempts, updated_at)
+     VALUES (?1, ?2, ?3, 'grant', 'pending', 0, ?4)
+     ON CONFLICT(operation_key) DO NOTHING`
+  ).bind(operationKey, session.id, mapping.entitlementKey, now.toISOString()).run();
+
+  const claim = await env.DB.prepare(
+    `UPDATE entitlement_outbox SET status = 'processing', attempts = attempts + 1,
+       lease_expires_at = ?2, last_error = NULL, updated_at = ?3
+     WHERE operation_key = ?1
+       AND (status IN ('pending', 'failed')
+         OR (status = 'processing' AND lease_expires_at <= ?3))
+     RETURNING status`
+  ).bind(operationKey, leaseExpires, now.toISOString()).first();
+  if (!claim) {
+    const existing = await env.DB.prepare(
+      'SELECT status FROM entitlement_outbox WHERE operation_key = ?1'
+    ).bind(operationKey).first();
+    if (existing && existing.status === 'succeeded') return { ok: true, duplicate: true, operationKey };
+    throw new Error('entitlement operation is already processing');
+  }
+
+  if (!deps.autocreator || typeof deps.autocreator.grant !== 'function') {
+    throw new Error('AutoCreator grant contract is not implemented');
+  }
+  try {
+    await deps.autocreator.grant({
+      operationKey,
+      offer: session.metadata.offer,
+      entitlementKey: mapping.entitlementKey,
+      sessionId: session.id,
+      email: session.customer_details && session.customer_details.email || null,
+    });
+    await runBatch(env, [
+      env.DB.prepare(
+        `UPDATE entitlement_outbox SET status = 'succeeded', lease_expires_at = NULL,
+          updated_at = ?2 WHERE operation_key = ?1`
+      ).bind(operationKey, clock(deps).toISOString()),
+      env.DB.prepare(
+        `UPDATE stripe_orders SET fulfillment_status = 'granted', updated_at = ?2
+         WHERE session_id = ?1`
+      ).bind(session.id, clock(deps).toISOString()),
+    ]);
+    return { ok: true, operationKey };
+  } catch (error) {
+    await runBatch(env, [
+      env.DB.prepare(
+        `UPDATE entitlement_outbox SET status = 'failed', lease_expires_at = NULL,
+          last_error = 'grant_failed', updated_at = ?2 WHERE operation_key = ?1`
+      ).bind(operationKey, clock(deps).toISOString()),
+      env.DB.prepare(
+        `UPDATE stripe_orders SET fulfillment_status = 'failed', updated_at = ?2
+         WHERE session_id = ?1`
+      ).bind(session.id, clock(deps).toISOString()),
+    ]);
+    throw error;
   }
 }
 
@@ -195,39 +335,32 @@ export async function handleWebhook(request, env, deps = {}) {
   }
 
   try {
-    const claim = await env.DB.prepare(
-      `INSERT INTO stripe_events (id, type, status, attempts, updated_at)
-       VALUES (?1, ?2, 'processing', 1, ?3)
-       ON CONFLICT(id) DO UPDATE SET status = 'processing', attempts = attempts + 1, updated_at = excluded.updated_at
-       WHERE stripe_events.status = 'failed'
-       RETURNING status`
-    ).bind(event.id, event.type, new Date().toISOString()).first();
-    if (!claim) return response({ ok: true, duplicate: true });
-    if (!FULFILLMENT_IMPLEMENTED && deps.allowUnimplementedFulfillment !== true) {
-      throw new Error('fulfillment is not implemented');
-    }
+    const now = clock(deps);
+    const eventClaim = await claimStripeEvent(env, event, now);
+    if (eventClaim.duplicate) return response({ ok: true, duplicate: true });
+    if (!eventClaim.claimed) return response({ ok: false, error: 'event_in_progress' }, 503);
 
-    if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
+    const readiness = await checkRuntimeReadiness(env, deps);
+    if (!readiness.ok) throw new Error(`runtime not ready: ${readiness.reason}`);
+
+    if (['checkout.session.completed', 'checkout.session.async_payment_succeeded', 'checkout.session.async_payment_failed'].includes(event.type)) {
       const session = event.data.object;
       const offerKey = session.metadata && session.metadata.offer;
       const mapping = resolveOffer(env, offerKey);
       if (!mapping.ok) throw new Error(`offer mapping missing: ${mapping.missing.join(',')}`);
-      if (session.metadata.price_id !== mapping.priceId || session.metadata.entitlement_id !== mapping.entitlementId) {
+      if (session.metadata.price_id !== mapping.priceId || session.metadata.entitlement_key !== mapping.entitlementKey) {
         throw new Error('checkout metadata does not match configured offer mapping');
       }
-      await env.DB.prepare(
-        `INSERT INTO stripe_orders (session_id, customer_id, payment_intent_id, subscription_id, offer, price_id, entitlement_id, amount_cents, email, status, metadata, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)
-         ON CONFLICT(session_id) DO UPDATE SET status = excluded.status, updated_at = excluded.updated_at`
-      ).bind(session.id, session.customer || null, session.payment_intent || null, session.subscription || null,
-        offerKey, mapping.priceId, mapping.entitlementId, session.amount_total || null,
-        session.customer_details && session.customer_details.email || null, session.payment_status || session.status,
-        JSON.stringify(cleanAttribution(session.metadata)), new Date().toISOString()).run();
-      // Mapping is explicit and auditable. Entitlement writes intentionally do
-      // not exist in this Worker until AutoCreator's contract is verified.
+
+      const failed = event.type === 'checkout.session.async_payment_failed';
+      const paid = event.type === 'checkout.session.async_payment_succeeded'
+        || ['paid', 'no_payment_required'].includes(session.payment_status);
+      const orderStatus = failed ? 'failed' : paid ? 'paid' : 'pending';
+      await orderStatement(env, session, mapping, orderStatus, now).run();
+      if (paid && !failed) await processEntitlementOperation(env, session, mapping, deps);
     }
     await env.DB.prepare("UPDATE stripe_events SET status = 'processed', updated_at = ?2 WHERE id = ?1")
-      .bind(event.id, new Date().toISOString()).run();
+      .bind(event.id, clock(deps).toISOString()).run();
     return response({ ok: true });
   } catch (error) {
     console.error('webhook processing failed', { event_id: event.id, event_type: event.type });

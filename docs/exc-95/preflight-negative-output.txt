@@ -36,4 +36,3 @@ PREFLIGHT FAILED - 6 blockers, do not deploy:
       thrivecart/upsell-3-certification.html: [[CERT_LEVEL_2_DETAIL]]
       thrivecart/upsell-3-certification.html: [[CERT_LEVEL_3_DETAIL]]
   6. variant A (landing-a.html) is missing the price block
-

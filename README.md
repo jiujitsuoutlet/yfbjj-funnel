@@ -9,8 +9,9 @@ signatures, records orders in D1, and reports health.
 
 Payment remains intentionally locked. A Checkout Session cannot be created
 unless `PREVIEW_MODE` is the exact string `false`, the selected offer has both
-its Stripe Price and exact AutoCreator entitlement ID, and the authenticated
-fulfillment implementation is complete. The entitlement IDs and fulfillment
+its Stripe Price and exact AutoCreator grant key, and the authenticated
+fulfillment implementation, required Cloudflare Secrets, readiness flags, and
+D1 schema sentinel all pass. The missing bundle slugs and authenticated AutoCreator
 contract are the current software blockers.
 
 ## Routes
@@ -18,8 +19,8 @@ contract are the current software blockers.
 | Route                  | Method | State                                            |
 |------------------------|--------|--------------------------------------------------|
 | `/`                    | GET    | landing page                                      |
-| `/thanks`              | GET    | renders in production only after server retrieval verifies a paid completed Checkout Session |
-| `/health`              | GET    | 200 when D1 is reachable and all 5 active tables exist; 503 otherwise |
+| `/thanks`              | GET    | reads D1 order and fulfillment state; pending copy never claims access and granted copy requires a durable grant |
+| `/health`              | GET    | 200 when D1 is reachable and all 7 active tables exist; 503 otherwise |
 | `/preview-checkout`    | GET    | stand-in for the cart while `PREVIEW_MODE` is on |
 | `/api/lead`            | POST   | live - rate limited, validates email, inserts into `leads` with its variant |
 | `/api/stats`           | GET    | per-variant counts, JSON. `Authorization: Bearer $STATS_SECRET` |
@@ -36,10 +37,14 @@ The lock returns HTTP 423 with `{"ok":false,"error":"preview_locked"}` before
 constructing a Stripe client, so no Checkout Session is created.
 
 Four existing Price IDs are mapped in configuration. Do not create, edit, or
-duplicate them. Each offer also requires an exact AutoCreator entitlement ID.
-Confirmed names are not accepted as IDs. The Two-Month Checkout contains the one-time $8 item and trials
+duplicate them. Each offer also requires its exact AutoCreator grant key.
+Confirmed names and UUIDs are not accepted as bundle slugs. The Two-Month Checkout contains the one-time $8 item and trials
 the existing $20/month recurring item until exactly two UTC calendar months
 later. Month-end dates clamp to the last valid day.
+
+The currently verified AutoCreator UUIDs, plan references, tool contract, scopes,
+and remaining slug/plan blockers are recorded in
+[`docs/autocreator-fulfillment-contract.md`](docs/autocreator-fulfillment-contract.md).
 
 Webhook registration is deliberately not part of staging setup. Once a stable
 destination is approved, register exactly:
@@ -50,16 +55,26 @@ Minimum event types:
 
 * `checkout.session.completed`
 * `checkout.session.async_payment_succeeded`
+* `checkout.session.async_payment_failed`
 * `invoice.paid`
 * `invoice.payment_failed`
 * `customer.subscription.deleted`
 
 The real signing secret exists only after that destination is registered. Do
 not deploy a fixture value. Tests generate signatures from a test-only secret.
-No entitlement writes exist yet. `FULFILLMENT_IMPLEMENTED = false` is a second
-runtime lock, independent from preview mode and missing mapping values. Signed
-events also remain retryable instead of being acknowledged as fulfilled while
-that lock is closed.
+No authenticated AutoCreator client exists yet. `FULFILLMENT_IMPLEMENTED` and
+`AUTOCREATOR_CLIENT_IMPLEMENTED` are independent runtime locks. Checkout also
+requires `STRIPE_WEBHOOK_SECRET`, `AUTOCREATOR_API_KEY`, both explicit readiness
+flags, and migration `0006`'s D1 sentinel. Signed events remain retryable while
+those locks are closed.
+
+Paid events write through `entitlement_outbox`. A stable operation key guards
+the documented idempotent AutoCreator grant tools; no undocumented HTTP
+idempotency header is assumed. Fresh processing leases return HTTP 503, and
+stale leases can be reclaimed. `checkout.session.completed` grants only for
+`paid` or `no_payment_required`; delayed unpaid methods wait for
+`checkout.session.async_payment_succeeded`, and async failure records a failed
+order without granting.
 
 ## Design
 
@@ -82,7 +97,11 @@ the pages through one JSON island (`<script id="page-config">`):
 | `BUNDLE_PRICE_CENTS`      | 1400 |
 | `STRIPE_PRICE_*`          | The four verified existing Stripe Price IDs. |
 | `STRIPE_PRODUCT_TWO_MONTH` | The verified existing product used for the one-time $8 item. |
-| `AUTOCREATOR_ENTITLEMENT_*_ID` | Exact authenticated AutoCreator target for each active offer. Empty keeps preflight and Checkout closed. |
+| `AUTOCREATOR_*_BUNDLE_UUID` | Confirmed read-only bundle references. UUID is not assumed to be a grant slug. |
+| `AUTOCREATOR_*_BUNDLE_SLUG` | Exact authenticated bundle slug required by the AutoCreator grant tool. Empty keeps Checkout closed. |
+| `AUTOCREATOR_*_ENTITLEMENT_TARGET` | Exact lifetime or monthly grant target once that plan contract is confirmed. |
+| `STRIPE_WEBHOOK_READY` | Exact `true` only after the signed endpoint proof passes on the deployed revision. |
+| `AUTOCREATOR_FULFILLMENT_READY` | Exact `true` only after authenticated grant, retry, and revocation proof passes. |
 
 Prices render from these values, so one edit moves every surface.
 
@@ -150,15 +169,18 @@ leave it running forever.
 Refuses to deploy a half-configured page. Checks, all reported in one run:
 
 1. all four verified Stripe Price IDs and the Two-Month Product ID are valid and unique
-2. all four exact AutoCreator entitlement IDs are set
+2. all four exact AutoCreator grant keys are set
 3. authenticated AutoCreator fulfillment is implemented and tested
-4. `OFFER_DEADLINE` is set, parses, and is in the future
-5. `PREVIEW_MODE` is exactly `"false"`
-6. `database_id` is a real D1 uuid, not the placeholder
-7. no unfilled `[[PLACEHOLDER]]` markers would render on a served page
-8. both variants are complete pages (CTA, price block, lead form, all 8 collections)
-9. the landing page posts to the guarded Checkout endpoint and sends variant metadata
-10. every served image exists and the secrets scan passes
+4. authenticated AutoCreator client is implemented and tested
+5. webhook and fulfillment readiness flags are exactly `"true"`
+6. runtime code requires both Cloudflare Secrets and migration `0006`'s D1 sentinel
+7. `OFFER_DEADLINE` is set, parses, and is in the future
+8. `PREVIEW_MODE` is exactly `"false"`
+9. `database_id` is a real D1 uuid, not the placeholder
+10. no unfilled `[[PLACEHOLDER]]` markers would render on a served page
+11. both variants are complete pages (CTA, price block, lead form, all 8 collections)
+12. the landing page posts to the guarded Checkout endpoint and sends variant metadata
+13. every served image exists and the secrets scan passes
 
 `npm run deploy` runs preflight first and stops on any failure.
 

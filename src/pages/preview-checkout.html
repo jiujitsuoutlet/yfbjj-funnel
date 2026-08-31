@@ -27,11 +27,11 @@
     <ul class="checks">
       <li><strong>The email address is captured first</strong><span>It is written to our own database before the handoff, so we keep the lead whether or not the sale completes.</span></li>
       <li><strong>The buyer lands on Stripe Checkout</strong><span>Stripe owns the hosted payment form and returns a signed completion event to this Worker.</span></li>
-      <li><strong>Access follows the verified offer mapping</strong><span>The signed event is recorded with the exact AutoCreator entitlement ID selected for that offer.</span></li>
+      <li><strong>Access follows the verified offer mapping</strong><span>The signed event is recorded with the exact AutoCreator grant key selected for that offer.</span></li>
     </ul>
     <p class="faint">
       Checkout stays locked until <strong>npm run preflight</strong> verifies the
-      Stripe prices, AutoCreator entitlement IDs, deadline, D1 database, and
+      Stripe prices, AutoCreator grant keys, deadline, D1 database, and
       fulfillment implementation. Only then can <strong>PREVIEW_MODE</strong> become
       the exact string <strong>false</strong>.
     </p>

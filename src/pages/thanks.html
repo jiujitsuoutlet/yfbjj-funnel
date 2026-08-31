@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>Order confirmed</title>
+<title>{{THANKS_TITLE}}</title>
 <meta name="robots" content="noindex">
 <style>{{BASE_CSS}}</style>
 </head>
@@ -16,21 +16,16 @@
 
 <main>
 
-  <!-- Stripe returns completed Checkout Sessions here. Nothing is sold on this page. -->
+  <!-- Copy is selected server-side from durable D1 payment and fulfillment state. -->
   <section id="thanks-hero" class="hero">
-    <p class="kicker">Order confirmed</p>
-    <h1>You're in.</h1>
-    <p class="lede">
-      Payment went through. Your access is on its way by email, along with your
-      receipt. Keep that email... it is your proof of purchase.
-    </p>
+    <p class="kicker">{{THANKS_KICKER}}</p>
+    <h1>{{THANKS_HEADLINE}}</h1>
+    <p class="lede">{{THANKS_MESSAGE}}</p>
   </section>
 
   <section id="support">
     <p class="dim">
-      Nothing in your inbox after 15 minutes? Check spam and promotions first,
-      then write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with
-      your receipt and we will sort it out.
+      {{THANKS_SUPPORT}}
     </p>
   </section>
 
