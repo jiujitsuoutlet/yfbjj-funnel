@@ -30,6 +30,29 @@ contract are the current software blockers.
 | `/api/offer-skip`      | POST   | records an explicit decline and advances the D1 state machine |
 | `/api/customer-portal` | POST   | creates a portal only after retrieving and verifying a completed Checkout Session |
 | `/api/stripe-webhook`  | POST   | verifies the raw signed body, then processes it through the D1 retry ledger |
+| `/admin/editor`        | GET    | authenticated visual editor; drafts never affect public pages until explicit publish |
+| `/api/admin/*`         | varies | no-store, same-origin and CSRF-protected editor session, draft, publish, history, and restore API |
+
+## Visual content editor
+
+Run migration `0008_content_editor.sql`, then set `ADMIN_PASSWORD` as a
+Cloudflare Secret. It must be a unique, generated high-entropy value, not a
+human-memorable or reused password. Sign in at `/admin/login` and open
+`/admin/editor`.
+
+The editor owns only validated presentation JSON for a fixed page registry.
+It supports sections, rows, columns, safe content elements, responsive preview,
+autosaved drafts, explicit publish, and version restore. A restore creates a new
+draft revision and never changes the public page by itself. If D1 or published
+content is missing, unavailable, malformed, or unsupported, the Worker serves
+the compiled page already in source.
+
+Commerce remains code-owned. The editor cannot store HTML, CSS, JavaScript,
+links, routes, Stripe identifiers, offer actions, AutoCreator mappings, secrets,
+preview flags, or deployment locks. Checkout, price, legal, offer-action, and
+preview components have fixed behavior. Their limited copy fields may be
+edited, but they cannot be deleted or duplicated. See
+[`docs/EDITOR-GUIDE.md`](docs/EDITOR-GUIDE.md).
 
 ## Stripe staging
 
@@ -146,6 +169,9 @@ Stripe and webhook keys are Cloudflare Secrets, read off the `env` binding,
 never in source, never in `wrangler.toml`, and never in the client bundle. Local
 development values go in `.dev.vars` (gitignored); see
 `.dev.vars.example`.
+
+`ADMIN_PASSWORD` follows the same secret-only rule. Never put it in source,
+Wrangler variables, editor JSON, screenshots, logs, or client code.
 
     npm run scan     # fails non-zero if a secret-shaped key reaches served output
 

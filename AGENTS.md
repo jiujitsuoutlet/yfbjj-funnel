@@ -95,6 +95,22 @@ fresh Stripe-hosted Checkout. A Stripe cancel is not a decline.
 tool name, invalid JSON, or a write without exact bundle/plan read-back is
 failure. Never mark D1 granted from the write response alone.
 
+**The visual editor owns presentation only.** `/admin/editor` may publish only
+strict versioned JSON for the fixed page registry. It must never persist raw
+HTML, CSS, JavaScript, arbitrary links, routes, Stripe identifiers, offer
+actions, AutoCreator mappings, secrets, `PREVIEW_MODE`, webhook behavior, or
+deployment locks. Functional checkout, price, legal, offer-action, and preview
+components keep code-owned behavior and page-specific cardinality. Public
+rendering must fall back to the compiled page on every editor storage or schema
+failure. Drafts are private. Restore creates a new draft and never publishes.
+
+**Admin access is secret-only and fail-closed.** `ADMIN_PASSWORD` must be a
+unique generated high-entropy Cloudflare Secret, never a human-memorable or
+reused password. Admin sessions require D1, opaque hashed session tokens,
+strict host cookies, exact same-origin checks, CSRF, bounded JSON bodies, and
+rate-limited login. Editor failures must never weaken checkout health or block
+the compiled public fallback.
+
 ## Verification discipline
 
 **Verify in a real browser, not curl.** A JS syntax error in the inlined

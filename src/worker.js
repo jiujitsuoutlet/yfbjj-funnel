@@ -14,8 +14,18 @@ import landingBHtml from './pages/landing-b.html';
 import thanksHtml from './pages/thanks.html';
 import offerHtml from './pages/offer.html';
 import previewCheckoutHtml from './pages/preview-checkout.html';
+import publishedHtml from './pages/published.html';
+import adminLoginHtml from './pages/admin-login.html';
+import adminEditorHtml from './pages/admin-editor.html';
 import baseCss from './pages/_base.css';
 import pageJs from './pages/_page.js';
+import adminCss from './pages/_admin.css';
+import adminJs from './pages/_admin.js';
+import adminLoginJs from './pages/_admin-login.js';
+import { EDITOR_IMAGE_PATHS } from './editor/images.js';
+import { loadPublishedDocument } from './editor/repository.js';
+import { renderContentDocument } from './editor/renderer.js';
+import { handleEditorRoute } from './editor/routes.js';
 import {
   getOfferJourneyState,
   getOrderFulfillmentState,
@@ -45,6 +55,7 @@ const SECURITY_HEADERS = {
 };
 
 const nowIso = () => new Date().toISOString();
+const BUYER_STATE_HEADERS = { 'Cache-Control': 'private, no-store', Vary: 'Cookie' };
 
 function json(body, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(body), {
@@ -186,6 +197,17 @@ function renderPage(template, env, variant, extra = {}) {
     .replace(/\{\{BASE_CSS\}\}/g, () => baseCss)
     .replace(/\{\{PAGE_JS\}\}/g, () => pageJs)
     .replace(/\{\{PAGE_CONFIG_JSON\}\}/g, () => payload);
+}
+
+async function renderPublishedPage(env, pageKey, variant, extra = {}, context = {}) {
+  const document = await loadPublishedDocument(env, pageKey, { imagePaths: EDITOR_IMAGE_PATHS });
+  if (!document) return null;
+  const rendered = renderContentDocument(document, { pageKey, env, context });
+  const template = publishedHtml
+    .replace(/\{\{EDITOR_TITLE\}\}/g, () => rendered.title)
+    .replace(/\{\{EDITOR_DESCRIPTION\}\}/g, () => rendered.description)
+    .replace(/\{\{EDITOR_BODY\}\}/g, () => rendered.body);
+  return renderPage(template, env, variant, extra);
 }
 
 function renderThanksPage(env, state) {
@@ -352,9 +374,10 @@ async function checkLeadRateLimit(request, env, ctx) {
 
 /* ------------------------------------------------------------------ routes */
 
-function handleLanding(request, env, ctx) {
+async function handleLanding(request, env, ctx) {
   const { variant, assigned } = assignVariant(request);
   const doc = variant === 'b' ? landingBHtml : landingAHtml;
+  const edited = await renderPublishedPage(env, `landing-${variant}`, variant);
 
   // The response body now depends on a cookie, so it must never be held in a
   // shared cache. This costs the landing page its edge caching: a deliberate
@@ -362,7 +385,7 @@ function handleLanding(request, env, ctx) {
   const headers = { 'Cache-Control': 'private, no-store', Vary: 'Cookie' };
   if (assigned) headers['Set-Cookie'] = variantCookie(variant);
 
-  const response = html(renderPage(doc, env, variant), 200, headers);
+  const response = html(edited || renderPage(doc, env, variant), 200, headers);
   if (assigned && !isNoD1Preview(env) && ctx && ctx.waitUntil) ctx.waitUntil(countVisit(env, variant));
   return response;
 }
@@ -530,25 +553,37 @@ export default {
     const path = url.pathname.replace(/\/+$/, '') || '/';
     const method = request.method.toUpperCase();
 
+    if (path === '/admin') return new Response(null, { status: 302, headers: { ...SECURITY_HEADERS, 'Cache-Control': 'no-store', Location: '/admin/editor' } });
+    if (path.startsWith('/admin/') || path.startsWith('/api/admin/')) {
+      const editorResponse = await handleEditorRoute(request, env, {
+        loginHtml: adminLoginHtml, editorHtml: adminEditorHtml, css: adminCss, js: adminJs, loginJs: adminLoginJs,
+      });
+      if (editorResponse) return editorResponse;
+    }
+
     if (method === 'HEAD' || method === 'GET') {
       if (path === '/') return handleLanding(request, env, ctx);
       if (path === '/thanks') {
-        if (isPreviewMode(env)) return html(renderThanksPage(env, 'preview'));
+        if (isPreviewMode(env)) return html(await renderPublishedPage(env, 'thanks-preview', null) || renderThanksPage(env, 'preview'), 200, BUYER_STATE_HEADERS);
         const order = await getOrderFulfillmentState(request, env);
         if (!order.valid) return json({ ok: false, error: 'invalid_session' }, 400);
         const state = order.fulfillment === 'granted'
           ? order.access === 'activation_needed' ? 'activation' : 'granted'
           : order.payment === 'failed' || order.fulfillment === 'failed' ? 'failed' : 'pending';
-        return html(renderThanksPage(env, state), state === 'pending' ? 202 : 200);
+        return html(await renderPublishedPage(env, `thanks-${state}`, null) || renderThanksPage(env, state), state === 'pending' ? 202 : 200, BUYER_STATE_HEADERS);
       }
       if (path === '/offer') {
         const state = await getOfferJourneyState(request, env);
         if (!state.ok) return json({ ok: false, error: state.error }, state.status || 403);
-        if (state.pending) return html(renderThanksPage(env, 'pending'), 202);
-        if (state.complete) return html(renderThanksPage(env, state.access === 'activation_needed' ? 'activation' : 'granted'));
-        return html(renderOfferPage(env, state, url.searchParams.get('session_id') || ''));
+        if (state.pending) return html(await renderPublishedPage(env, 'thanks-pending', null) || renderThanksPage(env, 'pending'), 202, BUYER_STATE_HEADERS);
+        if (state.complete) {
+          const completeState = state.access === 'activation_needed' ? 'activation' : 'granted';
+          return html(await renderPublishedPage(env, `thanks-${completeState}`, null) || renderThanksPage(env, completeState), 200, BUYER_STATE_HEADERS);
+        }
+        const offerPageKey = `offer-${String(state.offer || '').replace(/_/g, '-')}`;
+        return html(await renderPublishedPage(env, offerPageKey, null, { SOURCE_SESSION_ID: url.searchParams.get('session_id') || '' }, { trialEnd: state.trialEnd }) || renderOfferPage(env, state, url.searchParams.get('session_id') || ''), 200, BUYER_STATE_HEADERS);
       }
-      if (path === '/preview-checkout') return html(renderPage(previewCheckoutHtml, env, null));
+      if (path === '/preview-checkout') return html(await renderPublishedPage(env, 'preview-checkout', null) || renderPage(previewCheckoutHtml, env, null));
       if (path === '/health') return handleHealth(env);
       if (path === '/api/stats') return handleStats(request, env);
     }
@@ -565,7 +600,7 @@ export default {
       if (path === '/api/stripe-webhook') return handleWebhook(request, env);
     }
 
-    const known = ['/', '/offer', '/thanks', '/preview-checkout', '/health', '/api/lead', '/api/stats', '/api/checkout', '/api/offer-checkout', '/api/offer-skip', '/api/customer-portal', '/api/stripe-webhook'];
+    const known = ['/', '/offer', '/thanks', '/preview-checkout', '/health', '/api/lead', '/api/stats', '/api/checkout', '/api/offer-checkout', '/api/offer-skip', '/api/customer-portal', '/api/stripe-webhook', '/admin/login', '/admin/editor'];
     if (known.includes(path)) return json({ ok: false, error: 'method_not_allowed' }, 405);
 
     return json({ ok: false, error: 'not_found' }, 404);

@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+  <title>Yoga for BJJ funnel editor</title><style>{{ADMIN_CSS}}</style>
+</head>
+<body><div class="builder">
+  <header><strong>Yoga for BJJ editor</strong><select id="page-select" aria-label="Page"></select><button id="undo">Undo</button><button id="redo">Redo</button><div class="devices" aria-label="Preview size"><button data-device="desktop">Desktop</button><button data-device="tablet">Tablet</button><button data-device="mobile">Mobile</button></div><span id="save-state">Loading</span><button id="save">Save draft</button><button id="versions">History</button><button id="publish" class="primary">Publish</button><button id="logout">Log out</button></header>
+  <aside class="layers"><h2>Layers and layout</h2><div id="layers"></div><h2>Add element</h2><div id="add-tools"></div><button id="add-section">Add section</button></aside>
+  <main class="canvas-wrap"><div id="canvas" class="canvas desktop"></div></main>
+  <aside class="inspector"><h2>Inspector</h2><div id="inspector"><p>Select an element.</p></div><div id="history-panel" hidden></div></aside>
+</div><script>{{ADMIN_JS}}</script></body></html>
