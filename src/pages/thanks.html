@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>Order confirmed</title>
+<title>{{THANKS_TITLE}}</title>
 <meta name="robots" content="noindex">
 <style>{{BASE_CSS}}</style>
 </head>
@@ -16,30 +16,24 @@
 
 <main>
 
-  <!-- Fallback destination only. ThriveCart's own funnel ends elsewhere, so a
-       buyer normally never sees this page. Nothing is sold here on purpose. -->
+  <!-- Copy is selected server-side from durable D1 payment and fulfillment state. -->
   <section id="thanks-hero" class="hero">
-    <p class="kicker">Order confirmed</p>
-    <h1>You're in.</h1>
-    <p class="lede">
-      Payment went through. Your access is on its way by email, along with your
-      receipt. Keep that email... it is your proof of purchase.
-    </p>
+    <p class="kicker">{{THANKS_KICKER}}</p>
+    <h1>{{THANKS_HEADLINE}}</h1>
+    <p class="lede">{{THANKS_MESSAGE}}</p>
   </section>
 
   <section id="support">
     <p class="dim">
-      Nothing in your inbox after 15 minutes? Check spam and promotions first,
-      then write to <a href="mailto:[[SUPPORT_EMAIL]]">[[SUPPORT_EMAIL]]</a> with
-      your receipt and we will sort it out.
+      {{THANKS_SUPPORT}}
     </p>
   </section>
 
   <footer>
     <p>Yoga for BJJ</p>
     <nav>
-      <a href="[[TERMS_URL]]">Terms</a> &middot;
-      <a href="[[PRIVACY_URL]]">Privacy</a>
+      <a href="https://yfbjj.autocreator.ai/legal/terms">Terms</a> &middot;
+      <a href="https://yfbjj.autocreator.ai/legal/privacy">Privacy</a>
     </nav>
   </footer>
 

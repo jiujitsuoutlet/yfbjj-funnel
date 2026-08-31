@@ -8,36 +8,71 @@
 
   var PREVIEW = CFG.PREVIEW_MODE === true;
   var PREVIEW_PATH = '/preview-checkout';
-  var CART = { bundle: CFG.THRIVECART_BUNDLE_URL || '' };
   var VARIANT = CFG.VARIANT || '';
+  var ATTRIBUTION_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'gclid'];
 
-  /**
-   * Carries the variant across the handoff. Without this the test measures
-   * clicks, not money: ThriveCart owns the purchase, so the variant has to
-   * ride along and come back on the webhook.
-   *
-   * passthrough[variant] is ThriveCart's documented custom-data convention.
-   * utm_content is sent as well, because it survives more systems than any one
-   * vendor field does. Verify both land in the webhook payload before trusting
-   * the numbers.
-   */
-  function withVariant(raw) {
-    if (!raw || !VARIANT) return raw;
+  function withAttribution(raw) {
+    if (!raw) return raw;
     try {
-      var u = new URL(raw);
-      u.searchParams.set('passthrough[variant]', VARIANT);
-      u.searchParams.set('utm_content', 'variant-' + VARIANT);
-      return u.toString();
+      var u = new URL(raw, location.href);
+      var incoming = new URL(location.href);
+      ATTRIBUTION_KEYS.forEach(function (key) {
+        if (incoming.searchParams.has(key)) u.searchParams.set(key, incoming.searchParams.get(key));
+      });
+      return raw.charAt(0) === '/' ? u.pathname + u.search + u.hash : u.toString();
     } catch (e) {
       return raw;
     }
   }
 
-  // Preview mode, or a missing cart link, always routes to the preview page.
-  // A CTA on this site is never a dead link and never a broken cart.
-  function target(kind) {
-    if (PREVIEW) return PREVIEW_PATH;
-    return withVariant(CART[kind]) || PREVIEW_PATH;
+  /**
+   * Preview links retain the full attribution payload so review navigation can
+   * be verified without creating a Checkout Session.
+   */
+  function withVariant(raw) {
+    if (!raw || !VARIANT) return raw;
+    try {
+      var u = new URL(raw, location.href);
+      u.searchParams.set('passthrough[variant]', VARIANT);
+      u.searchParams.set('utm_content', 'variant-' + VARIANT);
+      return raw.charAt(0) === '/' ? u.pathname + u.search + u.hash : u.toString();
+    } catch (e) {
+      return raw;
+    }
+  }
+
+  function previewTarget() {
+    return withVariant(withAttribution(PREVIEW_PATH));
+  }
+
+  function attribution() {
+    var incoming = new URL(location.href);
+    var values = { variant: VARIANT, utm_content: VARIANT ? 'variant-' + VARIANT : '' };
+    ATTRIBUTION_KEYS.forEach(function (key) {
+      if (incoming.searchParams.has(key)) values[key] = incoming.searchParams.get(key);
+    });
+    return values;
+  }
+
+  function checkout(kind) {
+    var key = 'yfbjj_checkout_' + kind;
+    var idempotencyKey = '';
+    try {
+      idempotencyKey = sessionStorage.getItem(key) || crypto.randomUUID();
+      sessionStorage.setItem(key, idempotencyKey);
+    } catch (_) {
+      idempotencyKey = String(Date.now()) + '-' + Math.random().toString(16).slice(2);
+    }
+    return fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
+      body: JSON.stringify({ offer: kind, attribution: attribution() })
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (payload) {
+        if (!res.ok || !payload.url) throw new Error(payload.error || 'checkout_failed');
+        return payload.url;
+      });
+    });
   }
 
   /* ------------------------------------------------------------- prices */
@@ -77,7 +112,9 @@
 
   /* --------------------------------------------------------- cart links */
   var ctas = [].slice.call(document.querySelectorAll('[data-cart]'));
-  ctas.forEach(function (el) { el.setAttribute('href', target(el.getAttribute('data-cart'))); });
+  // The href stays on the mutation-free preview page as a fail-closed fallback.
+  // Live Stripe Checkout starts only through the guarded POST below.
+  ctas.forEach(function (el) { el.setAttribute('href', previewTarget()); });
 
   /* -------------------------------------------------------- lead capture */
   var form = document.getElementById('lead-form');
@@ -87,7 +124,9 @@
   function recall() { try { return sessionStorage.getItem('yfbjj_email') || ''; } catch (_) { return ''; } }
 
   function capture(email, source) {
-    if (captured || !email) return Promise.resolve();
+    // Preview has no D1 by design. Skip the request so the review flow stays
+    // mutation-free without generating a failed-resource console error.
+    if (PREVIEW || captured || !email) return Promise.resolve();
     return fetch('/api/lead', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -119,7 +158,14 @@
       // rate limiter must never hold a buyer on this page: 1.5s hard cap.
       var wait = new Promise(function (r) { setTimeout(r, 1500); });
       Promise.race([capture(email, 'landing-hero'), wait]).then(function () {
-        location.assign(target('bundle'));
+        if (PREVIEW) return previewTarget();
+        return checkout('bundle');
+      }).then(function (url) {
+        location.assign(url);
+      }).catch(function () {
+        button.disabled = false;
+        msg.textContent = 'Checkout is not ready yet. Please try again shortly.';
+        msg.dataset.state = 'error';
       });
     });
   }
@@ -127,13 +173,16 @@
   // Secondary CTAs: send the address we already have, then hand off.
   ctas.forEach(function (el) {
     el.addEventListener('click', function (e) {
-      var stored = recall();
-      if (!stored || captured) return;         // plain navigation
+      if (PREVIEW) return;
       e.preventDefault();
-      var href = el.getAttribute('href');
+      var stored = recall();
       var wait = new Promise(function (r) { setTimeout(r, 800); });
-      Promise.race([capture(stored, el.getAttribute('data-source') || 'secondary-cta'), wait])
-        .then(function () { location.assign(href); });
+      var lead = stored && !captured
+        ? Promise.race([capture(stored, el.getAttribute('data-source') || 'secondary-cta'), wait])
+        : Promise.resolve();
+      lead.then(function () { return checkout(el.getAttribute('data-cart')); })
+        .then(function (url) { location.assign(url); })
+        .catch(function () { location.assign(previewTarget()); });
     });
   });
 

@@ -1,6 +1,8 @@
 # Parked
 
-Nothing in this directory is imported by the Worker.
+Nothing in this directory is imported by the Worker. The protected Stripe
+reconstruction now lives in `src/stripe.js`; this is the retired prototype and
+must not be restored alongside it.
 
 Two things are parked here: the Stripe payment layer, and the `/upsell` page.
 
@@ -40,16 +42,14 @@ which system owns them.
 
 ---
 
-# Parked: Stripe checkout and webhook
+# Historical Stripe checkout and webhook stub
 
-Parked 2026-08-19.
+Parked 2026-08-19 and superseded by `src/stripe.js` in August 2026.
 
 ## Why
 
-Checkout runs on ThriveCart (`learnbjjfast.thrivecart.com`), which already owns
-SKUs, coupons, one-click upsells, VAT, and fulfilment. Building Stripe checkout
-alongside it would duplicate a working system and split the order record across
-two payment processors.
+This was the pre-recovery implementation. It remains only to preserve history.
+Do not import it, patch it, or use its table names as the active contract.
 
 ## What is here
 
@@ -62,9 +62,8 @@ Workers), returns 400 before touching D1, then claims the event id in
 handler side effect. All four paths were proven locally: missing header 400, bad
 signature 400, valid signature 200, replay 200 with `duplicate: true`.
 
-The `stripe` package has been uninstalled, so the `import Stripe from 'stripe'`
-at the top of that file does not currently resolve. It is not bundled - esbuild
-only follows imports reachable from `src/worker.js` - so the build is unaffected.
+The active implementation uses the installed `stripe` package and Workers-safe
+asynchronous signature verification.
 
 ## What stayed behind
 
@@ -73,21 +72,7 @@ only follows imports reachable from `src/worker.js` - so the build is unaffected
 - Nothing else. `/api/lead`, `leads`, `rate_limits`, and both rate-limit layers
   are live and untouched.
 
-## What would bring it back
+## Do not un-shelve
 
-Any of: ThriveCart cannot express an offer we need; we want the order record in
-our own system rather than reading ThriveCart's; we start selling something
-ThriveCart does not handle (subscriptions billed our way, in-app purchases).
-
-## How to un-shelve
-
-1. `npm i stripe`
-2. Import the handlers into `src/worker.js`.
-3. Re-add the routes: `POST /api/checkout`, `POST /api/upsell`,
-   `POST /api/stripe-webhook`, and add them to the `known` array so a wrong
-   method returns 405 rather than 404.
-4. `wrangler secret put STRIPE_SECRET_KEY` and
-   `wrangler secret put STRIPE_WEBHOOK_SECRET`. Never in `wrangler.toml`.
-5. Add the publishable key back to `[vars]` only if a page needs Stripe.js, and
-   extend the CSP in `src/worker.js` with `https://js.stripe.com`.
-6. `npm run scan` before deploying.
+`src/stripe.js`, migrations `0004` and `0005`, and the guarded routes in
+`src/worker.js` are the source of truth now.

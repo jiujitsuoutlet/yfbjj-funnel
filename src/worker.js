@@ -1,14 +1,12 @@
 /**
  * welcome.yogaforbjj.net - funnel Worker.
  *
- * One job: the landing page for the $14 Guard Retention Bundle, plus lead
- * capture. Checkout and everything after it belongs to ThriveCart, including
- * the whole post-purchase upsell chain, because one-click requires the payment
- * session to stay on their side. The Stripe layer and the old /upsell page are
- * parked in src/deferred/ - see the README there.
+ * Serves the landing page, captures leads, and owns guarded Stripe Checkout and
+ * webhook routes. Payment and AutoCreator entitlement writes remain fail-closed
+ * until the complete mapping and fulfillment contract are configured.
  *
- * No secrets are needed at present. If the Stripe layer is un-shelved, its keys
- * come from Cloudflare Secrets on `env` and never touch a page or wrangler.toml.
+ * Stripe keys come from Cloudflare Secrets on `env`. They never touch a page or
+ * wrangler.toml.
  */
 
 import landingAHtml from './pages/landing-a.html';
@@ -17,6 +15,7 @@ import thanksHtml from './pages/thanks.html';
 import previewCheckoutHtml from './pages/preview-checkout.html';
 import baseCss from './pages/_base.css';
 import pageJs from './pages/_page.js';
+import { getOrderFulfillmentState, handleCheckout, handlePortal, handleWebhook } from './stripe.js';
 
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
@@ -71,7 +70,6 @@ function html(body, status = 200, extraHeaders = {}) {
  */
 const PAGE_CONFIG_KEYS = [
   'PREVIEW_MODE',
-  'THRIVECART_BUNDLE_URL',
   'OFFER_DEADLINE',
   'BUNDLE_PRICE_CENTS',
 ];
@@ -157,7 +155,11 @@ async function countVisit(env, variant) {
  * at a cart that is not ready.
  */
 function isPreviewMode(env) {
-  return String(env.PREVIEW_MODE ?? 'true').trim().toLowerCase() !== 'false';
+  return env.PREVIEW_MODE !== 'false';
+}
+
+function isNoD1Preview(env) {
+  return isPreviewMode(env) && String(env.PREVIEW_NO_D1 || '').trim().toLowerCase() === 'true';
 }
 
 function renderPage(template, env, variant) {
@@ -174,6 +176,37 @@ function renderPage(template, env, variant) {
     .replace(/\{\{BASE_CSS\}\}/g, () => baseCss)
     .replace(/\{\{PAGE_JS\}\}/g, () => pageJs)
     .replace(/\{\{PAGE_CONFIG_JSON\}\}/g, () => payload);
+}
+
+function renderThanksPage(env, state) {
+  const copy = {
+    preview: {
+      title: 'Checkout preview', kicker: 'Preview', headline: 'Checkout is locked.',
+      message: 'No payment or access change happened in this preview.',
+      support: 'This page will report the durable order state after checkout is connected.',
+    },
+    pending: {
+      title: 'Order processing', kicker: 'Order processing', headline: 'We are checking your order.',
+      message: 'Access has not been confirmed yet. This page will only say you are in after the entitlement grant is durably recorded.',
+      support: 'If this is still pending after 15 minutes, write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your Stripe receipt.',
+    },
+    failed: {
+      title: 'Payment not completed', kicker: 'Payment not completed', headline: 'Your order needs attention.',
+      message: 'Access was not granted. Return to the offer and try checkout again.',
+      support: 'Questions? Write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a>.',
+    },
+    granted: {
+      title: 'Access granted', kicker: 'Order confirmed', headline: "You're in.",
+      message: 'Payment is complete and your access grant is durably recorded. Your receipt and access details are on the way by email.',
+      support: 'Nothing in your inbox after 15 minutes? Check spam and promotions, then write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your receipt.',
+    },
+  }[state];
+  return renderPage(thanksHtml, env, null)
+    .replace(/\{\{THANKS_TITLE\}\}/g, () => copy.title)
+    .replace(/\{\{THANKS_KICKER\}\}/g, () => copy.kicker)
+    .replace(/\{\{THANKS_HEADLINE\}\}/g, () => copy.headline)
+    .replace(/\{\{THANKS_MESSAGE\}\}/g, () => copy.message)
+    .replace(/\{\{THANKS_SUPPORT\}\}/g, () => copy.support);
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -278,18 +311,21 @@ function handleLanding(request, env, ctx) {
   if (assigned) headers['Set-Cookie'] = variantCookie(variant);
 
   const response = html(renderPage(doc, env, variant), 200, headers);
-  if (assigned && ctx && ctx.waitUntil) ctx.waitUntil(countVisit(env, variant));
+  if (assigned && !isNoD1Preview(env) && ctx && ctx.waitUntil) ctx.waitUntil(countVisit(env, variant));
   return response;
 }
 
 async function handleHealth(env) {
+  if (isNoD1Preview(env)) {
+    return json({ ok: false, d1: 'intentionally_unbound', preview: true, at: nowIso() }, 503);
+  }
   try {
     const row = await env.DB.prepare(
       `SELECT count(*) AS n FROM sqlite_master
-        WHERE type = 'table' AND name IN ('orders', 'webhook_events', 'leads')`
+        WHERE type = 'table' AND name IN ('leads', 'rate_limits', 'variant_visits', 'stripe_events', 'stripe_orders', 'fulfillment_readiness', 'entitlement_outbox')`
     ).first();
     const tables = row ? row.n : 0;
-    if (tables < 3) {
+    if (tables < 7) {
       return json(
         { ok: false, d1: 'connected', schema: 'incomplete', tables_found: tables, at: nowIso() },
         503
@@ -302,6 +338,9 @@ async function handleHealth(env) {
 }
 
 async function handleLead(request, env, ctx) {
+  if (isNoD1Preview(env)) {
+    return json({ ok: false, error: 'preview_state_disabled' }, 503);
+  }
   const rl = await checkLeadRateLimit(request, env, ctx);
   if (!rl.allowed) {
     return json(
@@ -350,7 +389,7 @@ async function handleLead(request, env, ctx) {
     return json({ ok: false, error: 'storage_failed' }, 500);
   }
 
-  // Client hands off to ThriveCart after this resolves; see src/pages/landing.html.
+  // The client starts guarded Stripe Checkout after this resolves.
   return json({ ok: true }, 201);
 }
 
@@ -366,6 +405,9 @@ function timingSafeEqual(a, b) {
 }
 
 async function handleStats(request, env) {
+  if (isNoD1Preview(env)) {
+    return json({ ok: false, error: 'preview_state_disabled' }, 503);
+  }
   if (!env.STATS_SECRET) {
     console.error('STATS_SECRET missing from env');
     return json({ ok: false, error: 'stats_not_configured' }, 500);
@@ -381,7 +423,11 @@ async function handleStats(request, env) {
     const [visits, leads, orders] = await Promise.all([
       env.DB.prepare('SELECT variant, sum(count) AS n FROM variant_visits GROUP BY variant').all(),
       env.DB.prepare('SELECT variant, count(*) AS n FROM leads GROUP BY variant').all(),
-      env.DB.prepare('SELECT variant, count(*) AS n, sum(amount_cents) AS cents FROM orders GROUP BY variant').all(),
+      env.DB.prepare(`SELECT json_extract(metadata, '$.variant') AS variant,
+          count(*) AS n, sum(amount_cents) AS cents
+        FROM stripe_orders
+        WHERE status IN ('paid', 'complete')
+        GROUP BY json_extract(metadata, '$.variant')`).all(),
     ]);
 
     const tally = (rows, field = 'n') => {
@@ -415,7 +461,7 @@ async function handleStats(request, env) {
       unassigned_leads: leadCounts.unassigned || 0,
       notes: {
         visitors: 'Counted once per newly assigned human. Returning visitors, ?v= overrides and bots are excluded.',
-        purchases: 'Always 0 until a ThriveCart webhook writes to the orders table. Nothing writes it yet.',
+        purchases: 'Counted from signed Stripe Checkout completion events recorded in stripe_orders.',
       },
     });
   } catch (err) {
@@ -434,17 +480,29 @@ export default {
 
     if (method === 'HEAD' || method === 'GET') {
       if (path === '/') return handleLanding(request, env, ctx);
-      if (path === '/thanks') return html(renderPage(thanksHtml, env, null));
+      if (path === '/thanks') {
+        if (isPreviewMode(env)) return html(renderThanksPage(env, 'preview'));
+        const order = await getOrderFulfillmentState(request, env);
+        if (!order.valid) return json({ ok: false, error: 'invalid_session' }, 400);
+        const state = order.fulfillment === 'granted' ? 'granted' : order.payment === 'failed' ? 'failed' : 'pending';
+        return html(renderThanksPage(env, state), state === 'pending' ? 202 : 200);
+      }
       if (path === '/preview-checkout') return html(renderPage(previewCheckoutHtml, env, null));
       if (path === '/health') return handleHealth(env);
       if (path === '/api/stats') return handleStats(request, env);
     }
 
     if (method === 'POST') {
+      if (path === '/api/checkout' && isPreviewMode(env)) {
+        return json({ ok: false, error: 'preview_locked' }, 423);
+      }
       if (path === '/api/lead') return handleLead(request, env, ctx);
+      if (path === '/api/checkout') return handleCheckout(request, env);
+      if (path === '/api/customer-portal') return handlePortal(request, env);
+      if (path === '/api/stripe-webhook') return handleWebhook(request, env);
     }
 
-    const known = ['/', '/thanks', '/preview-checkout', '/health', '/api/lead', '/api/stats'];
+    const known = ['/', '/thanks', '/preview-checkout', '/health', '/api/lead', '/api/stats', '/api/checkout', '/api/customer-portal', '/api/stripe-webhook'];
     if (known.includes(path)) return json({ ok: false, error: 'method_not_allowed' }, 405);
 
     return json({ ok: false, error: 'not_found' }, 404);

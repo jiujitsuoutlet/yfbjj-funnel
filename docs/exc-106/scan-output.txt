@@ -1,0 +1,10 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> yfbjj-funnel@1.0.0 scan
+> bash scripts/scan-secrets.sh
+
+== building worker bundle for scan ==
+bundle: .scan-out (built)
+== scanning: src .scan-out ==
+== patterns: sk_live, sk_test, whsec_, rk_ (key-shaped tokens) ==
+PASS: no sk_live / sk_test / whsec_ / rk_ key in served output

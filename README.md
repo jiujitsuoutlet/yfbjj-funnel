@@ -3,27 +3,78 @@
 Cloudflare Worker behind `welcome.yogaforbjj.net`. The landing page for the $14
 Guard Retention Bundle, plus lead capture. That is the whole job.
 
-Checkout runs on **ThriveCart** (`learnbjjfast.thrivecart.com`), and so does
-everything after it. One-click upsells require the payment session to stay on
-ThriveCart, so the entire post-purchase chain is theirs. This Worker serves the
-landing page, captures leads into D1 before the handoff, and reports health.
+Checkout uses the four verified existing Stripe Prices. The Worker captures
+leads, creates guarded Stripe-hosted Checkout Sessions, verifies webhook
+signatures, records orders in D1, and reports health.
 
-Upsell prices are deliberately absent from this repo. They live in ThriveCart
-only, because two copies drift: lifetime is $247 in the funnel and $297 on the
-main site.
-
-The Stripe layer and the retired `/upsell` page are parked in `src/deferred/`.
+Payment remains intentionally locked. A Checkout Session cannot be created
+unless `PREVIEW_MODE` is the exact string `false`, the selected offer has both
+its Stripe Price and exact AutoCreator grant key, and the authenticated
+fulfillment implementation, required Cloudflare Secrets, readiness flags, and
+D1 schema sentinel all pass. The missing bundle slugs and authenticated AutoCreator
+contract are the current software blockers.
 
 ## Routes
 
 | Route                  | Method | State                                            |
 |------------------------|--------|--------------------------------------------------|
 | `/`                    | GET    | landing page                                      |
-| `/thanks`              | GET    | fallback confirmation only, nothing is sold there  |
-| `/health`              | GET    | 200 when D1 is reachable and all 3 tables exist; 503 otherwise |
+| `/thanks`              | GET    | reads D1 order and fulfillment state; pending copy never claims access and granted copy requires a durable grant |
+| `/health`              | GET    | 200 when D1 is reachable and all 7 active tables exist; 503 otherwise |
 | `/preview-checkout`    | GET    | stand-in for the cart while `PREVIEW_MODE` is on |
 | `/api/lead`            | POST   | live - rate limited, validates email, inserts into `leads` with its variant |
 | `/api/stats`           | GET    | per-variant counts, JSON. `Authorization: Bearer $STATS_SECRET` |
+| `/api/checkout`        | POST   | creates one of four Stripe-hosted Checkout Sessions only when preview is explicitly off |
+| `/api/customer-portal` | POST   | creates a portal only after retrieving and verifying a completed Checkout Session |
+| `/api/stripe-webhook`  | POST   | verifies the raw signed body, then processes it through the D1 retry ledger |
+
+## Stripe staging
+
+The `staging` Wrangler environment has a separate Worker name, no custom
+routes, a separate D1 binding, and `PREVIEW_MODE = "true"`. It is safe to put
+on an unlisted `workers.dev` hostname after replacing the staging D1 placeholder.
+The lock returns HTTP 423 with `{"ok":false,"error":"preview_locked"}` before
+constructing a Stripe client, so no Checkout Session is created.
+
+Four existing Price IDs are mapped in configuration. Do not create, edit, or
+duplicate them. Each offer also requires its exact AutoCreator grant key.
+Confirmed names and UUIDs are not accepted as bundle slugs. The Two-Month Checkout contains the one-time $8 item and trials
+the existing $20/month recurring item until exactly two UTC calendar months
+later. Month-end dates clamp to the last valid day.
+
+The currently verified AutoCreator UUIDs, plan references, tool contract, scopes,
+and remaining slug/plan blockers are recorded in
+[`docs/autocreator-fulfillment-contract.md`](docs/autocreator-fulfillment-contract.md).
+
+Webhook registration is deliberately not part of staging setup. Once a stable
+destination is approved, register exactly:
+
+    https://<staging-worker-host>/api/stripe-webhook
+
+Minimum event types:
+
+* `checkout.session.completed`
+* `checkout.session.async_payment_succeeded`
+* `checkout.session.async_payment_failed`
+* `invoice.paid`
+* `invoice.payment_failed`
+* `customer.subscription.deleted`
+
+The real signing secret exists only after that destination is registered. Do
+not deploy a fixture value. Tests generate signatures from a test-only secret.
+No authenticated AutoCreator client exists yet. `FULFILLMENT_IMPLEMENTED` and
+`AUTOCREATOR_CLIENT_IMPLEMENTED` are independent runtime locks. Checkout also
+requires `STRIPE_WEBHOOK_SECRET`, `AUTOCREATOR_API_KEY`, both explicit readiness
+flags, and migration `0006`'s D1 sentinel. Signed events remain retryable while
+those locks are closed.
+
+Paid events write through `entitlement_outbox`. A stable operation key guards
+the documented idempotent AutoCreator grant tools; no undocumented HTTP
+idempotency header is assumed. Fresh processing leases return HTTP 503, and
+stale leases can be reclaimed. `checkout.session.completed` grants only for
+`paid` or `no_payment_required`; delayed unpaid methods wait for
+`checkout.session.async_payment_succeeded`, and async failure records a failed
+order without granting.
 
 ## Design
 
@@ -42,9 +93,15 @@ the pages through one JSON island (`<script id="page-config">`):
 | Var | Meaning |
 |-----|---------|
 | `PREVIEW_MODE`            | Default **true**. Any value other than the exact string `false` routes every CTA to `/preview-checkout` and shows the preview banner. Unset means preview, so a missing var can never send paid traffic at a cart that is not ready. |
-| `THRIVECART_BUNDLE_URL`   | $14 bundle cart link. Empty = CTA scrolls to the email form instead of dead-linking. |
 | `OFFER_DEADLINE`          | ISO 8601. Empty = the deadline bar is not rendered at all. |
 | `BUNDLE_PRICE_CENTS`      | 1400 |
+| `STRIPE_PRICE_*`          | The four verified existing Stripe Price IDs. |
+| `STRIPE_PRODUCT_TWO_MONTH` | The verified existing product used for the one-time $8 item. |
+| `AUTOCREATOR_*_BUNDLE_UUID` | Confirmed read-only bundle references. UUID is not assumed to be a grant slug. |
+| `AUTOCREATOR_*_BUNDLE_SLUG` | Exact authenticated bundle slug required by the AutoCreator grant tool. Empty keeps Checkout closed. |
+| `AUTOCREATOR_*_ENTITLEMENT_TARGET` | Exact lifetime or monthly grant target once that plan contract is confirmed. |
+| `STRIPE_WEBHOOK_READY` | Exact `true` only after the signed endpoint proof passes on the deployed revision. |
+| `AUTOCREATOR_FULFILLMENT_READY` | Exact `true` only after authenticated grant, retry, and revocation proof passes. |
 
 Prices render from these values, so one edit moves every surface.
 
@@ -73,10 +130,9 @@ the whole zone's single free rule on this one endpoint.
 
 ## Secrets
 
-The Worker currently needs **no secrets** - ThriveCart owns payment. The rule
-still stands for anything added later: secrets go in Cloudflare Secrets, read
-off the `env` binding, never in source, never in `wrangler.toml`, never in the
-client bundle. Local dev values go in `.dev.vars` (gitignored); see
+Stripe and webhook keys are Cloudflare Secrets, read off the `env` binding,
+never in source, never in `wrangler.toml`, and never in the client bundle. Local
+development values go in `.dev.vars` (gitignored); see
 `.dev.vars.example`.
 
     npm run scan     # fails non-zero if a secret-shaped key reaches served output
@@ -95,9 +151,9 @@ Order of precedence:
 4. everyone else is flipped 50/50, cookied, and counted once
 
 Attribution rides the whole way through: the variant is stored on the lead row
-at capture, appended to the ThriveCart URL as `passthrough[variant]` plus
-`utm_content`, and has a column waiting on `orders` for when the webhook is
-wired. Without that last step the test measures clicks, not money.
+at capture, sent in Stripe Checkout metadata, and copied into `stripe_orders`
+from the verified webhook. Without that last step the test measures leads, not
+money.
 
 Cost to know about: the landing page now sends `Cache-Control: private,
 no-store` and `Vary: Cookie`, because its body depends on the cookie. It cannot
@@ -112,15 +168,19 @@ leave it running forever.
 
 Refuses to deploy a half-configured page. Checks, all reported in one run:
 
-1. `THRIVECART_BUNDLE_URL` is set and is an https URL
-2. `OFFER_DEADLINE` is set, parses, and is in the future
-3. `PREVIEW_MODE` is exactly `"false"`
-4. `database_id` is a real D1 uuid, not the placeholder
-5. no unfilled `[[PLACEHOLDER]]` markers would render on a live page
-6. both variants are complete pages (CTA, price block, lead form, all 8 collections)
-7. the variant parameter survives onto the outbound cart URL
-8. the ThriveCart pages are built and current
-9. the secrets scan passes
+1. all four verified Stripe Price IDs and the Two-Month Product ID are valid and unique
+2. all four exact AutoCreator grant keys are set
+3. authenticated AutoCreator fulfillment is implemented and tested
+4. authenticated AutoCreator client is implemented and tested
+5. webhook and fulfillment readiness flags are exactly `"true"`
+6. runtime code requires both Cloudflare Secrets and migration `0006`'s D1 sentinel
+7. `OFFER_DEADLINE` is set, parses, and is in the future
+8. `PREVIEW_MODE` is exactly `"false"`
+9. `database_id` is a real D1 uuid, not the placeholder
+10. no unfilled `[[PLACEHOLDER]]` markers would render on a served page
+11. both variants are complete pages (CTA, price block, lead form, all 8 collections)
+12. the landing page posts to the guarded Checkout endpoint and sends variant metadata
+13. every served image exists and the secrets scan passes
 
 `npm run deploy` runs preflight first and stops on any failure.
 

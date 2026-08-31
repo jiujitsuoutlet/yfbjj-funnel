@@ -1,6 +1,6 @@
 -- 0003: A/B test attribution.
 --
--- The variant has to survive the handoff to ThriveCart and come back on the
+-- The variant has to survive into Stripe metadata and come back on the
 -- webhook, otherwise the test measures clicks rather than money. It is stored
 -- in three places for that reason: on the lead at capture time, on the order
 -- when the webhook is wired, and as a visit counter so the denominator of the
