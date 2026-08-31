@@ -38,6 +38,7 @@ test('bundle grant uses the documented envelope and requires exact read-back', a
   assert.deepEqual(transport.calls[0].body, { args: {
     email: 'buyer@example.com', bundle_slug: 'guard-retention', source: 'stripe_purchase', notes: 'Stripe Checkout cs_1',
   } });
+  assert.deepEqual(transport.calls[3].body, { args: { memberId: 'member_1' } });
 });
 
 test('plan grant attaches Stripe references and proves the exact active price', async () => {
@@ -57,6 +58,7 @@ test('plan grant attaches Stripe references and proves the exact active price', 
     email: 'buyer@example.com', price_id: 'price_plan', status: 'active', create_if_missing: true,
     stripe_customer_id: 'cus_1', stripe_subscription_id: 'sub_1',
   });
+  assert.deepEqual(calls[3].body, { args: { memberId: 'member_2' } });
 });
 
 test('transport, auth, rate, envelope, and read-back failures never verify a grant', async () => {

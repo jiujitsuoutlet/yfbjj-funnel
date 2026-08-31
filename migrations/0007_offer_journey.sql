@@ -19,8 +19,7 @@ CREATE TABLE IF NOT EXISTS checkout_flows (
   expires_at TEXT NOT NULL,
   two_month_trial_end TEXT,
   version INTEGER NOT NULL DEFAULT 0,
-  updated_at TEXT NOT NULL,
-  FOREIGN KEY (root_session_id) REFERENCES stripe_orders(session_id)
+  updated_at TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS offer_transitions (

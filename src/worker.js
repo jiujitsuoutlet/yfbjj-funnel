@@ -538,7 +538,7 @@ export default {
         if (!order.valid) return json({ ok: false, error: 'invalid_session' }, 400);
         const state = order.fulfillment === 'granted'
           ? order.access === 'activation_needed' ? 'activation' : 'granted'
-          : order.payment === 'failed' ? 'failed' : 'pending';
+          : order.payment === 'failed' || order.fulfillment === 'failed' ? 'failed' : 'pending';
         return html(renderThanksPage(env, state), state === 'pending' ? 202 : 200);
       }
       if (path === '/offer') {

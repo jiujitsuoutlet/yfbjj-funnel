@@ -130,7 +130,7 @@ export function createAutoCreatorClient(env, deps = {}) {
       const member = await tool('members.findByEmail', { email });
       const id = memberId(member);
       if (!id) throw new AutoCreatorError('AutoCreator member read-back did not return a member ID', { retryable: true, code: 'readback_failed' });
-      const access = await tool('members.checkAccess', { member_id: id });
+      const access = await tool('members.checkAccess', { memberId: id });
       return { verified: true, activationNeeded: needsActivation(access) };
     }
 
@@ -153,7 +153,7 @@ export function createAutoCreatorClient(env, deps = {}) {
           retryable: true, code: 'readback_failed',
         });
       }
-      const access = await tool('members.checkAccess', { member_id: id });
+      const access = await tool('members.checkAccess', { memberId: id });
       return { verified: true, activationNeeded: needsActivation(access) };
     }
     throw new AutoCreatorError('Unsupported fulfillment offer', { code: 'unsupported_offer' });

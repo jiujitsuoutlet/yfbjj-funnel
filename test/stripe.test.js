@@ -19,9 +19,11 @@ const env = {
   STRIPE_WEBHOOK_READY: 'true',
   AUTOCREATOR_FULFILLMENT_READY: 'true',
   STRIPE_PRICE_BUNDLE: 'price_bundle',
+  STRIPE_PRICE_HEAD_TO_TOES: 'price_head',
   STRIPE_PRICE_TWO_MONTH: 'price_monthly',
   STRIPE_PRODUCT_TWO_MONTH: 'prod_trial',
   AUTOCREATOR_GUARD_RETENTION_BUNDLE_SLUG: 'guard-retention',
+  AUTOCREATOR_HEAD_TO_TOES_BUNDLE_SLUG: 'head-slug',
   AUTOCREATOR_MONTHLY_ENTITLEMENT_TARGET: 'full-monthly',
 };
 
@@ -68,11 +70,12 @@ test('checkout fails closed before Stripe when fulfillment is not implemented', 
 test('checkout preserves first-party attribution in session and payment metadata', async () => {
   let created;
   const stripe = { checkout: { sessions: { create: async (params) => { created = params; return { url: 'https://checkout.test/s' }; } } } };
+  const DB = database();
   const request = new Request('https://staging.test/api/checkout', {
     method: 'POST', headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ offer: 'bundle', attribution: { variant: 'b', utm_source: 'email', ignored: 'no' } }),
   });
-  const response = await handleCheckout(request, { ...env, DB: database() }, {
+  const response = await handleCheckout(request, { ...env, DB }, {
     stripe,
     fulfillmentImplemented: true,
   });
@@ -86,6 +89,10 @@ test('checkout preserves first-party attribution in session and payment metadata
   assert.equal(created.customer_creation, 'always');
   assert.deepEqual(created.payment_intent_data.metadata, created.metadata);
   assert.match(response.headers.get('set-cookie'), /^yfbjj_flow=/);
+  const flowInsert = DB.calls.findIndex(({ sql }) => sql.includes('INSERT INTO checkout_flows'));
+  const rootUpdate = DB.calls.findIndex(({ sql }) => sql.includes('UPDATE checkout_flows SET root_session_id'));
+  assert.ok(flowInsert >= 0 && rootUpdate > flowInsert);
+  assert.equal(DB.calls.some(({ sql }) => sql.includes('INSERT INTO stripe_orders')), false);
 });
 
 test('initial checkout rejects every non-Guard offer and calendar months clamp', async () => {
@@ -145,7 +152,7 @@ async function signature(payload, secret, timestamp) {
 }
 
 function database({ eventStatus, eventUpdatedAt, outboxStatus, outboxLeaseExpires, failOrder = false,
-  orderStatus, fulfillmentStatus, accessState = 'active' } = {}) {
+  orderStatus, fulfillmentStatus, accessState = 'active', flowRow } = {}) {
   const calls = [];
   const state = {
     eventStatus,
@@ -155,6 +162,7 @@ function database({ eventStatus, eventUpdatedAt, outboxStatus, outboxLeaseExpire
     orderStatus,
     fulfillmentStatus,
     accessState,
+    flowRow: flowRow || { root_session_id: 'cs_fixture', customer_id: 'cus_fixture', current_offer: null, status: 'front_checkout', pending_session_id: 'cs_fixture' },
   };
   const DB = {
     calls,
@@ -188,6 +196,9 @@ function database({ eventStatus, eventUpdatedAt, outboxStatus, outboxLeaseExpire
             if (sql.includes('SELECT status, fulfillment_status, access_state FROM stripe_orders')) {
               return state.orderStatus ? { status: state.orderStatus, fulfillment_status: state.fulfillmentStatus, access_state: state.accessState } : null;
             }
+            if (sql.includes('SELECT root_session_id, customer_id, current_offer, status, pending_session_id')) {
+              return state.flowRow;
+            }
             if (sql.includes('UPDATE checkout_flows SET customer_id')) return { flow_hash: 'flow_fixture' };
             return null;
           },
@@ -209,6 +220,10 @@ function database({ eventStatus, eventUpdatedAt, outboxStatus, outboxLeaseExpire
             } else if (sql.includes("fulfillment_status = 'granted'")) {
               state.fulfillmentStatus = 'granted';
               state.accessState = values[2];
+            } else if (sql.includes("status = 'paid_stale'")) {
+              state.orderStatus = 'paid_stale';
+              state.fulfillmentStatus = 'failed';
+              state.stale = true;
             } else if (sql.includes("fulfillment_status = 'failed'")) {
               state.fulfillmentStatus = 'failed';
             }
@@ -315,6 +330,29 @@ test('fresh event claims return retryable 503 while stale processing is reclaime
   assert.equal(stale.status, 200);
   assert.deepEqual(keys, ['grant:cs_fixture:guard-retention']);
   assert.equal(staleDB.state.eventStatus, 'processed');
+});
+
+test('late child completion is acknowledged without granting a stale offer', async () => {
+  const timestamp = 2_000_000_000;
+  const DB = database({ flowRow: {
+    root_session_id: 'cs_root', customer_id: 'cus_fixture', current_offer: 'lifetime',
+    status: 'offer_ready', pending_session_id: null,
+  } });
+  const event = checkoutEvent('checkout.session.completed');
+  event.data.object.id = 'cs_late_head';
+  event.data.object.metadata = {
+    offer: 'head_to_toes', price_id: 'price_head', entitlement_key: 'head-slug',
+    flow_hash: 'flow_fixture', root_session_id: 'cs_root', parent_session_id: 'cs_root',
+  };
+  let grants = 0;
+  const result = await handleWebhook(await webhookRequest(event, timestamp), { ...env, DB }, {
+    timestamp: timestamp * 1000, fulfillmentImplemented: true,
+    autocreator: { grant: async () => { grants++; } },
+  });
+  assert.equal(result.status, 200);
+  assert.equal(grants, 0);
+  assert.equal(DB.state.stale, true);
+  assert.equal(DB.state.eventStatus, 'processed');
 });
 
 test('AutoCreator retries reuse one stable outbox operation key', async () => {

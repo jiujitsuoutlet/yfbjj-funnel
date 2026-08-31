@@ -110,13 +110,19 @@ test('server derives the sole allowed child offer and accept replay returns one 
   assert.equal(created.length, 1);
 });
 
-test('declines follow the approved order and Stripe cancel remains a pending offer', async () => {
+test('a live pending Checkout cannot be declined and ready declines follow the approved order', async () => {
   const DB = flowDatabase({ status: 'checkout_pending', pending_session_id: 'cs_abandoned', pending_checkout_url: 'https://checkout.test/abandoned' });
   const result = await handleOfferSkip(request('/api/offer-skip'), { ...baseEnv, DB }, { stripe: stripe([]) });
-  assert.equal(result.status, 200);
-  assert.equal(DB.state.current_offer, 'lifetime');
-  assert.equal(DB.state.status, 'offer_ready');
-  assert.equal((await result.json()).url, '/offer?session_id=cs_parent');
+  assert.equal(result.status, 409);
+  assert.deepEqual(await result.json(), { ok: false, error: 'checkout_still_open' });
+  assert.equal(DB.state.current_offer, 'head_to_toes');
+  assert.equal(DB.state.status, 'checkout_pending');
+
+  const ready = flowDatabase();
+  const skipped = await handleOfferSkip(request('/api/offer-skip'), { ...baseEnv, DB: ready }, { stripe: stripe([]) });
+  assert.equal(skipped.status, 200);
+  assert.equal(ready.state.current_offer, 'lifetime');
+  assert.equal((await skipped.json()).url, '/offer?session_id=cs_parent');
 
   const lifetime = flowDatabase({ current_offer: 'lifetime' });
   await handleOfferSkip(request('/api/offer-skip'), { ...baseEnv, DB: lifetime }, { stripe: stripe([]), now: () => new Date('2027-01-31T12:00:00Z') });

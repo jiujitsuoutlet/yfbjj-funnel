@@ -402,13 +402,16 @@ export async function handleOfferSkip(request, env, deps = {}) {
   if (!auth.ok) return response({ ok: false, error: auth.error }, auth.status);
   const current = auth.flow.current_offer;
   if (!current || auth.flow.status === 'complete') return response({ ok: false, error: 'journey_complete' }, 409);
+  if (auth.flow.status === 'checkout_pending') {
+    return response({ ok: false, error: 'checkout_still_open' }, 409);
+  }
   const next = SKIP_OFFER[current];
   const trialEnd = next === 'two_month' ? addCalendarMonths(clock(deps), 2).toISOString() : null;
   const changed = await env.DB.prepare(
     `UPDATE checkout_flows SET current_offer = ?2, status = ?3,
       pending_session_id = NULL, pending_checkout_url = NULL,
       two_month_trial_end = ?4, version = version + 1, updated_at = ?5
-     WHERE flow_hash = ?1 AND current_offer = ?6 AND status IN ('offer_ready', 'checkout_pending')
+     WHERE flow_hash = ?1 AND current_offer = ?6 AND status = 'offer_ready'
      RETURNING flow_hash`
   ).bind(auth.flowHash, next, next ? 'offer_ready' : 'complete', trialEnd, clock(deps).toISOString(), current).first();
   if (!changed) return response({ ok: false, error: 'concurrent_transition' }, 409);
@@ -575,6 +578,41 @@ async function advanceFlowAfterGrant(env, session, now) {
   if (!changed) throw new Error('checkout flow transition was stale or out of order');
 }
 
+async function flowCanFulfill(env, session) {
+  const metadata = session.metadata || {};
+  if (!metadata.flow_hash) return false;
+  const flow = await env.DB.prepare(
+    `SELECT root_session_id, customer_id, current_offer, status, pending_session_id
+     FROM checkout_flows WHERE flow_hash = ?1`
+  ).bind(metadata.flow_hash).first();
+  if (!flow) return false;
+  if (metadata.offer === 'bundle') {
+    return flow.status === 'front_checkout' && flow.root_session_id === session.id;
+  }
+  return flow.status === 'checkout_pending'
+    && flow.pending_session_id === session.id
+    && flow.current_offer === metadata.offer
+    && flow.customer_id === session.customer;
+}
+
+async function releaseFailedCheckout(env, session, now) {
+  const metadata = session.metadata || {};
+  if (!metadata.flow_hash) return;
+  if (metadata.offer === 'bundle') {
+    await env.DB.prepare(
+      `UPDATE checkout_flows SET status = 'failed', pending_session_id = NULL,
+       pending_checkout_url = NULL, updated_at = ?3
+       WHERE flow_hash = ?1 AND root_session_id = ?2 AND status = 'front_checkout'`
+    ).bind(metadata.flow_hash, session.id, now.toISOString()).run();
+    return;
+  }
+  await env.DB.prepare(
+    `UPDATE checkout_flows SET status = 'offer_ready', pending_session_id = NULL,
+     pending_checkout_url = NULL, updated_at = ?3
+     WHERE flow_hash = ?1 AND pending_session_id = ?2 AND status = 'checkout_pending'`
+  ).bind(metadata.flow_hash, session.id, now.toISOString()).run();
+}
+
 export async function handleWebhook(request, env, deps = {}) {
   if (!env.STRIPE_WEBHOOK_SECRET || !env.STRIPE_SECRET_KEY) {
     return response({ ok: false, error: 'webhook_not_configured' }, 503);
@@ -605,7 +643,7 @@ export async function handleWebhook(request, env, deps = {}) {
     const readiness = await checkRuntimeReadiness(env, deps);
     if (!readiness.ok) throw new Error(`runtime not ready: ${readiness.reason}`);
 
-    if (['checkout.session.completed', 'checkout.session.async_payment_succeeded', 'checkout.session.async_payment_failed'].includes(event.type)) {
+    if (['checkout.session.completed', 'checkout.session.async_payment_succeeded', 'checkout.session.async_payment_failed', 'checkout.session.expired'].includes(event.type)) {
       const session = event.data.object;
       const offerKey = session.metadata && session.metadata.offer;
       const mapping = resolveOffer(env, offerKey);
@@ -614,14 +652,22 @@ export async function handleWebhook(request, env, deps = {}) {
         throw new Error('checkout metadata does not match configured offer mapping');
       }
 
-      const failed = event.type === 'checkout.session.async_payment_failed';
+      const failed = event.type === 'checkout.session.async_payment_failed' || event.type === 'checkout.session.expired';
       const paid = event.type === 'checkout.session.async_payment_succeeded'
         || ['paid', 'no_payment_required'].includes(session.payment_status);
       const orderStatus = failed ? 'failed' : paid ? 'paid' : 'pending';
       await orderStatement(env, session, mapping, orderStatus, now).run();
+      if (failed) await releaseFailedCheckout(env, session, clock(deps));
       if (paid && !failed) {
-        await processEntitlementOperation(env, session, mapping, deps);
-        await advanceFlowAfterGrant(env, session, clock(deps));
+        if (await flowCanFulfill(env, session)) {
+          await processEntitlementOperation(env, session, mapping, deps);
+          await advanceFlowAfterGrant(env, session, clock(deps));
+        } else {
+          await env.DB.prepare(
+            `UPDATE stripe_orders SET status = 'paid_stale', fulfillment_status = 'failed',
+             access_state = 'failed', updated_at = ?2 WHERE session_id = ?1`
+          ).bind(session.id, clock(deps).toISOString()).run();
+        }
       }
     }
     await env.DB.prepare("UPDATE stripe_events SET status = 'processed', updated_at = ?2 WHERE id = ?1")
