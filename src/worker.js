@@ -12,10 +12,19 @@
 import landingAHtml from './pages/landing-a.html';
 import landingBHtml from './pages/landing-b.html';
 import thanksHtml from './pages/thanks.html';
+import offerHtml from './pages/offer.html';
 import previewCheckoutHtml from './pages/preview-checkout.html';
 import baseCss from './pages/_base.css';
 import pageJs from './pages/_page.js';
-import { getOrderFulfillmentState, handleCheckout, handlePortal, handleWebhook } from './stripe.js';
+import {
+  getOfferJourneyState,
+  getOrderFulfillmentState,
+  handleCheckout,
+  handleOfferCheckout,
+  handleOfferSkip,
+  handlePortal,
+  handleWebhook,
+} from './stripe.js';
 
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
@@ -162,11 +171,12 @@ function isNoD1Preview(env) {
   return isPreviewMode(env) && String(env.PREVIEW_NO_D1 || '').trim().toLowerCase() === 'true';
 }
 
-function renderPage(template, env, variant) {
+function renderPage(template, env, variant, extra = {}) {
   const config = {};
   for (const key of PAGE_CONFIG_KEYS) config[key] = env[key] || '';
   config.PREVIEW_MODE = isPreviewMode(env);
   config.VARIANT = variant || '';
+  Object.assign(config, extra);
   // `<` escaped so a value can never close the script tag it sits in.
   const payload = JSON.stringify(config).replace(/</g, '\\u003c');
   // Replacer FUNCTIONS, not strings: a replacement string treats $$, $&, $`
@@ -197,8 +207,13 @@ function renderThanksPage(env, state) {
     },
     granted: {
       title: 'Access granted', kicker: 'Order confirmed', headline: "You're in.",
-      message: 'Payment is complete and your access grant is durably recorded. Your receipt and access details are on the way by email.',
-      support: 'Nothing in your inbox after 15 minutes? Check spam and promotions, then write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your receipt.',
+      message: 'Payment is complete and your access grant is durably recorded.',
+      support: 'Sign in to Yoga for BJJ to use your access. If anything looks wrong, write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your Stripe receipt.',
+    },
+    activation: {
+      title: 'Activate your access', kicker: 'Order confirmed', headline: 'Your access is assigned.',
+      message: 'Payment is complete. Your Yoga for BJJ access is assigned, but this account has not signed in yet.',
+      support: 'Open Yoga for BJJ and use the email from checkout to sign in. If you need help, write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your Stripe receipt.',
     },
   }[state];
   return renderPage(thanksHtml, env, null)
@@ -207,6 +222,43 @@ function renderThanksPage(env, state) {
     .replace(/\{\{THANKS_HEADLINE\}\}/g, () => copy.headline)
     .replace(/\{\{THANKS_MESSAGE\}\}/g, () => copy.message)
     .replace(/\{\{THANKS_SUPPORT\}\}/g, () => copy.support);
+}
+
+function offerCopy(offer, trialEnd) {
+  if (offer === 'head_to_toes') return {
+    title: 'Head to Toes', kicker: 'Optional next step', headline: 'Add Head to Toes.',
+    message: 'Keep this separate from your Guard Retention purchase. Choose it only if you want it.',
+    price: '$29', terms: 'A new Stripe Checkout opens. Nothing is charged unless you confirm there.',
+    accept: 'Add Head to Toes for $29', skip: 'No thanks. Show me the next option.',
+  };
+  if (offer === 'lifetime') return {
+    title: 'Lifetime access', kicker: 'Optional next step', headline: 'Choose lifetime access.',
+    message: 'This is a separate one-time purchase.',
+    price: '$247 once', terms: 'A new Stripe Checkout opens. Nothing is charged unless you confirm there.',
+    accept: 'Choose lifetime for $247', skip: 'No thanks. Show me the lower-cost option.',
+  };
+  const starts = trialEnd
+    ? new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' }).format(new Date(trialEnd)) + ' UTC'
+    : 'two calendar months after checkout';
+  return {
+    title: 'Two-month access', kicker: 'Optional lower-cost option', headline: 'Start with two months.',
+    message: 'This is not lifetime access. It becomes a monthly membership unless you cancel.',
+    price: '$8 today', terms: `Then $19.99 per month starting ${starts}, until canceled. Stripe shows the same terms before you confirm.`,
+    accept: 'Start for $8', skip: 'No thanks. Finish my order.',
+  };
+}
+
+function renderOfferPage(env, state, sourceSessionId) {
+  const copy = offerCopy(state.offer, state.trialEnd);
+  return renderPage(offerHtml, env, null, { SOURCE_SESSION_ID: sourceSessionId })
+    .replace(/\{\{OFFER_TITLE\}\}/g, () => copy.title)
+    .replace(/\{\{OFFER_KICKER\}\}/g, () => copy.kicker)
+    .replace(/\{\{OFFER_HEADLINE\}\}/g, () => copy.headline)
+    .replace(/\{\{OFFER_MESSAGE\}\}/g, () => copy.message)
+    .replace(/\{\{OFFER_PRICE\}\}/g, () => copy.price)
+    .replace(/\{\{OFFER_TERMS\}\}/g, () => copy.terms)
+    .replace(/\{\{OFFER_ACCEPT\}\}/g, () => copy.accept)
+    .replace(/\{\{OFFER_SKIP\}\}/g, () => copy.skip);
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -322,10 +374,10 @@ async function handleHealth(env) {
   try {
     const row = await env.DB.prepare(
       `SELECT count(*) AS n FROM sqlite_master
-        WHERE type = 'table' AND name IN ('leads', 'rate_limits', 'variant_visits', 'stripe_events', 'stripe_orders', 'fulfillment_readiness', 'entitlement_outbox')`
+        WHERE type = 'table' AND name IN ('leads', 'rate_limits', 'variant_visits', 'stripe_events', 'stripe_orders', 'fulfillment_readiness', 'entitlement_outbox', 'checkout_flows', 'offer_transitions')`
     ).first();
     const tables = row ? row.n : 0;
-    if (tables < 7) {
+    if (tables < 9) {
       return json(
         { ok: false, d1: 'connected', schema: 'incomplete', tables_found: tables, at: nowIso() },
         503
@@ -484,8 +536,17 @@ export default {
         if (isPreviewMode(env)) return html(renderThanksPage(env, 'preview'));
         const order = await getOrderFulfillmentState(request, env);
         if (!order.valid) return json({ ok: false, error: 'invalid_session' }, 400);
-        const state = order.fulfillment === 'granted' ? 'granted' : order.payment === 'failed' ? 'failed' : 'pending';
+        const state = order.fulfillment === 'granted'
+          ? order.access === 'activation_needed' ? 'activation' : 'granted'
+          : order.payment === 'failed' || order.fulfillment === 'failed' ? 'failed' : 'pending';
         return html(renderThanksPage(env, state), state === 'pending' ? 202 : 200);
+      }
+      if (path === '/offer') {
+        const state = await getOfferJourneyState(request, env);
+        if (!state.ok) return json({ ok: false, error: state.error }, state.status || 403);
+        if (state.pending) return html(renderThanksPage(env, 'pending'), 202);
+        if (state.complete) return html(renderThanksPage(env, state.access === 'activation_needed' ? 'activation' : 'granted'));
+        return html(renderOfferPage(env, state, url.searchParams.get('session_id') || ''));
       }
       if (path === '/preview-checkout') return html(renderPage(previewCheckoutHtml, env, null));
       if (path === '/health') return handleHealth(env);
@@ -498,11 +559,13 @@ export default {
       }
       if (path === '/api/lead') return handleLead(request, env, ctx);
       if (path === '/api/checkout') return handleCheckout(request, env);
+      if (path === '/api/offer-checkout') return handleOfferCheckout(request, env);
+      if (path === '/api/offer-skip') return handleOfferSkip(request, env);
       if (path === '/api/customer-portal') return handlePortal(request, env);
       if (path === '/api/stripe-webhook') return handleWebhook(request, env);
     }
 
-    const known = ['/', '/thanks', '/preview-checkout', '/health', '/api/lead', '/api/stats', '/api/checkout', '/api/customer-portal', '/api/stripe-webhook'];
+    const known = ['/', '/offer', '/thanks', '/preview-checkout', '/health', '/api/lead', '/api/stats', '/api/checkout', '/api/offer-checkout', '/api/offer-skip', '/api/customer-portal', '/api/stripe-webhook'];
     if (known.includes(path)) return json({ ok: false, error: 'method_not_allowed' }, 405);
 
     return json({ ok: false, error: 'not_found' }, 404);

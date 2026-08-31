@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex">
+<title>{{OFFER_TITLE}}</title>
+<style>{{BASE_CSS}}</style>
+</head>
+<body>
+<div id="preview-banner" class="preview-banner" hidden>
+  Preview build &middot; <strong>checkout not connected</strong>
+</div>
+<main>
+  <section class="hero">
+    <p class="kicker">{{OFFER_KICKER}}</p>
+    <h1>{{OFFER_HEADLINE}}</h1>
+    <p class="lede">{{OFFER_MESSAGE}}</p>
+    <p class="offer-price">{{OFFER_PRICE}}</p>
+    <p class="dim">{{OFFER_TERMS}}</p>
+    <div class="form-actions">
+      <button class="cta" type="button" data-offer-accept>{{OFFER_ACCEPT}}</button>
+      <button class="decline" type="button" data-offer-skip>{{OFFER_SKIP}}</button>
+    </div>
+    <p class="faint" data-offer-status aria-live="polite"></p>
+  </section>
+  <footer>
+    <p>Yoga for BJJ</p>
+    <nav>
+      <a href="https://yfbjj.autocreator.ai/legal/terms">Terms</a> &middot;
+      <a href="https://yfbjj.autocreator.ai/legal/privacy">Privacy</a>
+    </nav>
+  </footer>
+</main>
+<script id="page-config" type="application/json">{{PAGE_CONFIG_JSON}}</script>
+<script>{{PAGE_JS}}</script>
+</body>
+</html>

@@ -85,6 +85,16 @@ AutoCreator call must remain behind the stable D1 outbox operation key. Do not
 invent an HTTP idempotency header; the two confirmed grant tools are themselves
 idempotent. Durable `granted` state must be written before `/thanks` claims access.
 
+**The post-purchase sequence is server-owned.** Initial Checkout accepts Guard
+only. Child offers come from D1, never from browser-supplied offer data. Every
+mutation requires the opaque HttpOnly flow cookie, same Origin, the matching
+paid Stripe Session, and durable AutoCreator read-back. Each accept opens a
+fresh Stripe-hosted Checkout. A Stripe cancel is not a decline.
+
+**AutoCreator success requires read-back.** HTTP 200 with `ok:false`, a wrong
+tool name, invalid JSON, or a write without exact bundle/plan read-back is
+failure. Never mark D1 granted from the write response alone.
+
 ## Verification discipline
 
 **Verify in a real browser, not curl.** A JS syntax error in the inlined

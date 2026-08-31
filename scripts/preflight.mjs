@@ -101,6 +101,20 @@ const readinessMigration = readFileSync(join(ROOT, 'migrations', '0006_fulfillme
 if (!readinessMigration.includes('fulfillment_readiness') || !readinessMigration.includes('entitlement_outbox')) {
   fail('migration 0006 does not contain both the readiness sentinel and durable entitlement outbox.');
 } else pass('readiness sentinel and durable entitlement outbox migration present');
+const flowMigration = readFileSync(join(ROOT, 'migrations', '0007_offer_journey.sql'), 'utf8');
+const autoCreatorSource = readFileSync(join(ROOT, 'src', 'autocreator.js'), 'utf8');
+if (!flowMigration.includes('checkout_flows') || !flowMigration.includes('offer_transitions')) {
+  fail('migration 0007 does not contain the cookie-bound offer state machine.');
+} else pass('cookie-bound offer state migration present');
+if (!autoCreatorSource.includes('members.grantBundleEntitlement')
+  || !autoCreatorSource.includes('members.setMembership')
+  || !autoCreatorSource.includes('members.listBundleEntitlements')
+  || !autoCreatorSource.includes('subscriptions.getActive')) {
+  fail('authenticated AutoCreator grant and read-back client paths are incomplete.');
+} else pass('AutoCreator bundle and plan grant/read-back client paths present');
+if (!stripeSource.includes("offerKey !== 'bundle'") || !stripeSource.includes('FLOW_COOKIE')) {
+  fail('initial Checkout is not locked to Guard or the child sequence is not cookie-bound.');
+} else pass('initial Checkout is Guard-only and child sequence is cookie-bound');
 
 /* 2. deadline set and still in the future */
 const deadline = (cfg.OFFER_DEADLINE || '').trim();
@@ -136,7 +150,7 @@ if (!dbId || dbId === 'REPLACE_WITH_D1_DATABASE_ID') {
 }
 
 /* 5. no unfilled copy placeholders left in any served page */
-const WORKER_PAGES = ['landing-a.html', 'landing-b.html', 'thanks.html', 'preview-checkout.html'];
+const WORKER_PAGES = ['landing-a.html', 'landing-b.html', 'offer.html', 'thanks.html', 'preview-checkout.html'];
 const leftovers = [];
 
 function sweep(label, html) {

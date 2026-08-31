@@ -19,12 +19,15 @@ contract are the current software blockers.
 | Route                  | Method | State                                            |
 |------------------------|--------|--------------------------------------------------|
 | `/`                    | GET    | landing page                                      |
+| `/offer`               | GET    | cookie-bound next step after prior payment and access are durable |
 | `/thanks`              | GET    | reads D1 order and fulfillment state; pending copy never claims access and granted copy requires a durable grant |
-| `/health`              | GET    | 200 when D1 is reachable and all 7 active tables exist; 503 otherwise |
+| `/health`              | GET    | 200 when D1 is reachable and all 9 active tables exist; 503 otherwise |
 | `/preview-checkout`    | GET    | stand-in for the cart while `PREVIEW_MODE` is on |
 | `/api/lead`            | POST   | live - rate limited, validates email, inserts into `leads` with its variant |
 | `/api/stats`           | GET    | per-variant counts, JSON. `Authorization: Bearer $STATS_SECRET` |
-| `/api/checkout`        | POST   | creates one of four Stripe-hosted Checkout Sessions only when preview is explicitly off |
+| `/api/checkout`        | POST   | creates Guard Checkout only; every other offer key is rejected |
+| `/api/offer-checkout`  | POST   | accepts the sole D1-authorized next offer in a fresh hosted Checkout |
+| `/api/offer-skip`      | POST   | records an explicit decline and advances the D1 state machine |
 | `/api/customer-portal` | POST   | creates a portal only after retrieving and verifying a completed Checkout Session |
 | `/api/stripe-webhook`  | POST   | verifies the raw signed body, then processes it through the D1 retry ledger |
 
@@ -62,11 +65,20 @@ Minimum event types:
 
 The real signing secret exists only after that destination is registered. Do
 not deploy a fixture value. Tests generate signatures from a test-only secret.
-No authenticated AutoCreator client exists yet. `FULFILLMENT_IMPLEMENTED` and
+The authenticated AutoCreator client is implemented but not enabled.
+`FULFILLMENT_IMPLEMENTED` and
 `AUTOCREATOR_CLIENT_IMPLEMENTED` are independent runtime locks. Checkout also
 requires `STRIPE_WEBHOOK_SECRET`, `AUTOCREATOR_API_KEY`, both explicit readiness
 flags, and migration `0006`'s D1 sentinel. Signed events remain retryable while
 those locks are closed.
+
+The client uses the documented `{ "args": { ... } }` tool envelope and marks
+D1 granted only after exact bundle or active-plan read-back. The post-purchase
+sequence is server-owned: Guard, optional Head to Toes, optional Lifetime, then
+Two-Month after a Lifetime decline. D1 derives each step from an opaque HttpOnly
+flow-cookie hash. Every accept opens a new Stripe-hosted Checkout. Two-Month
+persists one exact timestamp for the `$8 today, then $19.99/month` terms shown
+both before Checkout and to Stripe.
 
 Paid events write through `entitlement_outbox`. A stable operation key guards
 the documented idempotent AutoCreator grant tools; no undocumented HTTP

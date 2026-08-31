@@ -7,6 +7,9 @@ const out = process.argv[3] || 'artifacts/after';
 const pages = [
   ['landing-a', '/?v=a'],
   ['landing-b', '/?v=b'],
+  ['offer-head', '/offer?step=head_to_toes'],
+  ['offer-lifetime', '/offer?step=lifetime'],
+  ['offer-two-month', '/offer?step=two_month'],
   ['thanks', '/thanks'],
   ['preview-checkout', '/preview-checkout'],
 ];
