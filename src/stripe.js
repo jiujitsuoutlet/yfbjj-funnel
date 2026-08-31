@@ -1,18 +1,33 @@
 import Stripe from 'stripe';
 
 export const OFFERS = Object.freeze({
-  bundle: { priceVar: 'STRIPE_PRICE_BUNDLE', mode: 'payment' },
-  head_to_toes: { priceVar: 'STRIPE_PRICE_HEAD_TO_TOES', mode: 'payment' },
-  lifetime: { priceVar: 'STRIPE_PRICE_LIFETIME', mode: 'payment' },
-  two_month: { priceVar: 'STRIPE_PRICE_TWO_MONTH', mode: 'subscription' },
+  bundle: {
+    priceVar: 'STRIPE_PRICE_BUNDLE',
+    entitlementVar: 'AUTOCREATOR_ENTITLEMENT_GUARD_RETENTION_ID',
+    mode: 'payment',
+  },
+  head_to_toes: {
+    priceVar: 'STRIPE_PRICE_HEAD_TO_TOES',
+    entitlementVar: 'AUTOCREATOR_ENTITLEMENT_HEAD_TO_TOES_ID',
+    mode: 'payment',
+  },
+  lifetime: {
+    priceVar: 'STRIPE_PRICE_LIFETIME',
+    entitlementVar: 'AUTOCREATOR_ENTITLEMENT_LIFETIME_ID',
+    mode: 'payment',
+  },
+  two_month: {
+    priceVar: 'STRIPE_PRICE_TWO_MONTH',
+    entitlementVar: 'AUTOCREATOR_ENTITLEMENT_TWO_MONTH_ID',
+    mode: 'subscription',
+  },
 });
 
-export const AUTOCREATOR_PRICE_MAP = Object.freeze({
-  price_1U9IkNIwpEtt4FIedvXFb9tC: 'Guard Retention',
-});
+// AutoCreator's authenticated write contract is not present in this repository.
+// Keep Checkout closed until that integration and its retry tests actually exist.
+export const FULFILLMENT_IMPLEMENTED = false;
 
-const ATTRIBUTION_KEYS = ['variant', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content'];
-const encoder = new TextEncoder();
+const ATTRIBUTION_KEYS = ['variant', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'gclid'];
 
 export function isPreviewMode(env) {
   return env.PREVIEW_MODE !== 'false';
@@ -48,6 +63,22 @@ function stripeClient(env) {
   return new Stripe(env.STRIPE_SECRET_KEY, { maxNetworkRetries: 2 });
 }
 
+export function resolveOffer(env, offerKey) {
+  const offer = OFFERS[offerKey];
+  if (!offer) return { ok: false, error: 'invalid_offer', missing: [] };
+  const missing = [offer.priceVar, offer.entitlementVar].filter((key) => !String(env[key] || '').trim());
+  if (offerKey === 'two_month' && !String(env.STRIPE_PRODUCT_TWO_MONTH || '').trim()) {
+    missing.push('STRIPE_PRODUCT_TWO_MONTH');
+  }
+  if (missing.length) return { ok: false, error: 'offer_not_configured', missing };
+  return {
+    ok: true,
+    offer,
+    priceId: env[offer.priceVar],
+    entitlementId: env[offer.entitlementVar],
+  };
+}
+
 export async function handleCheckout(request, env, deps = {}) {
   // This check must precede body parsing and Stripe construction. Unset,
   // misspelled, and every value except the exact string "false" stay locked.
@@ -61,14 +92,21 @@ export async function handleCheckout(request, env, deps = {}) {
     return response({ ok: false, error: 'invalid_body' }, 400);
   }
   const offerKey = body && body.offer;
-  const offer = OFFERS[offerKey];
-  if (!offer || !env[offer.priceVar]) return response({ ok: false, error: 'invalid_offer' }, 400);
+  const mapping = resolveOffer(env, offerKey);
+  if (!mapping.ok) {
+    const status = mapping.error === 'invalid_offer' ? 400 : 503;
+    return response({ ok: false, error: mapping.error, missing: mapping.missing }, status);
+  }
+  if (!FULFILLMENT_IMPLEMENTED && deps.allowUnimplementedFulfillment !== true) {
+    return response({ ok: false, error: 'fulfillment_not_ready' }, 503);
+  }
+  const { offer, priceId, entitlementId } = mapping;
 
-  const metadata = { ...cleanAttribution(body.attribution), offer: offerKey, price_id: env[offer.priceVar] };
+  const metadata = { ...cleanAttribution(body.attribution), offer: offerKey, price_id: priceId, entitlement_id: entitlementId };
   const origin = new URL(request.url).origin;
   const params = {
     mode: offer.mode,
-    line_items: [{ price: env[offer.priceVar], quantity: 1 }],
+    line_items: [{ price: priceId, quantity: 1 }],
     metadata,
     success_url: `${origin}/thanks?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/?checkout=cancelled`,
@@ -121,28 +159,40 @@ export async function handlePortal(request, env, deps = {}) {
   }
 }
 
-async function verifySignature(raw, signature, secret, timestamp = Date.now()) {
-  const parts = Object.fromEntries(signature.split(',').map((part) => part.split('=', 2)));
-  const seconds = Number(parts.t);
-  if (!seconds || !parts.v1 || Math.abs(timestamp / 1000 - seconds) > 300) return false;
-  const key = await crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  const digest = await crypto.subtle.sign('HMAC', key, encoder.encode(`${seconds}.${raw}`));
-  const actual = [...new Uint8Array(digest)].map((value) => value.toString(16).padStart(2, '0')).join('');
-  if (actual.length !== parts.v1.length) return false;
-  let difference = 0;
-  for (let i = 0; i < actual.length; i++) difference |= actual.charCodeAt(i) ^ parts.v1.charCodeAt(i);
-  return difference === 0;
+export async function verifyCompletedCheckout(request, env, deps = {}) {
+  if (isPreviewMode(env)) return false;
+  if (!env.STRIPE_SECRET_KEY) return false;
+  const sessionId = new URL(request.url).searchParams.get('session_id');
+  if (!sessionId || !sessionId.startsWith('cs_')) return false;
+  try {
+    const stripe = deps.stripe || stripeClient(env);
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    return session.status === 'complete' && ['paid', 'no_payment_required'].includes(session.payment_status);
+  } catch {
+    return false;
+  }
 }
 
 export async function handleWebhook(request, env, deps = {}) {
-  if (!env.STRIPE_WEBHOOK_SECRET) return response({ ok: false, error: 'webhook_not_configured' }, 503);
+  if (!env.STRIPE_WEBHOOK_SECRET || !env.STRIPE_SECRET_KEY) {
+    return response({ ok: false, error: 'webhook_not_configured' }, 503);
+  }
   const signature = request.headers.get('stripe-signature');
   const raw = await request.text();
-  if (!signature || !(await verifySignature(raw, signature, env.STRIPE_WEBHOOK_SECRET, deps.timestamp))) {
+  let event;
+  try {
+    const stripe = deps.stripe || stripeClient(env);
+    event = await stripe.webhooks.constructEventAsync(
+      raw,
+      signature,
+      env.STRIPE_WEBHOOK_SECRET,
+      300,
+      Stripe.createSubtleCryptoProvider(),
+      deps.timestamp ? deps.timestamp / 1000 : undefined
+    );
+  } catch {
     return response({ ok: false, error: 'invalid_signature' }, 400);
   }
-  let event;
-  try { event = JSON.parse(raw); } catch { return response({ ok: false, error: 'invalid_payload' }, 400); }
 
   try {
     const claim = await env.DB.prepare(
@@ -153,15 +203,24 @@ export async function handleWebhook(request, env, deps = {}) {
        RETURNING status`
     ).bind(event.id, event.type, new Date().toISOString()).first();
     if (!claim) return response({ ok: true, duplicate: true });
+    if (!FULFILLMENT_IMPLEMENTED && deps.allowUnimplementedFulfillment !== true) {
+      throw new Error('fulfillment is not implemented');
+    }
 
     if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
       const session = event.data.object;
+      const offerKey = session.metadata && session.metadata.offer;
+      const mapping = resolveOffer(env, offerKey);
+      if (!mapping.ok) throw new Error(`offer mapping missing: ${mapping.missing.join(',')}`);
+      if (session.metadata.price_id !== mapping.priceId || session.metadata.entitlement_id !== mapping.entitlementId) {
+        throw new Error('checkout metadata does not match configured offer mapping');
+      }
       await env.DB.prepare(
-        `INSERT INTO stripe_orders (session_id, customer_id, payment_intent_id, subscription_id, offer, price_id, email, status, metadata, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)
+        `INSERT INTO stripe_orders (session_id, customer_id, payment_intent_id, subscription_id, offer, price_id, entitlement_id, amount_cents, email, status, metadata, updated_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)
          ON CONFLICT(session_id) DO UPDATE SET status = excluded.status, updated_at = excluded.updated_at`
       ).bind(session.id, session.customer || null, session.payment_intent || null, session.subscription || null,
-        session.metadata && session.metadata.offer || 'unknown', session.metadata && session.metadata.price_id || null,
+        offerKey, mapping.priceId, mapping.entitlementId, session.amount_total || null,
         session.customer_details && session.customer_details.email || null, session.payment_status || session.status,
         JSON.stringify(cleanAttribution(session.metadata)), new Date().toISOString()).run();
       // Mapping is explicit and auditable. Entitlement writes intentionally do
@@ -179,5 +238,3 @@ export async function handleWebhook(request, env, deps = {}) {
     return response({ ok: false, error: 'processing_failed' }, 500);
   }
 }
-
-export { verifySignature };

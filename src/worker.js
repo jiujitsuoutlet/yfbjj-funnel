@@ -1,14 +1,12 @@
 /**
  * welcome.yogaforbjj.net - funnel Worker.
  *
- * One job: the landing page for the $14 Guard Retention Bundle, plus lead
- * capture. Checkout and everything after it belongs to ThriveCart, including
- * the whole post-purchase upsell chain, because one-click requires the payment
- * session to stay on their side. The Stripe layer and the old /upsell page are
- * parked in src/deferred/ - see the README there.
+ * Serves the landing page, captures leads, and owns guarded Stripe Checkout and
+ * webhook routes. Payment and AutoCreator entitlement writes remain fail-closed
+ * until the complete mapping and fulfillment contract are configured.
  *
- * No secrets are needed at present. If the Stripe layer is un-shelved, its keys
- * come from Cloudflare Secrets on `env` and never touch a page or wrangler.toml.
+ * Stripe keys come from Cloudflare Secrets on `env`. They never touch a page or
+ * wrangler.toml.
  */
 
 import landingAHtml from './pages/landing-a.html';
@@ -17,7 +15,7 @@ import thanksHtml from './pages/thanks.html';
 import previewCheckoutHtml from './pages/preview-checkout.html';
 import baseCss from './pages/_base.css';
 import pageJs from './pages/_page.js';
-import { handleCheckout, handlePortal, handleWebhook } from './stripe.js';
+import { handleCheckout, handlePortal, handleWebhook, verifyCompletedCheckout } from './stripe.js';
 
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
@@ -72,7 +70,6 @@ function html(body, status = 200, extraHeaders = {}) {
  */
 const PAGE_CONFIG_KEYS = [
   'PREVIEW_MODE',
-  'THRIVECART_BUNDLE_URL',
   'OFFER_DEADLINE',
   'BUNDLE_PRICE_CENTS',
 ];
@@ -294,10 +291,10 @@ async function handleHealth(env) {
   try {
     const row = await env.DB.prepare(
       `SELECT count(*) AS n FROM sqlite_master
-        WHERE type = 'table' AND name IN ('orders', 'webhook_events', 'leads')`
+        WHERE type = 'table' AND name IN ('leads', 'rate_limits', 'variant_visits', 'stripe_events', 'stripe_orders')`
     ).first();
     const tables = row ? row.n : 0;
-    if (tables < 3) {
+    if (tables < 5) {
       return json(
         { ok: false, d1: 'connected', schema: 'incomplete', tables_found: tables, at: nowIso() },
         503
@@ -361,7 +358,7 @@ async function handleLead(request, env, ctx) {
     return json({ ok: false, error: 'storage_failed' }, 500);
   }
 
-  // Client hands off to ThriveCart after this resolves; see src/pages/landing.html.
+  // The client starts guarded Stripe Checkout after this resolves.
   return json({ ok: true }, 201);
 }
 
@@ -395,7 +392,11 @@ async function handleStats(request, env) {
     const [visits, leads, orders] = await Promise.all([
       env.DB.prepare('SELECT variant, sum(count) AS n FROM variant_visits GROUP BY variant').all(),
       env.DB.prepare('SELECT variant, count(*) AS n FROM leads GROUP BY variant').all(),
-      env.DB.prepare('SELECT variant, count(*) AS n, sum(amount_cents) AS cents FROM orders GROUP BY variant').all(),
+      env.DB.prepare(`SELECT json_extract(metadata, '$.variant') AS variant,
+          count(*) AS n, sum(amount_cents) AS cents
+        FROM stripe_orders
+        WHERE status IN ('paid', 'complete')
+        GROUP BY json_extract(metadata, '$.variant')`).all(),
     ]);
 
     const tally = (rows, field = 'n') => {
@@ -429,7 +430,7 @@ async function handleStats(request, env) {
       unassigned_leads: leadCounts.unassigned || 0,
       notes: {
         visitors: 'Counted once per newly assigned human. Returning visitors, ?v= overrides and bots are excluded.',
-        purchases: 'Always 0 until a ThriveCart webhook writes to the orders table. Nothing writes it yet.',
+        purchases: 'Counted from signed Stripe Checkout completion events recorded in stripe_orders.',
       },
     });
   } catch (err) {
@@ -448,7 +449,12 @@ export default {
 
     if (method === 'HEAD' || method === 'GET') {
       if (path === '/') return handleLanding(request, env, ctx);
-      if (path === '/thanks') return html(renderPage(thanksHtml, env, null));
+      if (path === '/thanks') {
+        if (!isPreviewMode(env) && !(await verifyCompletedCheckout(request, env))) {
+          return json({ ok: false, error: 'unverified_session' }, 403);
+        }
+        return html(renderPage(thanksHtml, env, null));
+      }
       if (path === '/preview-checkout') return html(renderPage(previewCheckoutHtml, env, null));
       if (path === '/health') return handleHealth(env);
       if (path === '/api/stats') return handleStats(request, env);

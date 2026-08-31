@@ -5,26 +5,24 @@ if you're an agent that just opened this directory, this is what you need.
 
 ## What this is
 
-A Cloudflare Worker serving `welcome.yogaforbjj.net` — the landing page for
-Yoga for BJJ's $14 Guard Retention Bundle, plus lead capture. That is the
-whole job. This is a **live client** (Yoga for BJJ / Sebastian), not a demo.
+A Cloudflare Worker serving `welcome.yogaforbjj.net`, the landing page for
+Yoga for BJJ's anniversary offer, lead capture, guarded Stripe Checkout, and
+the signed Stripe webhook ledger. This is a **live client** (Yoga for BJJ /
+Sebastian), not a demo.
 
-Checkout is **ThriveCart** (`learnbjjfast.thrivecart.com`), and so is
-everything after checkout — one-click upsells require the payment session to
-stay on ThriveCart, so the whole post-purchase chain lives there, not here.
-This repo builds those pages as standalone HTML for ThriveCart's page
-builder (`src/thrivecart/`); it does not serve or route them.
+Stripe is the payment system. The previous ThriveCart pages remain in
+`src/thrivecart/` as retired reference artifacts only. They are not served,
+they are not part of production preflight, and no ThriveCart URL is required.
 
 Two A/B variants of the landing page (`landing-a.html` short, `landing-b.html`
 long-form), decided server-side before render — no client redirect, no flash.
 
-**Offer ladder** (ThriveCart owns these prices; treat this list as reference,
-not source of truth — see "Which prices live where" below):
+**Offer ladder** (Stripe Price IDs in `wrangler.toml` are authoritative):
 - Front: Guard Retention Bundle, $14
 - Upsell 1: Head to Toes, $29 (was $59.99)
 - Upsell 2: Lifetime access, $247 (was $297 — the site's own price)
 - Downsell 2: 2-month trial, $8
-- Upsell 3: Certification (3 levels), $397 (was $891 separately)
+- Certification is a later phase and is not mapped into the active Stripe flow.
 
 Full detail, routes, and operator knobs: [README.md](README.md). This file is
 the rules; the README is the reference.
@@ -40,23 +38,24 @@ Never "fix" a broken CTA by relaxing this check.
 **Never bypass preflight.** `npm run deploy` runs `npm run preflight` first
 and stops on any failure — that chain is load-bearing, don't break it or run
 `wrangler deploy` directly. Preflight is the deploy gate, not a lint
-suggestion: cart URL set, deadline set and future, preview off, real D1 id, no
-unfilled placeholders, both variants complete, variant survives onto the cart
-URL, ThriveCart pages current, secrets scan clean.
+suggestion: all verified Stripe Price IDs set, every exact AutoCreator
+entitlement ID set, fulfillment implemented, deadline set and future, preview
+off, real D1 id, no unfilled served-page placeholders, both variants complete,
+variant survives into Checkout metadata, images present, secrets scan clean.
 
 **Never deploy without explicit instruction.** Building, editing, and running
 `npm run preflight` locally are fine. `wrangler deploy` (or anything that
 runs it) needs the operator to say so, in this conversation, for this change.
 
-**Never touch the client's Cloudflare/ThriveCart account beyond what's asked.**
-No new routes, DNS, secrets, or ThriveCart products without being asked. If a
+**Never touch the client's Cloudflare, Stripe, or AutoCreator account beyond what's asked.**
+No new routes, DNS, secrets, Stripe objects, or AutoCreator objects without being asked. If a
 command 403s, that's not a puzzle to route around — stop and name the exact
 missing permission (e.g. "this token can deploy Workers but not create D1
 databases") rather than finding a workaround.
 
-**No secrets in source, `wrangler.toml`, or the client bundle.** The Worker
-currently needs none — ThriveCart owns payment. If that changes: Cloudflare
-Secrets via `wrangler secret put`, read off `env`, local dev values in
+**No secrets in source, `wrangler.toml`, or the client bundle.** Stripe and
+webhook keys are Cloudflare Secrets via `wrangler secret put`, read off `env`.
+Local development values belong in
 `.dev.vars` (gitignored, see `.dev.vars.example`). Run `npm run scan` before
 any deploy; it fails non-zero on a secret-shaped key in served output. See
 "Known traps" below for why the scan pattern is anchored the way it is.
@@ -65,14 +64,18 @@ any deploy; it fails non-zero on a secret-shaped key in served output. See
 personal detail about a real person that wasn't given to you. If a fact is
 missing, write a marked `[[PLACEHOLDER]]` and say out loud what's missing —
 `npm run preflight` will catch an unfilled one before it ships. This
-especially includes upsell/downsell prices: they live in ThriveCart only
-(see below), never invent or duplicate one here.
+especially includes AutoCreator object IDs. Confirmed entitlement names are not
+IDs. Leave the strict mapping value empty and let preflight fail until the exact
+authenticated ID is retrieved.
 
-**Which prices live where.** `BUNDLE_PRICE_CENTS` in `wrangler.toml` is the
-only price this repo owns. Everything past the $14 front offer is ThriveCart's
-number, deliberately absent from source — a second copy drifts (lifetime is
-already $247 here vs $297 on the main site; that gap is intentional, not a
-bug to reconcile).
+**Which prices live where.** The four existing Stripe Price IDs in
+`wrangler.toml` own billing. `BUNDLE_PRICE_CENTS` is display-only for the landing
+page. Never create or duplicate Stripe Products or Prices as a shortcut.
+
+**Payment must never outrun access.** `src/stripe.js` keeps Checkout blocked
+while `FULFILLMENT_IMPLEMENTED` is false or any offer lacks its exact
+AutoCreator entitlement ID. Do not flip that constant until authenticated grant,
+retry, cancellation, and revocation behavior exists and is tested.
 
 ## Verification discipline
 
@@ -95,8 +98,8 @@ than no test — it's a false green.
 with no console errors and no horizontal overflow; the `yfbjj_v` cookie
 sticks across reloads and `?v=` forces without permanently overwriting it;
 `npm run scan` and `npm run preflight` both ran clean, output pasted not
-summarized; and you've said plainly which parts (usually: ThriveCart-side
-behavior) you have not actually verified rather than implying they're proven.
+summarized; and you've said plainly which parts of Stripe, D1, and AutoCreator
+behavior you have not actually verified rather than implying they're proven.
 
 ## Voice
 
@@ -134,11 +137,9 @@ headings; keep small text on the neutral ramp.
   can request a slightly-too-large image or, at certain widths, cause a
   fractional overflow. Check actual rendered width at the breakpoints you
   touch rather than trusting the attribute.
-- **ThriveCart pages need `ASSET_BASE_URL`.** They're hosted on ThriveCart's
-  domain, not served by this Worker, so relative image paths (`/img/...`)
-  break there. `scripts/build-thrivecart.mjs` rewrites them to an absolute
-  origin from `[vars]` — never hand-edit a built `src/thrivecart/*.html`
-  file; edit its source in `src/thrivecart/_src/` and rebuild.
+- **Retired ThriveCart pages are references only.** Do not reconnect them or
+  add their placeholders back to production preflight without a new approved
+  architecture decision.
 - **Stripe's minimum charge is $0.50.** Not currently reachable (Stripe is
   parked, see below) but binding if it's ever un-shelved — don't wire a
   price under that.
@@ -148,18 +149,15 @@ headings; keep small text on the neutral ramp.
 
 ## Parked code
 
-Stripe checkout/webhook and the old `/upsell` page are parked in
-`src/deferred/`, not deleted — each with a README on why, what stayed behind
-(schema, mostly), and what would justify bringing it back. Read
-`src/deferred/README.md` before reintroducing anything that looks similar;
-don't rebuild what's already sitting there.
+The old `/upsell` page and the pre-recovery Stripe stub are parked in
+`src/deferred/`. The active Stripe implementation is `src/stripe.js`. Do not
+import the deferred copy.
 
 ## Commands
 
 ```bash
 npm run scan        # secrets scan — fails non-zero on a secret-shaped key in served output
 npm run preflight    # full deploy gate, see "Hard rules" above
-npm run build:tc     # rebuild src/thrivecart/*.html from _src/ + current [vars]
 wrangler dev         # local dev server, http://localhost:8787
 ```
 

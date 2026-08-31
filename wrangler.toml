@@ -39,27 +39,15 @@ migrations_dir = "migrations"
 [vars]
 BUNDLE_PRICE_CENTS = "1400"
 # PREVIEW_MODE gates the cart handoff. TRUE (or unset, or anything but the exact
-# string "false") sends every CTA to /preview-checkout instead of ThriveCart.
-# Turn it off only when the cart link below is real. `npm run preflight` enforces this.
+# string "false") sends every CTA to /preview-checkout and locks Stripe Checkout.
+# Turn it off only after every production gate passes. `npm run preflight` enforces this.
 PREVIEW_MODE = "true"
 # Visual staging has no D1 binding. In this mode every stateful endpoint stops
 # before it reads or writes, while the reviewable pages continue to render.
 PREVIEW_NO_D1 = "true"
 
-# Checkout is ThriveCart, not Stripe. Two knobs to turn at launch.
-# Upsell prices deliberately do NOT live here: they are set in ThriveCart, and a
-# second copy in this file would drift the moment either side changed.
-THRIVECART_BUNDLE_URL = ""
 # ISO 8601, e.g. "2026-09-01T23:59:00Z". Empty = deadline block hidden entirely.
 OFFER_DEADLINE = ""
-# Absolute origin for images on the ThriveCart-hosted pages, no trailing slash,
-# e.g. "https://welcome.yogaforbjj.net". Those pages are not served by this
-# Worker, so they cannot use relative paths.
-ASSET_BASE_URL = ""
-# Bunny Stream embed URL for the certification video, e.g.
-# "https://iframe.mediadelivery.net/embed/<library>/<video>". Empty means the
-# video slot is left out of the built page entirely. autoplay is forced off.
-VSL_EMBED_URL = ""
 
 # Stripe identifiers are non-secret. Secret keys and the future webhook
 # signing secret are Cloudflare Secrets and must never appear in this file.
@@ -68,6 +56,13 @@ STRIPE_PRICE_HEAD_TO_TOES = "price_1U9IkOIwpEtt4FIeqq3edSnR"
 STRIPE_PRICE_LIFETIME = "price_1U9IkPIwpEtt4FIeD0mbQvCK"
 STRIPE_PRICE_TWO_MONTH = "price_1U9IkQIwpEtt4FIenOTDpw8e"
 STRIPE_PRODUCT_TWO_MONTH = "prod_V9byHoYGBGpDpc"
+# Exact authenticated AutoCreator object IDs. Names are confirmed, but IDs are
+# deliberately blank until read from AutoCreator. Checkout fails closed while
+# any one of these is missing.
+AUTOCREATOR_ENTITLEMENT_GUARD_RETENTION_ID = ""
+AUTOCREATOR_ENTITLEMENT_HEAD_TO_TOES_ID = ""
+AUTOCREATOR_ENTITLEMENT_LIFETIME_ID = ""
+AUTOCREATOR_ENTITLEMENT_TWO_MONTH_ID = ""
 
 [env.staging]
 name = "yfbjj-funnel-stripe-staging"
@@ -88,12 +83,13 @@ migrations_dir = "migrations"
 [env.staging.vars]
 PREVIEW_MODE = "true"
 BUNDLE_PRICE_CENTS = "1400"
-THRIVECART_BUNDLE_URL = ""
 OFFER_DEADLINE = ""
-ASSET_BASE_URL = ""
-VSL_EMBED_URL = ""
 STRIPE_PRICE_BUNDLE = "price_1U9IkNIwpEtt4FIedvXFb9tC"
 STRIPE_PRICE_HEAD_TO_TOES = "price_1U9IkOIwpEtt4FIeqq3edSnR"
 STRIPE_PRICE_LIFETIME = "price_1U9IkPIwpEtt4FIeD0mbQvCK"
 STRIPE_PRICE_TWO_MONTH = "price_1U9IkQIwpEtt4FIenOTDpw8e"
 STRIPE_PRODUCT_TWO_MONTH = "prod_V9byHoYGBGpDpc"
+AUTOCREATOR_ENTITLEMENT_GUARD_RETENTION_ID = ""
+AUTOCREATOR_ENTITLEMENT_HEAD_TO_TOES_ID = ""
+AUTOCREATOR_ENTITLEMENT_LIFETIME_ID = ""
+AUTOCREATOR_ENTITLEMENT_TWO_MONTH_ID = ""

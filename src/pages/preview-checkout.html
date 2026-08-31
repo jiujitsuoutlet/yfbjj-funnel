@@ -17,9 +17,8 @@
     <p class="kicker">Preview</p>
     <h1>Checkout is not connected yet</h1>
     <p class="lede">
-      On the live page, this button opens the ThriveCart order form, where payment,
-      coupons, VAT, and delivery are handled. This build has no cart link set, so
-      it stops here instead.
+      On the live page, this button opens a Stripe-hosted checkout. This preview
+      cannot create a session, customer, payment, subscription, or entitlement.
     </p>
   </section>
 
@@ -27,13 +26,14 @@
     <h2>What happens when it goes live</h2>
     <ul class="checks">
       <li><strong>The email address is captured first</strong><span>It is written to our own database before the handoff, so we keep the lead whether or not the sale completes.</span></li>
-      <li><strong>The buyer lands on ThriveCart</strong><span>ThriveCart owns the order form, payment, coupons, VAT, upsells, and fulfilment.</span></li>
-      <li><strong>ThriveCart takes it from there</strong><span>The post-purchase chain, including the one-click upsells, runs inside ThriveCart. This site's <a href="/thanks">/thanks</a> page is only a fallback destination.</span></li>
+      <li><strong>The buyer lands on Stripe Checkout</strong><span>Stripe owns the hosted payment form and returns a signed completion event to this Worker.</span></li>
+      <li><strong>Access follows the verified offer mapping</strong><span>The signed event is recorded with the exact AutoCreator entitlement ID selected for that offer.</span></li>
     </ul>
     <p class="faint">
-      To switch this off: set <strong>THRIVECART_BUNDLE_URL</strong> to the real cart
-      link and <strong>PREVIEW_MODE</strong> to <strong>false</strong> in wrangler.toml,
-      then run <strong>npm run preflight</strong>.
+      Checkout stays locked until <strong>npm run preflight</strong> verifies the
+      Stripe prices, AutoCreator entitlement IDs, deadline, D1 database, and
+      fulfillment implementation. Only then can <strong>PREVIEW_MODE</strong> become
+      the exact string <strong>false</strong>.
     </p>
   </section>
 

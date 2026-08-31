@@ -3,11 +3,10 @@
  * Deploy gate. Refuses to let a half-configured page take paid traffic.
  * Every check reports independently: one run tells you everything that is missing.
  */
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { renderCartPage } from './build-thrivecart.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CONFIG = join(ROOT, 'wrangler.toml');
@@ -40,14 +39,51 @@ try {
   process.exit(1);
 }
 
-/* 1. cart link */
-const cart = (cfg.THRIVECART_BUNDLE_URL || '').trim();
-if (!cart) {
-  fail('THRIVECART_BUNDLE_URL is empty in wrangler.toml. Paste the real ThriveCart link for the $14 bundle.');
-} else if (!/^https:\/\/\S+$/.test(cart)) {
-  fail(`THRIVECART_BUNDLE_URL is not an https URL: "${cart}"`);
+/* 1. Stripe offer and AutoCreator entitlement mappings */
+const STRIPE_PRICE_VARS = [
+  'STRIPE_PRICE_BUNDLE',
+  'STRIPE_PRICE_HEAD_TO_TOES',
+  'STRIPE_PRICE_LIFETIME',
+  'STRIPE_PRICE_TWO_MONTH',
+];
+const AUTOCREATOR_ENTITLEMENT_VARS = [
+  'AUTOCREATOR_ENTITLEMENT_GUARD_RETENTION_ID',
+  'AUTOCREATOR_ENTITLEMENT_HEAD_TO_TOES_ID',
+  'AUTOCREATOR_ENTITLEMENT_LIFETIME_ID',
+  'AUTOCREATOR_ENTITLEMENT_TWO_MONTH_ID',
+];
+
+const priceIds = [];
+for (const key of STRIPE_PRICE_VARS) {
+  const value = String(cfg[key] || '').trim();
+  if (!value) fail(`${key} is empty. Use the existing verified Stripe Price ID.`);
+  else if (!/^price_[A-Za-z0-9]+$/.test(value)) fail(`${key} is not a Stripe Price ID: "${value}"`);
+  else {
+    priceIds.push(value);
+    pass(`${key} set (${value})`);
+  }
+}
+if (priceIds.length === STRIPE_PRICE_VARS.length && new Set(priceIds).size !== priceIds.length) {
+  fail('Stripe offer mapping reuses a Price ID. Each of the four offers must map to its own verified Price.');
+}
+
+const twoMonthProduct = String(cfg.STRIPE_PRODUCT_TWO_MONTH || '').trim();
+if (!twoMonthProduct) fail('STRIPE_PRODUCT_TWO_MONTH is empty. Use the verified Two-Month Access Product ID.');
+else if (!/^prod_[A-Za-z0-9]+$/.test(twoMonthProduct)) fail(`STRIPE_PRODUCT_TWO_MONTH is not a Stripe Product ID: "${twoMonthProduct}"`);
+else pass(`STRIPE_PRODUCT_TWO_MONTH set (${twoMonthProduct})`);
+
+for (const key of AUTOCREATOR_ENTITLEMENT_VARS) {
+  const value = String(cfg[key] || '').trim();
+  if (!value) fail(`${key} is empty. Retrieve the exact entitlement ID from authenticated AutoCreator before enabling payment.`);
+  else if (/PLACEHOLDER|REPLACE_ME|\[\[/i.test(value)) fail(`${key} is still a placeholder: "${value}"`);
+  else pass(`${key} set (${value})`);
+}
+
+const stripeSource = readFileSync(join(ROOT, 'src', 'stripe.js'), 'utf8');
+if (!/export const FULFILLMENT_IMPLEMENTED\s*=\s*true\b/.test(stripeSource)) {
+  fail('AutoCreator fulfillment is not implemented. Checkout remains fail-closed until authenticated grant, retry, and revocation behavior is built and tested.');
 } else {
-  pass(`THRIVECART_BUNDLE_URL set (${cart})`);
+  pass('AutoCreator fulfillment implementation is enabled');
 }
 
 /* 2. deadline set and still in the future */
@@ -83,23 +119,15 @@ if (!dbId || dbId === 'REPLACE_WITH_D1_DATABASE_ID') {
   pass(`database_id set (${dbId})`);
 }
 
-/* 5. no unfilled copy placeholders left in any page */
-// ThriveCart wires its own accept and decline URLs when the page is pasted into
-// its builder, so these two are expected to sit unfilled in this repo forever.
-const TC_EXPECTED = new Set(['[[TC_ACCEPT_URL]]', '[[TC_DECLINE_URL]]']);
-
+/* 5. no unfilled copy placeholders left in any served page */
 const WORKER_PAGES = ['landing-a.html', 'landing-b.html', 'thanks.html', 'preview-checkout.html'];
 const leftovers = [];
-const expected = [];
 
 function sweep(label, html) {
   // Strip comments first: a commented-out example is guidance, not a leak.
   const visible = html.replace(/<!--[\s\S]*?-->/g, '');
   const hits = visible.match(/\[\[[A-Z0-9_]+[^\]]*\]\]/g) || [];
-  for (const hit of new Set(hits)) {
-    if (TC_EXPECTED.has(hit)) expected.push(`${label}: ${hit}`);
-    else leftovers.push(`${label}: ${hit}`);
-  }
+  for (const hit of new Set(hits)) leftovers.push(`${label}: ${hit}`);
 }
 
 for (const page of WORKER_PAGES) {
@@ -110,52 +138,10 @@ for (const page of WORKER_PAGES) {
   }
 }
 
-// ThriveCart pages are deliverables too, so their copy gaps are blockers as well.
-let tcPages = [];
-try {
-  tcPages = readdirSync(join(ROOT, 'src', 'thrivecart')).filter((f) => f.endsWith('.html'));
-} catch {
-  /* directory is optional */
-}
-for (const page of tcPages) {
-  sweep(`thrivecart/${page}`, readFileSync(join(ROOT, 'src', 'thrivecart', page), 'utf8'));
-}
-
 if (leftovers.length) {
-  fail(`${leftovers.length} unfilled copy placeholder${leftovers.length > 1 ? 's' : ''} would render on a live page:\n      ${leftovers.join('\n      ')}`);
+  fail(`${leftovers.length} unfilled copy placeholder${leftovers.length > 1 ? 's' : ''} would render on a served page:\n      ${leftovers.join('\n      ')}`);
 } else {
-  pass('no unfilled copy placeholders in any page');
-}
-if (expected.length) {
-  pass(`${expected.length} ThriveCart URL placeholder${expected.length > 1 ? 's' : ''} left unfilled on purpose (wired inside ThriveCart)`);
-}
-
-/* 5b. generated ThriveCart pages are current */
-if (tcPages.length) {
-  const css = readFileSync(join(ROOT, 'src', 'pages', '_base.css'), 'utf8');
-  const stale = [];
-  for (const page of tcPages) {
-    const built = readFileSync(join(ROOT, 'src', 'thrivecart', page), 'utf8');
-    let template = '';
-    try {
-      template = readFileSync(join(ROOT, 'src', 'thrivecart', '_src', page), 'utf8');
-    } catch {
-      stale.push(`${page} has no source in src/thrivecart/_src`);
-      continue;
-    }
-    // Uses the generator's own transform, so this check cannot drift from it.
-    const expected = renderCartPage(template, {
-      css,
-      assetBase: (cfg.ASSET_BASE_URL || '').trim() || '[[ASSET_BASE_URL]]',
-      vslUrl: (cfg.VSL_EMBED_URL || '').trim(),
-    });
-    if (built !== expected) stale.push(page);
-  }
-  if (stale.length) {
-    fail(`ThriveCart pages are stale, run \`npm run build:tc\`: ${stale.join(', ')}`);
-  } else {
-    pass(`${tcPages.length} ThriveCart pages built and current`);
-  }
+  pass('no unfilled copy placeholders in any served page');
 }
 
 /* 5c. both A/B variants are complete pages */
@@ -180,43 +166,16 @@ for (const variant of ['a', 'b']) {
   else pass(`variant ${variant.toUpperCase()} renders complete (CTA, price, form, eight-collection offer summary)`);
 }
 
-/* 5d. the variant actually rides the outbound cart URL */
-// This is the check that protects the whole test: without the parameter the
-// experiment measures clicks instead of money.
+/* 5d. the variant actually rides into Stripe Checkout metadata */
 const pageJs = readFileSync(join(ROOT, 'src', 'pages', '_page.js'), 'utf8');
-const appendsVariant = pageJs.includes('passthrough[variant]');
-if (!appendsVariant) {
-  fail('src/pages/_page.js no longer appends passthrough[variant] to the cart URL. The A/B test would measure clicks, not purchases.');
-} else if (preview !== 'false') {
-  pass('variant passthrough present in _page.js (not exercised while PREVIEW_MODE is on)');
-} else if (!cart) {
-  pass('variant passthrough present in _page.js (no cart URL to test against yet)');
-} else {
-  // Simulate exactly what the page does at click time.
-  try {
-    const built = new URL(cart);
-    built.searchParams.set('passthrough[variant]', 'b');
-    built.searchParams.set('utm_content', 'variant-b');
-    const round = new URL(built.toString());
-    if (round.searchParams.get('passthrough[variant]') !== 'b') {
-      fail(`the variant parameter does not survive on the cart URL: ${built.toString()}`);
-    } else {
-      pass(`variant rides the cart URL (${built.toString()})`);
-    }
-  } catch (err) {
-    fail(`cannot build a cart URL from THRIVECART_BUNDLE_URL: ${err.message}`);
-  }
-}
-
-/* 5d-2. video slot status, reported rather than blocking */
-// [[VSL_EMBED]] never appears in a built page (the generator drops the whole
-// block when there is no embed), so the placeholder sweep cannot see it. Say so
-// here instead, or the missing video becomes invisible.
-{
-  const vsl = (cfg.VSL_EMBED_URL || '').trim();
-  if (vsl) pass(`certification video embedded (${vsl})`);
-  else pass('certification page ships without the video slot: VSL_EMBED_URL is unset, hero photo carries it');
-}
+if (!pageJs.includes("fetch('/api/checkout'")) fail('src/pages/_page.js does not start Stripe Checkout through POST /api/checkout.');
+else pass('landing page starts Stripe Checkout through the guarded first-party endpoint');
+if (!pageJs.includes('variant: VARIANT') || !pageJs.includes("utm_content: VARIANT ? 'variant-' + VARIANT")) {
+  fail('src/pages/_page.js does not send the assigned variant in Stripe Checkout metadata. The A/B test would measure leads, not purchases.');
+} else pass('variant rides into Stripe Checkout metadata');
+if (!stripeSource.includes("entitlement_id: entitlementId")) {
+  fail('src/stripe.js does not snapshot the configured AutoCreator entitlement in Checkout metadata.');
+} else pass('Checkout metadata snapshots the configured AutoCreator entitlement');
 
 /* 5e. every image a page references actually exists */
 // A renamed original or a skipped `npm run build:img` would otherwise ship a
@@ -224,7 +183,6 @@ if (!appendsVariant) {
 const imageRefs = new Set();
 const scanPages = [
   ...WORKER_PAGES.map((f) => ['src/pages', f]),
-  ...tcPages.map((f) => ['src/thrivecart', f]),
 ];
 for (const [dir, file] of scanPages) {
   let html = '';
