@@ -77,32 +77,28 @@ test('checkout preserves first-party attribution in session and payment metadata
     fulfillmentImplemented: true,
   });
   assert.equal(response.status, 200);
-  assert.deepEqual(created.metadata, {
-    variant: 'b',
-    utm_source: 'email',
-    offer: 'bundle',
-    price_id: 'price_bundle',
-    entitlement_key: 'guard-retention',
-  });
+  assert.equal(created.metadata.variant, 'b');
+  assert.equal(created.metadata.utm_source, 'email');
+  assert.equal(created.metadata.offer, 'bundle');
+  assert.equal(created.metadata.price_id, 'price_bundle');
+  assert.equal(created.metadata.entitlement_key, 'guard-retention');
+  assert.match(created.metadata.flow_hash, /^[a-f0-9]{64}$/);
+  assert.equal(created.customer_creation, 'always');
   assert.deepEqual(created.payment_intent_data.metadata, created.metadata);
+  assert.match(response.headers.get('set-cookie'), /^yfbjj_flow=/);
 });
 
-test('two-month offer charges $8 once and starts recurring item after two clamped calendar months', async () => {
+test('initial checkout rejects every non-Guard offer and calendar months clamp', async () => {
   assert.equal(addCalendarMonths(new Date('2027-01-31T12:00:00Z'), 1).toISOString(), '2027-02-28T12:00:00.000Z');
   assert.equal(addCalendarMonths(new Date('2028-01-31T12:00:00Z'), 1).toISOString(), '2028-02-29T12:00:00.000Z');
-  let created;
-  const stripe = { checkout: { sessions: { create: async (params) => { created = params; return { url: 'x' }; } } } };
-  const request = new Request('https://staging.test/api/checkout', {
-    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ offer: 'two_month' }),
-  });
-  await handleCheckout(request, { ...env, DB: database() }, {
-    stripe,
-    now: () => new Date('2027-01-31T12:00:00Z'),
-    fulfillmentImplemented: true,
-  });
-  assert.equal(created.line_items[0].price_data.unit_amount, 800);
-  assert.equal(created.line_items[1].price, 'price_monthly');
-  assert.equal(created.subscription_data.trial_end, Date.parse('2027-03-31T12:00:00Z') / 1000);
+  for (const offer of ['head_to_toes', 'lifetime', 'two_month']) {
+    const request = new Request('https://staging.test/api/checkout', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ offer }),
+    });
+    const result = await handleCheckout(request, { ...env, DB: database() }, { fulfillmentImplemented: true });
+    assert.equal(result.status, 400);
+    assert.deepEqual(await body(result), { ok: false, error: 'initial_offer_only' });
+  }
 });
 
 test('portal requires a completed server-retrieved Checkout Session', async () => {
@@ -135,7 +131,7 @@ test('thanks state comes from the durable D1 fulfillment record', async () => {
   const DB = database({ orderStatus: 'paid', fulfillmentStatus: 'granted' });
   assert.deepEqual(await getOrderFulfillmentState(
     new Request('https://staging.test/thanks?session_id=cs_fixture'), { DB }
-  ), { valid: true, payment: 'paid', fulfillment: 'granted' });
+  ), { valid: true, payment: 'paid', fulfillment: 'granted', access: 'active' });
   assert.deepEqual(await getOrderFulfillmentState(
     new Request('https://staging.test/thanks'), { DB }
   ), { valid: false });
@@ -149,7 +145,7 @@ async function signature(payload, secret, timestamp) {
 }
 
 function database({ eventStatus, eventUpdatedAt, outboxStatus, outboxLeaseExpires, failOrder = false,
-  orderStatus, fulfillmentStatus } = {}) {
+  orderStatus, fulfillmentStatus, accessState = 'active' } = {}) {
   const calls = [];
   const state = {
     eventStatus,
@@ -158,6 +154,7 @@ function database({ eventStatus, eventUpdatedAt, outboxStatus, outboxLeaseExpire
     outboxLeaseExpires,
     orderStatus,
     fulfillmentStatus,
+    accessState,
   };
   const DB = {
     calls,
@@ -188,9 +185,10 @@ function database({ eventStatus, eventUpdatedAt, outboxStatus, outboxLeaseExpire
               return null;
             }
             if (sql.includes('SELECT status FROM entitlement_outbox')) return state.outboxStatus ? { status: state.outboxStatus } : null;
-            if (sql.includes('SELECT status, fulfillment_status FROM stripe_orders')) {
-              return state.orderStatus ? { status: state.orderStatus, fulfillment_status: state.fulfillmentStatus } : null;
+            if (sql.includes('SELECT status, fulfillment_status, access_state FROM stripe_orders')) {
+              return state.orderStatus ? { status: state.orderStatus, fulfillment_status: state.fulfillmentStatus, access_state: state.accessState } : null;
             }
+            if (sql.includes('UPDATE checkout_flows SET customer_id')) return { flow_hash: 'flow_fixture' };
             return null;
           },
           run: async () => {
@@ -210,6 +208,7 @@ function database({ eventStatus, eventUpdatedAt, outboxStatus, outboxLeaseExpire
               state.outboxStatus = 'failed';
             } else if (sql.includes("fulfillment_status = 'granted'")) {
               state.fulfillmentStatus = 'granted';
+              state.accessState = values[2];
             } else if (sql.includes("fulfillment_status = 'failed'")) {
               state.fulfillmentStatus = 'failed';
             }
@@ -231,7 +230,7 @@ function checkoutEvent(type, paymentStatus = 'paid') {
   return { id: `evt_${type.replaceAll('.', '_')}`, type, data: { object: {
     id: 'cs_fixture', customer: 'cus_fixture', payment_status: paymentStatus, amount_total: 1400,
     customer_details: { email: 'buyer@example.com' },
-    metadata: { offer: 'bundle', price_id: 'price_bundle', entitlement_key: 'guard-retention', variant: 'a' },
+    metadata: { offer: 'bundle', price_id: 'price_bundle', entitlement_key: 'guard-retention', flow_hash: 'flow_fixture', variant: 'a' },
   } } };
 }
 

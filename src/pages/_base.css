@@ -174,10 +174,12 @@ p{margin:0 0 var(--s4)} p:last-child{margin-bottom:0}
 /* Decline link. Full size, underlined, states what it does. Never a whisper. */
 .decline{
   display:block; margin:var(--s5) 0 0; padding:var(--s3);
+  width:100%; border:0; background:transparent; cursor:pointer;
   text-align:center; font-size:1rem; font-weight:700;
   color:var(--ink-2); text-decoration:underline; text-underline-offset:.2em;
 }
 .decline:hover{color:var(--ink)}
+.offer-price{margin:var(--s5) 0 var(--s2); font-size:2.25rem; font-weight:900; letter-spacing:-.04em}
 .band-cream .decline{color:var(--ink-cream-2)}
 .band-cream .decline:hover{color:var(--ink-dark)}
 

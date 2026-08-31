@@ -186,6 +186,39 @@
     });
   });
 
+  /* ------------------------------------------------ post-purchase offers */
+  (function () {
+    var accept = document.querySelector('[data-offer-accept]');
+    var skip = document.querySelector('[data-offer-skip]');
+    if (!accept || !skip) return;
+    var status = document.querySelector('[data-offer-status]');
+    function transition(path) {
+      if (PREVIEW) return Promise.resolve(PREVIEW_PATH);
+      accept.disabled = true;
+      skip.disabled = true;
+      if (status) status.textContent = 'Opening the next step...';
+      return fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source_session_id: CFG.SOURCE_SESSION_ID })
+      }).then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (payload) {
+          if (!res.ok || !payload.url) throw new Error(payload.error || 'transition_failed');
+          return payload.url;
+        });
+      });
+    }
+    function go(path) {
+      transition(path).then(function (url) { location.assign(url); }).catch(function () {
+        accept.disabled = false;
+        skip.disabled = false;
+        if (status) status.textContent = 'That step is not ready yet. Please try again.';
+      });
+    }
+    accept.addEventListener('click', function () { go('/api/offer-checkout'); });
+    skip.addEventListener('click', function () { go('/api/offer-skip'); });
+  })();
+
   /* ---------------------------------------------------------- buy bar */
   // Appears once the hero CTA is off screen, so the offer is always one tap away.
   (function () {
