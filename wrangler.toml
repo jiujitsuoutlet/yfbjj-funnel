@@ -31,9 +31,7 @@ simple = { limit = 5, period = 60 }
 [[d1_databases]]
 binding = "DB"
 database_name = "yfbjj_funnel"
-# Filled in by `wrangler d1 create yfbjj_funnel`. Placeholder is intentionally
-# invalid so a deploy against an unconfigured DB fails loudly instead of silently.
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "0cce4280-1113-45f5-b0da-bd5979f7cace"
 migrations_dir = "migrations"
 
 [vars]
@@ -90,7 +88,7 @@ simple = { limit = 5, period = 60 }
 [[env.staging.d1_databases]]
 binding = "DB"
 database_name = "yfbjj_funnel_staging"
-database_id = "REPLACE_WITH_STAGING_D1_DATABASE_ID"
+database_id = "e2ebcc63-f373-451e-84a9-9118f8053f82"
 migrations_dir = "migrations"
 
 [env.staging.vars]
