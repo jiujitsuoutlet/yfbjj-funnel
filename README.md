@@ -56,9 +56,14 @@ edited, but they cannot be deleted or duplicated. See
 
 ## Stripe staging
 
+The production and staging D1 databases are provisioned and migrations `0001`
+through `0009` are applied. Their non-secret resource IDs live in
+`wrangler.toml`; verification evidence is in
+[`docs/exc-128-d1-proof.md`](docs/exc-128-d1-proof.md).
+
 The `staging` Wrangler environment has a separate Worker name, no custom
 routes, a separate D1 binding, and `PREVIEW_MODE = "true"`. It is safe to put
-on an unlisted `workers.dev` hostname after replacing the staging D1 placeholder.
+on an unlisted `workers.dev` hostname while the checkout lock remains enabled.
 The lock returns HTTP 423 with `{"ok":false,"error":"preview_locked"}` before
 constructing a Stripe client, so no Checkout Session is created.
 
@@ -226,10 +231,13 @@ Refuses to deploy a half-configured page. Checks, all reported in one run:
 
 ## Setup
 
+Both remote D1 databases are already provisioned. Do not recreate them. Apply
+remote migrations only after reviewing the pending migration list.
+
     npm install
     npx wrangler login                      # or export CLOUDFLARE_API_TOKEN
-    npx wrangler d1 create yfbjj_funnel     # paste database_id into wrangler.toml
     npm run db:migrate:local
     npm run db:migrate:remote
+    npm run db:migrate:staging
     npm run dev                             # http://localhost:8787
     npm run scan && npm run deploy
