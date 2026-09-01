@@ -41,18 +41,56 @@ test('bundle grant uses the documented envelope and requires exact read-back', a
   assert.deepEqual(transport.calls[3].body, { args: { memberId: 'member_1' } });
 });
 
-test('Certification uses the bundle grant and exact bundle read-back path', async () => {
+test('Certification grants all three level bundles and requires every exact read-back', async () => {
+  const entitlementKeys = [
+    'level-1-instructors-course',
+    'level-2-instructor-course',
+    'level-3-instructors-course',
+  ];
   const transport = queued([
     ok('members.grantBundleEntitlement', { already_existed: false }),
-    ok('members.listBundleEntitlements', { items: [{ bundle_slug: 'certification-levels-1-2-3', status: 'active' }] }),
+    ok('members.grantBundleEntitlement', { already_existed: false }),
+    ok('members.grantBundleEntitlement', { already_existed: true }),
+    ok('members.listBundleEntitlements', { items: entitlementKeys.map((bundle_slug) => ({ bundle_slug, status: 'active' })) }),
     ok('members.findByEmail', { member: { id: 'member_cert' } }),
     ok('members.checkAccess', { neverSignedIn: false }),
   ]);
   const result = await createAutoCreatorClient(env, transport).grant({
-    offer: 'certification', entitlementKey: 'certification-levels-1-2-3', sessionId: 'cs_cert', email: 'coach@example.com',
+    offer: 'certification', entitlementKeys, sessionId: 'cs_cert', email: 'coach@example.com',
   });
   assert.deepEqual(result, { verified: true, activationNeeded: false });
-  assert.equal(transport.calls[0].body.args.bundle_slug, 'certification-levels-1-2-3');
+  assert.deepEqual(transport.calls.slice(0, 3).map(({ body }) => body.args), entitlementKeys.map((bundle_slug) => ({
+    email: 'coach@example.com', bundle_slug, source: 'stripe_purchase', notes: 'Stripe Checkout cs_cert',
+  })));
+  assert.deepEqual(transport.calls[3].body, { args: { email: 'coach@example.com' } });
+  assert.deepEqual(transport.calls[5].body, { args: { memberId: 'member_cert' } });
+});
+
+test('Certification fails closed when any level is missing from bundle read-back', async () => {
+  const entitlementKeys = [
+    'level-1-instructors-course',
+    'level-2-instructor-course',
+    'level-3-instructors-course',
+  ];
+  const transport = queued([
+    ok('members.grantBundleEntitlement', { already_existed: true }),
+    ok('members.grantBundleEntitlement', { already_existed: true }),
+    ok('members.grantBundleEntitlement', { already_existed: true }),
+    ok('members.listBundleEntitlements', { items: [
+      { bundle_slug: 'level-1-instructors-course', status: 'active' },
+      { bundle_slug: 'level-2-instructor-course', status: 'active' },
+    ] }),
+  ]);
+
+  await assert.rejects(createAutoCreatorClient(env, transport).grant({
+    offer: 'certification', entitlementKeys, sessionId: 'cs_cert_partial', email: 'coach@example.com',
+  }), (error) => {
+    assert.ok(error instanceof AutoCreatorError);
+    assert.equal(error.code, 'readback_failed');
+    assert.equal(error.retryable, true);
+    return true;
+  });
+  assert.equal(transport.calls.length, 4);
 });
 
 test('plan grant attaches Stripe references and proves the exact active price', async () => {

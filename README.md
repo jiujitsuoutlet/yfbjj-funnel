@@ -8,11 +8,13 @@ leads, creates guarded Stripe-hosted Checkout Sessions, verifies webhook
 signatures, records orders in D1, and reports health.
 
 Payment remains intentionally locked. A Checkout Session cannot be created
-unless `PREVIEW_MODE` is the exact string `false`, the selected offer has both
-its Stripe Price and exact AutoCreator grant key, and the authenticated
+unless `PREVIEW_MODE` is the exact string `false`, the selected offer has its
+Stripe Price and every required AutoCreator grant key, and the authenticated
 fulfillment implementation, required Cloudflare Secrets, readiness flags, and
-D1 schema sentinel all pass. The missing bundle slugs and authenticated AutoCreator
-contract are the current software blockers.
+D1 schema sentinel all pass. The bundle slugs and authenticated AutoCreator
+contract were verified by authenticated inspection on 2026-09-01. Live
+fulfillment remains locked until the deployed staging revision passes grant,
+read-back, retry, and revocation proof and both readiness flags are enabled.
 
 ## Routes
 
@@ -69,13 +71,13 @@ constructing a Stripe client, so no Checkout Session is created.
 
 Five Price IDs are mapped in configuration. Do not create, edit, or duplicate
 them. The Certification price is the one-time $297 Price
-`price_1UAvcCIwpEtt4FIeaPk7pUzB`. Each offer also requires its exact AutoCreator grant key.
+`price_1UAvcCIwpEtt4FIeaPk7pUzB`. Each offer also requires every exact AutoCreator grant key in its mapping.
 Confirmed names and UUIDs are not accepted as bundle slugs. The Two-Month Checkout contains the one-time $8 item and trials
 the existing $20/month recurring item until exactly two UTC calendar months
 later. Month-end dates clamp to the last valid day.
 
-The currently verified AutoCreator UUIDs, plan references, tool contract, scopes,
-and remaining slug/plan blockers are recorded in
+The authenticated AutoCreator bundle slugs, UUIDs, plan references, tool
+contract, scopes, and remaining activation proof are recorded in
 [`docs/autocreator-fulfillment-contract.md`](docs/autocreator-fulfillment-contract.md).
 
 Webhook registration is deliberately not part of staging setup. Once a stable
@@ -139,9 +141,9 @@ the pages through one JSON island (`<script id="page-config">`):
 | `BUNDLE_PRICE_CENTS`      | 1400 |
 | `STRIPE_PRICE_*`          | The five verified Stripe Price IDs. |
 | `STRIPE_PRODUCT_TWO_MONTH` | The verified existing product used for the one-time $8 item. |
-| `AUTOCREATOR_*_BUNDLE_UUID` | Confirmed read-only bundle references. UUID is not assumed to be a grant slug. |
-| `AUTOCREATOR_*_BUNDLE_SLUG` | Exact authenticated bundle slug required by the AutoCreator grant tool. Empty keeps Checkout closed. |
-| `AUTOCREATOR_*_ENTITLEMENT_TARGET` | Exact lifetime or monthly grant target once that plan contract is confirmed. |
+| `AUTOCREATOR_*_BUNDLE_UUID` | Confirmed read-only bundle references. UUID is not used as a grant slug. |
+| `AUTOCREATOR_*_BUNDLE_SLUG` | Exact authenticated bundle slug required by the AutoCreator grant tool. Certification requires all three level slugs. |
+| `AUTOCREATOR_*_ENTITLEMENT_TARGET` | Exact authenticated lifetime or monthly plan Price ID used by the membership grant tool. |
 | `STRIPE_WEBHOOK_READY` | Exact `true` only after the signed endpoint proof passes on the deployed revision. |
 | `AUTOCREATOR_FULFILLMENT_READY` | Exact `true` only after authenticated grant, retry, and revocation proof passes. |
 
@@ -214,7 +216,7 @@ leave it running forever.
 Refuses to deploy a half-configured page. Checks, all reported in one run:
 
 1. all five verified Stripe Price IDs and the Two-Month Product ID are valid and unique
-2. all five exact AutoCreator grant keys are set
+2. every offer's exact AutoCreator grant keys are set, including all three Certification levels
 3. authenticated AutoCreator fulfillment is implemented and tested
 4. authenticated AutoCreator client is implemented and tested
 5. webhook and fulfillment readiness flags are exactly `"true"`

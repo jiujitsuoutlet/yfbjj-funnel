@@ -4,35 +4,39 @@ import { createAutoCreatorClient } from './autocreator.js';
 export const OFFERS = Object.freeze({
   bundle: {
     priceVar: 'STRIPE_PRICE_BUNDLE',
-    entitlementKeyVar: 'AUTOCREATOR_GUARD_RETENTION_BUNDLE_SLUG',
+    entitlementKeyVars: ['AUTOCREATOR_GUARD_RETENTION_BUNDLE_SLUG'],
     mode: 'payment',
   },
   head_to_toes: {
     priceVar: 'STRIPE_PRICE_HEAD_TO_TOES',
-    entitlementKeyVar: 'AUTOCREATOR_HEAD_TO_TOES_BUNDLE_SLUG',
+    entitlementKeyVars: ['AUTOCREATOR_HEAD_TO_TOES_BUNDLE_SLUG'],
     mode: 'payment',
   },
   lifetime: {
     priceVar: 'STRIPE_PRICE_LIFETIME',
-    entitlementKeyVar: 'AUTOCREATOR_LIFETIME_ENTITLEMENT_TARGET',
+    entitlementKeyVars: ['AUTOCREATOR_LIFETIME_ENTITLEMENT_TARGET'],
     mode: 'payment',
   },
   two_month: {
     priceVar: 'STRIPE_PRICE_TWO_MONTH',
-    entitlementKeyVar: 'AUTOCREATOR_MONTHLY_ENTITLEMENT_TARGET',
+    entitlementKeyVars: ['AUTOCREATOR_MONTHLY_ENTITLEMENT_TARGET'],
     mode: 'subscription',
   },
   certification: {
     priceVar: 'STRIPE_PRICE_CERTIFICATION',
-    entitlementKeyVar: 'AUTOCREATOR_CERTIFICATION_BUNDLE_SLUG',
+    entitlementKeyVars: [
+      'AUTOCREATOR_CERTIFICATION_LEVEL_1_BUNDLE_SLUG',
+      'AUTOCREATOR_CERTIFICATION_LEVEL_2_BUNDLE_SLUG',
+      'AUTOCREATOR_CERTIFICATION_LEVEL_3_BUNDLE_SLUG',
+    ],
     mode: 'payment',
   },
 });
 
-// AutoCreator's authenticated write contract is not present in this repository.
-// Keep Checkout closed until that integration and its retry tests actually exist.
+// The authenticated client contract is implemented, but Checkout stays closed
+// until the deployed staging grant/read-back proof approves fulfillment.
 export const FULFILLMENT_IMPLEMENTED = false;
-export const AUTOCREATOR_CLIENT_IMPLEMENTED = false;
+export const AUTOCREATOR_CLIENT_IMPLEMENTED = true;
 const READINESS_SCHEMA_VERSION = 1;
 const PROCESSING_LEASE_MS = 5 * 60 * 1000;
 const FLOW_TTL_MS = 24 * 60 * 60 * 1000;
@@ -119,16 +123,21 @@ function stripeClient(env) {
 export function resolveOffer(env, offerKey) {
   const offer = OFFERS[offerKey];
   if (!offer) return { ok: false, error: 'invalid_offer', missing: [] };
-  const missing = [offer.priceVar, offer.entitlementKeyVar].filter((key) => !String(env[key] || '').trim());
+  const missing = [offer.priceVar, ...offer.entitlementKeyVars]
+    .filter((key) => !String(env[key] || '').trim());
   if (offerKey === 'two_month' && !String(env.STRIPE_PRODUCT_TWO_MONTH || '').trim()) {
     missing.push('STRIPE_PRODUCT_TWO_MONTH');
   }
   if (missing.length) return { ok: false, error: 'offer_not_configured', missing };
+  const entitlementKeys = offer.entitlementKeyVars.map((key) => String(env[key]).trim());
   return {
     ok: true,
     offer,
     priceId: env[offer.priceVar],
-    entitlementKey: env[offer.entitlementKeyVar],
+    entitlementKeys,
+    // Keep the existing Stripe and D1 field stable while supporting an ordered
+    // multi-bundle grant. This value is server-owned and validated on webhook.
+    entitlementKey: entitlementKeys.join(','),
   };
 }
 
@@ -525,6 +534,7 @@ export async function processEntitlementOperation(env, session, mapping, deps = 
       operationKey,
       offer: session.metadata.offer,
       entitlementKey: mapping.entitlementKey,
+      entitlementKeys: mapping.entitlementKeys,
       sessionId: session.id,
       email: session.customer_details && session.customer_details.email || null,
       customerId: session.customer || null,
