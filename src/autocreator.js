@@ -120,11 +120,22 @@ export function createAutoCreatorClient(env, deps = {}) {
       if (!bundleSlugs.length) {
         throw new AutoCreatorError('A bundle entitlement key is required for fulfillment', { code: 'entitlement_missing' });
       }
+      let member = await tool('members.findByEmail', { email });
+      let id = memberId(member);
+      if (!id) {
+        await tool('members.create', { email });
+        member = await tool('members.findByEmail', { email });
+        id = memberId(member);
+      }
+      if (!id) {
+        throw new AutoCreatorError('AutoCreator member creation did not return a member ID', {
+          retryable: true, code: 'readback_failed',
+        });
+      }
       for (const bundleSlug of bundleSlugs) {
         await tool('members.grantBundleEntitlement', {
           email,
           bundle_slug: bundleSlug,
-          source: 'stripe_purchase',
           notes: `Stripe Checkout ${sessionId}`,
         });
       }
@@ -138,10 +149,12 @@ export function createAutoCreatorClient(env, deps = {}) {
           retryable: true, code: 'readback_failed',
         });
       }
-      const member = await tool('members.findByEmail', { email });
-      const id = memberId(member);
-      if (!id) throw new AutoCreatorError('AutoCreator member read-back did not return a member ID', { retryable: true, code: 'readback_failed' });
       const access = await tool('members.checkAccess', { memberId: id });
+      if (!exactRecord(access, 'granted', true)) {
+        throw new AutoCreatorError('AutoCreator access read-back did not prove effective access', {
+          retryable: true, code: 'readback_failed',
+        });
+      }
       return { verified: true, activationNeeded: needsActivation(access) };
     }
 
@@ -158,13 +171,20 @@ export function createAutoCreatorClient(env, deps = {}) {
         });
       }
       const active = await tool('subscriptions.getActive', { member_id: id });
-      const record = exactRecord(active, 'price_id', entitlementKey);
+      const record = exactRecord(active, 'price_id', entitlementKey)
+        || exactRecord(active, 'stripe_price_id', entitlementKey)
+        || exactRecord(active, 'priceId', entitlementKey);
       if (!record || !isActive(record)) {
         throw new AutoCreatorError('AutoCreator membership read-back did not prove access', {
           retryable: true, code: 'readback_failed',
         });
       }
       const access = await tool('members.checkAccess', { memberId: id });
+      if (!exactRecord(access, 'granted', true)) {
+        throw new AutoCreatorError('AutoCreator access read-back did not prove effective access', {
+          retryable: true, code: 'readback_failed',
+        });
+      }
       return { verified: true, activationNeeded: needsActivation(access) };
     }
     throw new AutoCreatorError('Unsupported fulfillment offer', { code: 'unsupported_offer' });

@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "npm run preflight && wrangler deploy",
+    "preflight:staging:locked": "node scripts/preflight.mjs --locked-staging",
+    "deploy:staging:locked": "npm run preflight:staging:locked && wrangler deploy --env staging",
     "scan": "bash scripts/scan-secrets.sh",
     "db:create": "wrangler d1 create yfbjj_funnel",
     "db:migrate:local": "wrangler d1 migrations apply yfbjj_funnel --local",

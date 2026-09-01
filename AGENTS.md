@@ -51,13 +51,18 @@ Never "fix" a broken CTA by relaxing this check.
 and stops on any failure — that chain is load-bearing, don't break it or run
 `wrangler deploy` directly. Preflight is the deploy gate, not a lint
 suggestion: all verified Stripe Price IDs set, every exact AutoCreator grant
-key set, fulfillment implemented, deadline set and future, preview
+key set, fulfillment implemented, any configured deadline valid and future, preview
 off, real D1 id, no unfilled served-page placeholders, both variants complete,
 variant survives into Checkout metadata, images present, secrets scan clean.
 
 **Never deploy without explicit instruction.** Building, editing, and running
 `npm run preflight` locally are fine. `wrangler deploy` (or anything that
 runs it) needs the operator to say so, in this conversation, for this change.
+
+**Locked staging has its own gate.** `npm run deploy:staging:locked` chains the
+locked-staging preflight and staging deploy. It requires preview and both
+readiness flags to remain locked. Use it only for the initial isolated staging
+revision, never for production or for opening checkout.
 
 **Never touch the client's Cloudflare, Stripe, or AutoCreator account beyond what's asked.**
 No new routes, DNS, secrets, Stripe objects, or AutoCreator objects without being asked. If a
