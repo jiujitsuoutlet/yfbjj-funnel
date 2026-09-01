@@ -1,5 +1,5 @@
 (() => {
-  const pageKeys = ['landing-a','landing-b','offer-head-to-toes','offer-lifetime','offer-two-month','thanks-preview','thanks-pending','thanks-failed','thanks-granted','thanks-activation','preview-checkout'];
+  const pageKeys = ['landing-a','landing-b','offer-head-to-toes','offer-lifetime','offer-two-month','offer-certification','thanks-preview','thanks-pending','thanks-failed','thanks-granted','thanks-activation','preview-checkout'];
   const functional = new Set(['checkoutForm','offerActions','price','legalFooter','previewBanner','announcement','backgroundImage']);
   const colors = { black:'#080808',black2:'#111114',cream:'#f4efe5',white:'#fff',dim:'#aaa',red:'#d9321e' };
   const fonts = { brandSans:'Inter,Arial,sans-serif',systemSans:'Arial,Helvetica,sans-serif',serif:'Georgia,serif' };

@@ -10,6 +10,7 @@ const pages = [
   ['offer-head', '/offer?step=head_to_toes'],
   ['offer-lifetime', '/offer?step=lifetime'],
   ['offer-two-month', '/offer?step=two_month'],
+  ['offer-certification', '/offer?step=certification'],
   ['thanks', '/thanks'],
   ['preview-checkout', '/preview-checkout'],
 ];

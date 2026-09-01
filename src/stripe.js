@@ -22,6 +22,11 @@ export const OFFERS = Object.freeze({
     entitlementKeyVar: 'AUTOCREATOR_MONTHLY_ENTITLEMENT_TARGET',
     mode: 'subscription',
   },
+  certification: {
+    priceVar: 'STRIPE_PRICE_CERTIFICATION',
+    entitlementKeyVar: 'AUTOCREATOR_CERTIFICATION_BUNDLE_SLUG',
+    mode: 'payment',
+  },
 });
 
 // AutoCreator's authenticated write contract is not present in this repository.
@@ -36,13 +41,15 @@ const FLOW_COOKIE = 'yfbjj_flow';
 export const NEXT_OFFER = Object.freeze({
   bundle: 'head_to_toes',
   head_to_toes: 'lifetime',
-  lifetime: null,
-  two_month: null,
+  lifetime: 'certification',
+  two_month: 'certification',
+  certification: null,
 });
 export const SKIP_OFFER = Object.freeze({
   head_to_toes: 'lifetime',
   lifetime: 'two_month',
-  two_month: null,
+  two_month: 'certification',
+  certification: null,
 });
 
 const ATTRIBUTION_KEYS = ['variant', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'gclid'];

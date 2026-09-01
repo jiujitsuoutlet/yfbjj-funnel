@@ -41,6 +41,20 @@ test('bundle grant uses the documented envelope and requires exact read-back', a
   assert.deepEqual(transport.calls[3].body, { args: { memberId: 'member_1' } });
 });
 
+test('Certification uses the bundle grant and exact bundle read-back path', async () => {
+  const transport = queued([
+    ok('members.grantBundleEntitlement', { already_existed: false }),
+    ok('members.listBundleEntitlements', { items: [{ bundle_slug: 'certification-levels-1-2-3', status: 'active' }] }),
+    ok('members.findByEmail', { member: { id: 'member_cert' } }),
+    ok('members.checkAccess', { neverSignedIn: false }),
+  ]);
+  const result = await createAutoCreatorClient(env, transport).grant({
+    offer: 'certification', entitlementKey: 'certification-levels-1-2-3', sessionId: 'cs_cert', email: 'coach@example.com',
+  });
+  assert.deepEqual(result, { verified: true, activationNeeded: false });
+  assert.equal(transport.calls[0].body.args.bundle_slug, 'certification-levels-1-2-3');
+});
+
 test('plan grant attaches Stripe references and proves the exact active price', async () => {
   const calls = [];
   const transport = queued([

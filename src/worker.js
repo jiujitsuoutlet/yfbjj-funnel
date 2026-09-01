@@ -259,6 +259,12 @@ function offerCopy(offer, trialEnd) {
     price: '$247 once', terms: 'A new Stripe Checkout opens. Nothing is charged unless you confirm there.',
     accept: 'Choose lifetime for $247', skip: 'No thanks. Show me the lower-cost option.',
   };
+  if (offer === 'certification') return {
+    title: 'Instructor certification', kicker: 'Final optional offer', headline: 'Teach Yoga for BJJ.',
+    message: 'Levels 1, 2 and 3. This is for coaches and prospective coaches who intend to teach this material to grapplers.',
+    price: '$297 once', terms: 'One payment. A new Stripe Checkout opens. Nothing is charged unless you confirm there.',
+    accept: 'Get all three levels for $297', skip: 'No thanks. Finish my order.',
+  };
   const starts = trialEnd
     ? new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' }).format(new Date(trialEnd)) + ' UTC'
     : 'two calendar months after checkout';
@@ -266,7 +272,7 @@ function offerCopy(offer, trialEnd) {
     title: 'Two-month access', kicker: 'Optional lower-cost option', headline: 'Start with two months.',
     message: 'This is not lifetime access. It becomes a monthly membership unless you cancel.',
     price: '$8 today', terms: `Then $19.99 per month starting ${starts}, until canceled. Stripe shows the same terms before you confirm.`,
-    accept: 'Start for $8', skip: 'No thanks. Finish my order.',
+    accept: 'Start for $8', skip: 'No thanks. Show me the final option.',
   };
 }
 

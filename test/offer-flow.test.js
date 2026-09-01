@@ -15,6 +15,7 @@ const baseEnv = {
   STRIPE_PRICE_LIFETIME: 'price_lifetime', AUTOCREATOR_LIFETIME_ENTITLEMENT_TARGET: 'price_plan_lifetime',
   STRIPE_PRICE_TWO_MONTH: 'price_monthly', AUTOCREATOR_MONTHLY_ENTITLEMENT_TARGET: 'price_plan_monthly',
   STRIPE_PRODUCT_TWO_MONTH: 'prod_trial',
+  STRIPE_PRICE_CERTIFICATION: 'price_certification', AUTOCREATOR_CERTIFICATION_BUNDLE_SLUG: 'certification-levels-1-2-3',
 };
 
 function flowDatabase(overrides = {}) {
@@ -128,4 +129,30 @@ test('a live pending Checkout cannot be declined and ready declines follow the a
   await handleOfferSkip(request('/api/offer-skip'), { ...baseEnv, DB: lifetime }, { stripe: stripe([]), now: () => new Date('2027-01-31T12:00:00Z') });
   assert.equal(lifetime.state.current_offer, 'two_month');
   assert.equal(lifetime.state.two_month_trial_end, '2027-03-31T12:00:00.000Z');
+
+  const twoMonth = flowDatabase({ current_offer: 'two_month' });
+  await handleOfferSkip(request('/api/offer-skip'), { ...baseEnv, DB: twoMonth }, { stripe: stripe([]) });
+  assert.equal(twoMonth.state.current_offer, 'certification');
+  assert.equal(twoMonth.state.status, 'offer_ready');
+
+  const certification = flowDatabase({ current_offer: 'certification' });
+  const finished = await handleOfferSkip(request('/api/offer-skip'), { ...baseEnv, DB: certification }, { stripe: stripe([]) });
+  assert.equal(certification.state.current_offer, null);
+  assert.equal(certification.state.status, 'complete');
+  assert.equal((await finished.json()).url, '/thanks?session_id=cs_parent');
+});
+
+test('Certification checkout is server-derived, one-time, and fixed to the verified $297 Price', async () => {
+  const DB = flowDatabase({ current_offer: 'certification' });
+  const created = [];
+  const response = await handleOfferCheckout(request('/api/offer-checkout', {
+    offer: 'two_month', price_id: 'price_attacker', entitlement_key: 'attacker',
+  }), { ...baseEnv, DB }, { stripe: stripe(created), fulfillmentImplemented: true });
+  assert.equal(response.status, 200);
+  assert.equal(created.length, 1);
+  assert.equal(created[0].params.mode, 'payment');
+  assert.equal(created[0].params.line_items[0].price, 'price_certification');
+  assert.equal(created[0].params.metadata.offer, 'certification');
+  assert.equal(created[0].params.metadata.entitlement_key, 'certification-levels-1-2-3');
+  assert.equal(created[0].options.idempotencyKey, `offer:${flowHash}:certification`);
 });

@@ -22,9 +22,11 @@ const env = {
   STRIPE_PRICE_HEAD_TO_TOES: 'price_head',
   STRIPE_PRICE_TWO_MONTH: 'price_monthly',
   STRIPE_PRODUCT_TWO_MONTH: 'prod_trial',
+  STRIPE_PRICE_CERTIFICATION: 'price_certification',
   AUTOCREATOR_GUARD_RETENTION_BUNDLE_SLUG: 'guard-retention',
   AUTOCREATOR_HEAD_TO_TOES_BUNDLE_SLUG: 'head-slug',
   AUTOCREATOR_MONTHLY_ENTITLEMENT_TARGET: 'full-monthly',
+  AUTOCREATOR_CERTIFICATION_BUNDLE_SLUG: 'certification-levels-1-2-3',
 };
 
 async function body(response) { return response.json(); }
@@ -41,12 +43,13 @@ test('preview defaults locked and never calls Stripe', async () => {
   assert.equal(calls, 0);
 });
 
-test('all four offers require an explicit Stripe Price and AutoCreator entitlement mapping', () => {
+test('all five offers require an explicit Stripe Price and AutoCreator entitlement mapping', () => {
   assert.deepEqual(OFFERS, {
     bundle: { priceVar: 'STRIPE_PRICE_BUNDLE', entitlementKeyVar: 'AUTOCREATOR_GUARD_RETENTION_BUNDLE_SLUG', mode: 'payment' },
     head_to_toes: { priceVar: 'STRIPE_PRICE_HEAD_TO_TOES', entitlementKeyVar: 'AUTOCREATOR_HEAD_TO_TOES_BUNDLE_SLUG', mode: 'payment' },
     lifetime: { priceVar: 'STRIPE_PRICE_LIFETIME', entitlementKeyVar: 'AUTOCREATOR_LIFETIME_ENTITLEMENT_TARGET', mode: 'payment' },
     two_month: { priceVar: 'STRIPE_PRICE_TWO_MONTH', entitlementKeyVar: 'AUTOCREATOR_MONTHLY_ENTITLEMENT_TARGET', mode: 'subscription' },
+    certification: { priceVar: 'STRIPE_PRICE_CERTIFICATION', entitlementKeyVar: 'AUTOCREATOR_CERTIFICATION_BUNDLE_SLUG', mode: 'payment' },
   });
   assert.deepEqual(resolveOffer({ ...env, AUTOCREATOR_GUARD_RETENTION_BUNDLE_SLUG: '' }, 'bundle'), {
     ok: false,
@@ -98,7 +101,7 @@ test('checkout preserves first-party attribution in session and payment metadata
 test('initial checkout rejects every non-Guard offer and calendar months clamp', async () => {
   assert.equal(addCalendarMonths(new Date('2027-01-31T12:00:00Z'), 1).toISOString(), '2027-02-28T12:00:00.000Z');
   assert.equal(addCalendarMonths(new Date('2028-01-31T12:00:00Z'), 1).toISOString(), '2028-02-29T12:00:00.000Z');
-  for (const offer of ['head_to_toes', 'lifetime', 'two_month']) {
+  for (const offer of ['head_to_toes', 'lifetime', 'two_month', 'certification']) {
     const request = new Request('https://staging.test/api/checkout', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ offer }),
     });

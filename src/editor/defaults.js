@@ -80,7 +80,12 @@ const documents = {
   'offer-two-month': documentFor('offer-two-month', 'Two-month access', 'Optional lower-cost offer.', [
     element('offer-two-heading', 'heading', { level: 1, content: 'Start with two months.' }),
     element('offer-two-copy', 'text', { preset: 'lede', content: 'This is not lifetime access. It becomes a monthly membership unless you cancel.' }),
-    element('offer-two-price', 'price'), element('offer-two-actions', 'offerActions', { acceptText: 'Start for $8', skipText: 'No thanks. Finish my order.' }), legal('offer-two-month'),
+    element('offer-two-price', 'price'), element('offer-two-actions', 'offerActions', { acceptText: 'Start for $8', skipText: 'No thanks. Show me the final option.' }), legal('offer-two-month'),
+  ]),
+  'offer-certification': documentFor('offer-certification', 'Instructor certification', 'Final optional post-purchase offer.', [
+    element('offer-cert-heading', 'heading', { level: 1, content: 'Teach Yoga for BJJ.' }),
+    element('offer-cert-copy', 'text', { preset: 'lede', content: 'Levels 1, 2 and 3. This is for coaches and prospective coaches who intend to teach this material to grapplers.' }),
+    element('offer-cert-price', 'price'), element('offer-cert-actions', 'offerActions', { acceptText: 'Get all three levels for $297', skipText: 'No thanks. Finish my order.' }), legal('offer-certification'),
   ]),
   'thanks-preview': documentFor('thanks-preview', 'Checkout preview', 'Preview state.', [preview('thanks-preview'), element('thanks-preview-heading', 'heading', { level: 1, content: 'Checkout is locked.' }), element('thanks-preview-copy', 'text', { content: 'No payment or access change happened in this preview.' }), legal('thanks-preview')], 'support'),
   'thanks-pending': documentFor('thanks-pending', 'Order processing', 'Pending order state.', [element('thanks-pending-heading', 'heading', { level: 1, content: 'We are checking your order.' }), element('thanks-pending-copy', 'text', { content: 'Access has not been confirmed yet. This page will only say you are in after the entitlement grant is durably recorded.' }), element('thanks-pending-support', 'text', { preset: 'support', content: 'If this is still pending after 15 minutes, write to Sebastian@yogaforbjj.net with your Stripe receipt.' }), legal('thanks-pending')], 'support'),

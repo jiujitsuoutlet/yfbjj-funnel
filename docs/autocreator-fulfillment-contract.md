@@ -9,6 +9,7 @@ non-secret inventory. These references do not unlock checkout by themselves.
 | Head to Toes | public bundle UUID | `3c3947f7-cb93-4d40-a8c9-1806b6ed7060` | exact `bundle_slug` still missing |
 | Lifetime | published one-time plan Stripe Price | `price_1TdIGeARWKYPSBdfrFBG6rhT` | same Price ID through `members.setMembership` |
 | Two-Month then monthly | published Full monthly plan Stripe Price | `price_1TdIGdARWKYPSBdfNJFlXdwy` | same Price ID through `members.setMembership` |
+| Certification | exact entitlement not yet confirmed | pending Sebastian or authenticated lookup | exact `bundle_slug` still missing |
 
 The AutoCreator API base is `https://yfbjj.autocreator.ai/api/v1`. Tools use
 `POST /tools/<toolName>` with a dedicated `ac_` bearer key. Never place that key
@@ -45,7 +46,7 @@ through authenticated lookup. A bundle UUID must never be guessed to equal its
 slug. Arbitrary external Stripe Checkout sessions are not proven to auto-sync;
 the Worker must explicitly write the local membership record and verify access.
 
-Runtime stays locked until both bundle slugs are authoritative, the bundle and
+Runtime stays locked until all three bundle slugs are authoritative, the bundle and
 plan client paths are implemented, read-back succeeds, retry and lifecycle
 behavior pass, and both readiness flags are set to the exact string `true` for
 the deployed revision.

@@ -113,7 +113,7 @@ export function createAutoCreatorClient(env, deps = {}) {
 
   async function grant({ offer, entitlementKey, sessionId, email, customerId, subscriptionId }) {
     if (!email) throw new AutoCreatorError('A buyer email is required for fulfillment', { code: 'email_missing' });
-    if (offer === 'bundle' || offer === 'head_to_toes') {
+    if (offer === 'bundle' || offer === 'head_to_toes' || offer === 'certification') {
       await tool('members.grantBundleEntitlement', {
         email,
         bundle_slug: entitlementKey,

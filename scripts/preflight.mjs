@@ -45,12 +45,14 @@ const STRIPE_PRICE_VARS = [
   'STRIPE_PRICE_HEAD_TO_TOES',
   'STRIPE_PRICE_LIFETIME',
   'STRIPE_PRICE_TWO_MONTH',
+  'STRIPE_PRICE_CERTIFICATION',
 ];
 const AUTOCREATOR_ENTITLEMENT_VARS = [
   'AUTOCREATOR_GUARD_RETENTION_BUNDLE_SLUG',
   'AUTOCREATOR_HEAD_TO_TOES_BUNDLE_SLUG',
   'AUTOCREATOR_LIFETIME_ENTITLEMENT_TARGET',
   'AUTOCREATOR_MONTHLY_ENTITLEMENT_TARGET',
+  'AUTOCREATOR_CERTIFICATION_BUNDLE_SLUG',
 ];
 
 const priceIds = [];
@@ -64,7 +66,7 @@ for (const key of STRIPE_PRICE_VARS) {
   }
 }
 if (priceIds.length === STRIPE_PRICE_VARS.length && new Set(priceIds).size !== priceIds.length) {
-  fail('Stripe offer mapping reuses a Price ID. Each of the four offers must map to its own verified Price.');
+  fail('Stripe offer mapping reuses a Price ID. Each of the five offers must map to its own verified Price.');
 }
 
 const twoMonthProduct = String(cfg.STRIPE_PRODUCT_TWO_MONTH || '').trim();
@@ -103,6 +105,7 @@ if (!readinessMigration.includes('fulfillment_readiness') || !readinessMigration
 } else pass('readiness sentinel and durable entitlement outbox migration present');
 const flowMigration = readFileSync(join(ROOT, 'migrations', '0007_offer_journey.sql'), 'utf8');
 const editorMigration = readFileSync(join(ROOT, 'migrations', '0008_content_editor.sql'), 'utf8');
+const certificationMigration = readFileSync(join(ROOT, 'migrations', '0009_certification_offer.sql'), 'utf8');
 const autoCreatorSource = readFileSync(join(ROOT, 'src', 'autocreator.js'), 'utf8');
 if (!flowMigration.includes('checkout_flows') || !flowMigration.includes('offer_transitions')) {
   fail('migration 0007 does not contain the cookie-bound offer state machine.');
@@ -119,6 +122,12 @@ if (!stripeSource.includes("offerKey !== 'bundle'") || !stripeSource.includes('F
 if (!editorMigration.includes('editor_pages') || !editorMigration.includes('editor_sessions') || !editorMigration.includes('editor_page_versions')) {
   fail('migration 0008 does not contain the editor page, session, and version tables.');
 } else pass('editor migration contains page, session, and version tables');
+if (!certificationMigration.includes("'certification'")
+  || !certificationMigration.includes("'offer-certification'")
+  || !stripeSource.includes("two_month: 'certification'")
+  || !stripeSource.includes('certification: null')) {
+  fail('Certification is not present in both the D1 offer constraints and server-owned sequence.');
+} else pass('Certification is present in the D1 offer constraints and server-owned sequence');
 if (Object.hasOwn(cfg, 'ADMIN_PASSWORD')) {
   fail('ADMIN_PASSWORD must be a Cloudflare Secret, not a wrangler.toml variable.');
 } else pass('ADMIN_PASSWORD is absent from non-secret Wrangler variables');
