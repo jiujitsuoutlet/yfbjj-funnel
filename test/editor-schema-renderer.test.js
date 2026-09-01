@@ -62,6 +62,17 @@ test('renderer escapes content and derives locked prices and actions from server
   assert.match(rendered.body, /--editor-page-bg/);
 });
 
+test('Certification editor page keeps the $297 price server-owned', () => {
+  const document = defaultDocument('offer-certification');
+  assert.equal(validateContentDocument(document, { pageKey: 'offer-certification', imagePaths: images }).ok, true);
+  const rendered = renderContentDocument(document, {
+    pageKey: 'offer-certification', env: { STRIPE_PRICE_CERTIFICATION: 'price_secret' },
+  }).body;
+  assert.match(rendered, /\$297 once/);
+  assert.match(rendered, /All three certification levels/);
+  assert.doesNotMatch(rendered, /price_secret/);
+});
+
 test('landing defaults preserve the current offer copy before first publish', () => {
   for (const pageKey of ['landing-a', 'landing-b']) {
     const serialized = JSON.stringify(DEFAULT_PAGE_DOCUMENTS[pageKey]);

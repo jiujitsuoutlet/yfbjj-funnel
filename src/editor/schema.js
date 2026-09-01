@@ -1,6 +1,6 @@
 export const EDITOR_PAGE_KEYS = Object.freeze([
   'landing-a', 'landing-b',
-  'offer-head-to-toes', 'offer-lifetime', 'offer-two-month',
+  'offer-head-to-toes', 'offer-lifetime', 'offer-two-month', 'offer-certification',
   'thanks-preview', 'thanks-pending', 'thanks-failed', 'thanks-granted', 'thanks-activation',
   'preview-checkout',
 ]);
@@ -17,6 +17,7 @@ const FUNCTIONAL_RULES = Object.freeze({
   'offer-head-to-toes': { offerActions: 1, price: 1, legalFooter: 1 },
   'offer-lifetime': { offerActions: 1, price: 1, legalFooter: 1 },
   'offer-two-month': { offerActions: 1, price: 1, legalFooter: 1 },
+  'offer-certification': { offerActions: 1, price: 1, legalFooter: 1 },
   'thanks-preview': { legalFooter: 1, previewBanner: 1 },
   'thanks-pending': { legalFooter: 1 },
   'thanks-failed': { legalFooter: 1 },

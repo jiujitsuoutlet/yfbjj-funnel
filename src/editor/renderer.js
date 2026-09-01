@@ -54,6 +54,7 @@ function priceMarkup(pageKey, env, context) {
   }
   if (pageKey === 'offer-head-to-toes') return '<p class="offer-price">$29</p><p class="dim">One-time purchase. Confirm in Stripe Checkout.</p>';
   if (pageKey === 'offer-lifetime') return '<p class="offer-price">$247 once</p><p class="dim">One-time purchase. Confirm in Stripe Checkout.</p>';
+  if (pageKey === 'offer-certification') return '<p class="offer-price">$297 once</p><p class="dim">All three certification levels. One-time purchase. Confirm in Stripe Checkout.</p>';
   if (pageKey === 'offer-two-month') {
     const starts = context.trialEnd
       ? `${new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' }).format(new Date(context.trialEnd))} UTC`

@@ -3,7 +3,7 @@
 Cloudflare Worker behind `welcome.yogaforbjj.net`. The landing page for the $14
 Guard Retention Bundle, plus lead capture. That is the whole job.
 
-Checkout uses the four verified existing Stripe Prices. The Worker captures
+Checkout uses five verified Stripe Prices. The Worker captures
 leads, creates guarded Stripe-hosted Checkout Sessions, verifies webhook
 signatures, records orders in D1, and reports health.
 
@@ -62,8 +62,9 @@ on an unlisted `workers.dev` hostname after replacing the staging D1 placeholder
 The lock returns HTTP 423 with `{"ok":false,"error":"preview_locked"}` before
 constructing a Stripe client, so no Checkout Session is created.
 
-Four existing Price IDs are mapped in configuration. Do not create, edit, or
-duplicate them. Each offer also requires its exact AutoCreator grant key.
+Five Price IDs are mapped in configuration. Do not create, edit, or duplicate
+them. The Certification price is the one-time $297 Price
+`price_1UAvcCIwpEtt4FIeaPk7pUzB`. Each offer also requires its exact AutoCreator grant key.
 Confirmed names and UUIDs are not accepted as bundle slugs. The Two-Month Checkout contains the one-time $8 item and trials
 the existing $20/month recurring item until exactly two UTC calendar months
 later. Month-end dates clamp to the last valid day.
@@ -98,7 +99,8 @@ those locks are closed.
 The client uses the documented `{ "args": { ... } }` tool envelope and marks
 D1 granted only after exact bundle or active-plan read-back. The post-purchase
 sequence is server-owned: Guard, optional Head to Toes, optional Lifetime, then
-Two-Month after a Lifetime decline. D1 derives each step from an opaque HttpOnly
+Two-Month after a Lifetime decline, followed by the final optional Certification
+offer. D1 derives each step from an opaque HttpOnly
 flow-cookie hash. Every accept opens a new Stripe-hosted Checkout. Two-Month
 persists one exact timestamp for the `$8 today, then $19.99/month` terms shown
 both before Checkout and to Stripe.
@@ -130,7 +132,7 @@ the pages through one JSON island (`<script id="page-config">`):
 | `PREVIEW_MODE`            | Default **true**. Any value other than the exact string `false` routes every CTA to `/preview-checkout` and shows the preview banner. Unset means preview, so a missing var can never send paid traffic at a cart that is not ready. |
 | `OFFER_DEADLINE`          | ISO 8601. Empty = the deadline bar is not rendered at all. |
 | `BUNDLE_PRICE_CENTS`      | 1400 |
-| `STRIPE_PRICE_*`          | The four verified existing Stripe Price IDs. |
+| `STRIPE_PRICE_*`          | The five verified Stripe Price IDs. |
 | `STRIPE_PRODUCT_TWO_MONTH` | The verified existing product used for the one-time $8 item. |
 | `AUTOCREATOR_*_BUNDLE_UUID` | Confirmed read-only bundle references. UUID is not assumed to be a grant slug. |
 | `AUTOCREATOR_*_BUNDLE_SLUG` | Exact authenticated bundle slug required by the AutoCreator grant tool. Empty keeps Checkout closed. |
@@ -206,8 +208,8 @@ leave it running forever.
 
 Refuses to deploy a half-configured page. Checks, all reported in one run:
 
-1. all four verified Stripe Price IDs and the Two-Month Product ID are valid and unique
-2. all four exact AutoCreator grant keys are set
+1. all five verified Stripe Price IDs and the Two-Month Product ID are valid and unique
+2. all five exact AutoCreator grant keys are set
 3. authenticated AutoCreator fulfillment is implemented and tested
 4. authenticated AutoCreator client is implemented and tested
 5. webhook and fulfillment readiness flags are exactly `"true"`

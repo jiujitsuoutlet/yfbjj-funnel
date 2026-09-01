@@ -26,6 +26,11 @@ await page.screenshot({ path: '/tmp/yfbjj-compiled-a-1024.png', fullPage: true }
 await page.goto(`${base}/admin/login`);
 await page.getByLabel('Password').fill(password);
 await Promise.all([page.waitForURL('**/admin/editor'), page.getByRole('button', { name: 'Sign in' }).click()]);
+assert.equal(await page.locator('#page-select option[value="offer-certification"]').count(), 1);
+await page.locator('#page-select').selectOption('offer-certification');
+await page.waitForFunction(() => document.querySelector('#canvas')?.textContent.includes('Teach Yoga for BJJ.'));
+await page.locator('#page-select').selectOption('landing-a');
+await page.waitForFunction(() => document.querySelector('#canvas')?.textContent.includes('Mobility for Brazilian Jiu-Jitsu'));
 await page.locator('#canvas .announce').click();
 assert.match(await page.getByLabel('Text').inputValue(), /Mobility for Brazilian Jiu-Jitsu/);
 await page.getByRole('button', { name: 'Mobile' }).click();

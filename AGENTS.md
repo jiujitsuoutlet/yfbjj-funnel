@@ -22,7 +22,7 @@ long-form), decided server-side before render — no client redirect, no flash.
 - Upsell 1: Head to Toes, $29 (was $59.99)
 - Upsell 2: Lifetime access, $247 (was $297 — the site's own price)
 - Downsell 2: 2-month trial, $8
-- Certification is a later phase and is not mapped into the active Stripe flow.
+- Final OTO: Yoga for BJJ Certification, $297
 
 Full detail, routes, and operator knobs: [README.md](README.md). This file is
 the rules; the README is the reference.
@@ -68,9 +68,10 @@ especially includes AutoCreator grant keys. Confirmed names and UUIDs are not
 bundle slugs. Leave the strict mapping value empty and let preflight fail until
 the exact authenticated key is retrieved.
 
-**Which prices live where.** The four existing Stripe Price IDs in
+**Which prices live where.** The five verified Stripe Price IDs in
 `wrangler.toml` own billing. `BUNDLE_PRICE_CENTS` is display-only for the landing
-page. Never create or duplicate Stripe Products or Prices as a shortcut.
+page. The Certification product and price were created for EXC-127. Never create
+or duplicate Stripe Products or Prices as a shortcut.
 
 **Payment must never outrun access.** `src/stripe.js` keeps Checkout blocked
 while either implementation constant is false, a required secret is absent, a
