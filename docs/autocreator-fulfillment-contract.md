@@ -26,8 +26,8 @@ in source or Wrangler vars.
 Confirmed bundle tools:
 
 - `members.grantBundleEntitlement`: `email`, exact `bundle_slug`,
-  `source="stripe_purchase"`, and Checkout Session ID in `notes`. Repeating a
-  grant is explicitly idempotent and reports `already_existed=true`.
+  and Checkout Session ID in `notes`. Repeating a grant is explicitly
+  idempotent and reports `already_existed=true`.
 - `members.revokeBundleEntitlement`: soft revoke by `entitlement_id`, or by
   `email` plus exact `bundle_slug`.
 - `members.listBundleEntitlements`, `members.checkAccess`, and
@@ -64,3 +64,18 @@ the exact string `true` for that proven revision.
 Both confirmed grant tools are idempotent at the tool level. No generic
 AutoCreator HTTP idempotency header is documented. The D1 event claim and outbox
 operation key remain the outer guard for every API action and retry.
+
+Live proof on 2026-09-01 found two contract details that the client enforces:
+
+- A new bundle buyer must exist as an AutoCreator member before the bundle grant.
+  The client performs exact member lookup, creates only when missing, then reads
+  the member ID back before granting.
+- Passing the documented `source: "stripe_purchase"` currently reaches the tool
+  but is rejected by AutoCreator's database constraint. Omitting `source` uses
+  the tool's accepted `manual_grant` default. Stripe session identity remains in
+  the grant notes and in the Worker's D1 and Stripe metadata ledgers.
+
+Bundle, Certification, Lifetime, and Monthly grant plus effective-access
+read-back passed against reserved QA members. All bundle test entitlements were
+soft-revoked and every QA member was soft-deleted after proof. No card was
+charged and no Stripe subscription was created by those AutoCreator plan tests.

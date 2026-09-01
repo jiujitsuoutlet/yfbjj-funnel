@@ -41,6 +41,12 @@ const READINESS_SCHEMA_VERSION = 1;
 const PROCESSING_LEASE_MS = 5 * 60 * 1000;
 const FLOW_TTL_MS = 24 * 60 * 60 * 1000;
 const FLOW_COOKIE = 'yfbjj_flow';
+const HANDLED_STRIPE_EVENTS = new Set([
+  'checkout.session.completed',
+  'checkout.session.async_payment_succeeded',
+  'checkout.session.async_payment_failed',
+  'checkout.session.expired',
+]);
 
 export const NEXT_OFFER = Object.freeze({
   bundle: 'head_to_toes',
@@ -651,6 +657,13 @@ export async function handleWebhook(request, env, deps = {}) {
     return response({ ok: false, error: 'invalid_signature' }, 400);
   }
 
+  // Authenticate but safely acknowledge events outside this Worker's contract.
+  // This prevents an accidental broad Stripe subscription from creating retries
+  // while keeping unsupported lifecycle events out of the local ledger.
+  if (!HANDLED_STRIPE_EVENTS.has(event.type)) {
+    return response({ ok: true, ignored: true });
+  }
+
   try {
     const now = clock(deps);
     const eventClaim = await claimStripeEvent(env, event, now);
@@ -660,7 +673,7 @@ export async function handleWebhook(request, env, deps = {}) {
     const readiness = await checkRuntimeReadiness(env, deps);
     if (!readiness.ok) throw new Error(`runtime not ready: ${readiness.reason}`);
 
-    if (['checkout.session.completed', 'checkout.session.async_payment_succeeded', 'checkout.session.async_payment_failed', 'checkout.session.expired'].includes(event.type)) {
+    if (HANDLED_STRIPE_EVENTS.has(event.type)) {
       const session = event.data.object;
       const offerKey = session.metadata && session.metadata.offer;
       const mapping = resolveOffer(env, offerKey);

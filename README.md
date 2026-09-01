@@ -63,6 +63,11 @@ through `0009` are applied. Their non-secret resource IDs live in
 `wrangler.toml`; verification evidence is in
 [`docs/exc-128-d1-proof.md`](docs/exc-128-d1-proof.md).
 
+Locked functional staging is deployed at
+`https://yfbjj-funnel-stripe-staging.sebastian-brosche.workers.dev`. Deployment,
+webhook, live AutoCreator grant, cleanup, and browser evidence are recorded in
+[`docs/exc-130-staging-proof.md`](docs/exc-130-staging-proof.md).
+
 The `staging` Wrangler environment has a separate Worker name, no custom
 routes, a separate D1 binding, and `PREVIEW_MODE = "true"`. It is safe to put
 on an unlisted `workers.dev` hostname while the checkout lock remains enabled.
@@ -80,22 +85,21 @@ The authenticated AutoCreator bundle slugs, UUIDs, plan references, tool
 contract, scopes, and remaining activation proof are recorded in
 [`docs/autocreator-fulfillment-contract.md`](docs/autocreator-fulfillment-contract.md).
 
-Webhook registration is deliberately not part of staging setup. Once a stable
-destination is approved, register exactly:
+The live-mode staging webhook is registered but remains disabled while
+fulfillment is locked:
 
-    https://<staging-worker-host>/api/stripe-webhook
+    https://yfbjj-funnel-stripe-staging.sebastian-brosche.workers.dev/api/stripe-webhook
 
 Minimum event types:
 
 * `checkout.session.completed`
 * `checkout.session.async_payment_succeeded`
 * `checkout.session.async_payment_failed`
-* `invoice.paid`
-* `invoice.payment_failed`
-* `customer.subscription.deleted`
+* `checkout.session.expired`
 
-The real signing secret exists only after that destination is registered. Do
-not deploy a fixture value. Tests generate signatures from a test-only secret.
+The real signing secret exists only in the staging Worker's Cloudflare secret
+store. Do not deploy a fixture value. Tests generate signatures from a
+test-only secret.
 The authenticated AutoCreator client is implemented but not enabled.
 `FULFILLMENT_IMPLEMENTED` and
 `AUTOCREATOR_CLIENT_IMPLEMENTED` are independent runtime locks. Checkout also
@@ -221,7 +225,7 @@ Refuses to deploy a half-configured page. Checks, all reported in one run:
 4. authenticated AutoCreator client is implemented and tested
 5. webhook and fulfillment readiness flags are exactly `"true"`
 6. runtime code requires both Cloudflare Secrets and migration `0006`'s D1 sentinel
-7. `OFFER_DEADLINE` is set, parses, and is in the future
+7. any configured `OFFER_DEADLINE` parses and is in the future; empty hides it
 8. `PREVIEW_MODE` is exactly `"false"`
 9. `database_id` is a real D1 uuid, not the placeholder
 10. no unfilled `[[PLACEHOLDER]]` markers would render on a served page

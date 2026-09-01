@@ -10,18 +10,28 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CONFIG = join(ROOT, 'wrangler.toml');
+const LOCKED_STAGING = process.argv.includes('--locked-staging');
 
 /** Minimal reader for this file's flat `key = "value"` shape. */
-function readToml(path) {
+function readToml(path, staging = false) {
   const out = {};
+  let section = '';
   for (const raw of readFileSync(path, 'utf8').split('\n')) {
     const line = raw.trim();
-    if (!line || line.startsWith('#') || line.startsWith('[')) continue;
+    if (!line || line.startsWith('#')) continue;
+    if (line.startsWith('[')) {
+      section = line.replace(/^\[+|\]+$/g, '');
+      continue;
+    }
+    const productionSection = section === 'vars' || section === 'd1_databases';
+    const stagingSection = staging
+      && (section === 'env.staging.vars' || section === 'env.staging.d1_databases');
+    if (!productionSection && !stagingSection) continue;
     const match = line.match(/^([A-Za-z0-9_]+)\s*=\s*(.*)$/);
     if (!match) continue;
     const [, key, rest] = match;
     const value = rest.replace(/\s*#.*$/, '').trim().replace(/^["']|["']$/g, '');
-    if (!(key in out)) out[key] = value; // first wins: [vars] before any later table
+    if (stagingSection || !(key in out)) out[key] = value;
   }
   return out;
 }
@@ -33,7 +43,7 @@ const pass = (msg) => passes.push(msg);
 
 let cfg = {};
 try {
-  cfg = readToml(CONFIG);
+  cfg = readToml(CONFIG, LOCKED_STAGING);
 } catch (err) {
   console.error(`PREFLIGHT FAILED\n  - cannot read wrangler.toml: ${err.message}`);
   process.exit(1);
@@ -84,12 +94,22 @@ for (const key of AUTOCREATOR_ENTITLEMENT_VARS) {
 }
 
 for (const key of ['STRIPE_WEBHOOK_READY', 'AUTOCREATOR_FULFILLMENT_READY']) {
-  if (cfg[key] !== 'true') fail(`${key} is not the exact string "true". Complete and record the live readiness proof first.`);
-  else pass(`${key} = "true"`);
+  if (LOCKED_STAGING) {
+    if (cfg[key] !== 'false') fail(`${key} must remain "false" for the locked staging deployment.`);
+    else pass(`${key} safely locked for initial staging`);
+  } else if (cfg[key] !== 'true') {
+    fail(`${key} is not the exact string "true". Complete and record the live readiness proof first.`);
+  } else pass(`${key} = "true"`);
 }
 
 const stripeSource = readFileSync(join(ROOT, 'src', 'stripe.js'), 'utf8');
-if (!/export const FULFILLMENT_IMPLEMENTED\s*=\s*true\b/.test(stripeSource)) {
+if (LOCKED_STAGING) {
+  if (/export const FULFILLMENT_IMPLEMENTED\s*=\s*false\b/.test(stripeSource)) {
+    pass('AutoCreator fulfillment remains code-locked for initial staging');
+  } else {
+    fail('FULFILLMENT_IMPLEMENTED must remain false for locked staging.');
+  }
+} else if (!/export const FULFILLMENT_IMPLEMENTED\s*=\s*true\b/.test(stripeSource)) {
   fail('AutoCreator fulfillment is not implemented. Checkout remains fail-closed until authenticated grant, read-back, retry, and lifecycle behavior is built and tested.');
 } else {
   pass('AutoCreator fulfillment implementation is enabled');
@@ -134,10 +154,10 @@ if (Object.hasOwn(cfg, 'ADMIN_PASSWORD')) {
   fail('ADMIN_PASSWORD must be a Cloudflare Secret, not a wrangler.toml variable.');
 } else pass('ADMIN_PASSWORD is absent from non-secret Wrangler variables');
 
-/* 2. deadline set and still in the future */
+/* 2. optional deadline: empty intentionally hides the deadline block */
 const deadline = (cfg.OFFER_DEADLINE || '').trim();
 if (!deadline) {
-  fail('OFFER_DEADLINE is empty in wrangler.toml. Set the offer deadline as ISO 8601, e.g. "2026-09-01T23:59:00Z".');
+  pass('OFFER_DEADLINE intentionally unset; deadline block stays hidden');
 } else {
   const when = new Date(deadline);
   if (Number.isNaN(when.getTime())) {
@@ -151,7 +171,11 @@ if (!deadline) {
 
 /* 3. preview mode off */
 const preview = cfg.PREVIEW_MODE ?? 'true';
-if (preview !== 'false') {
+if (LOCKED_STAGING && preview === 'true') {
+  pass('PREVIEW_MODE = "true" for locked staging');
+} else if (LOCKED_STAGING) {
+  fail(`PREVIEW_MODE must be "true" for locked staging, found "${preview}".`);
+} else if (preview !== 'false') {
   fail(`PREVIEW_MODE is "${cfg.PREVIEW_MODE ?? '(unset)'}". Set PREVIEW_MODE = "false" or every CTA routes to /preview-checkout instead of the cart.`);
 } else {
   pass('PREVIEW_MODE = "false"');
@@ -263,10 +287,10 @@ try {
 for (const line of passes) console.log(`  ok    ${line}`);
 
 if (failures.length) {
-  console.error(`\nPREFLIGHT FAILED - ${failures.length} blocker${failures.length > 1 ? 's' : ''}, do not deploy:\n`);
+  console.error(`\n${LOCKED_STAGING ? 'LOCKED STAGING ' : ''}PREFLIGHT FAILED - ${failures.length} blocker${failures.length > 1 ? 's' : ''}, do not deploy:\n`);
   failures.forEach((line, i) => console.error(`  ${i + 1}. ${line}`));
   console.error('');
   process.exit(1);
 }
 
-console.log('\nPREFLIGHT PASSED - safe to deploy.');
+console.log(`\n${LOCKED_STAGING ? 'LOCKED STAGING ' : ''}PREFLIGHT PASSED - safe to deploy.`);

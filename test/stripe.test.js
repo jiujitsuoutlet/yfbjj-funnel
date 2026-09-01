@@ -295,6 +295,21 @@ test('webhook rejects invalid signatures before D1', async () => {
   assert.equal(DB.calls.length, 0);
 });
 
+test('authenticated unsupported events are acknowledged before readiness and D1', async () => {
+  const timestamp = 2_000_000_000;
+  const DB = database();
+  const event = { id: 'evt_invoice_paid', type: 'invoice.paid', data: { object: { id: 'in_fixture' } } };
+  const response = await handleWebhook(await webhookRequest(event, timestamp), {
+    ...env,
+    DB,
+    STRIPE_WEBHOOK_READY: 'false',
+    AUTOCREATOR_FULFILLMENT_READY: 'false',
+  }, { timestamp: timestamp * 1000 });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await body(response), { ok: true, ignored: true });
+  assert.equal(DB.calls.length, 0);
+});
+
 test('unpaid completion stays pending and async failure never grants access', async () => {
   const timestamp = 2_000_000_000;
   let grants = 0;

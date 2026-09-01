@@ -23,20 +23,20 @@ function queued(responses, calls = []) {
 
 test('bundle grant uses the documented envelope and requires exact read-back', async () => {
   const transport = queued([
+    ok('members.findByEmail', { member: { id: 'member_1' } }),
     ok('members.grantBundleEntitlement', { already_existed: true }),
     ok('members.listBundleEntitlements', { items: [{ bundle_slug: 'guard-retention', status: 'active' }] }),
-    ok('members.findByEmail', { member: { id: 'member_1' } }),
-    ok('members.checkAccess', { neverSignedIn: true }),
+    ok('members.checkAccess', { access: { granted: true, neverSignedIn: true } }),
   ]);
   const client = createAutoCreatorClient(env, transport);
   const result = await client.grant({
     offer: 'bundle', entitlementKey: 'guard-retention', sessionId: 'cs_1', email: 'buyer@example.com',
   });
   assert.deepEqual(result, { verified: true, activationNeeded: true });
-  assert.equal(transport.calls[0].url, 'https://yfbjj.autocreator.ai/api/v1/tools/members.grantBundleEntitlement');
+  assert.equal(transport.calls[1].url, 'https://yfbjj.autocreator.ai/api/v1/tools/members.grantBundleEntitlement');
   assert.equal(transport.calls[0].init.headers.Authorization, 'Bearer fixture_key');
-  assert.deepEqual(transport.calls[0].body, { args: {
-    email: 'buyer@example.com', bundle_slug: 'guard-retention', source: 'stripe_purchase', notes: 'Stripe Checkout cs_1',
+  assert.deepEqual(transport.calls[1].body, { args: {
+    email: 'buyer@example.com', bundle_slug: 'guard-retention', notes: 'Stripe Checkout cs_1',
   } });
   assert.deepEqual(transport.calls[3].body, { args: { memberId: 'member_1' } });
 });
@@ -48,21 +48,21 @@ test('Certification grants all three level bundles and requires every exact read
     'level-3-instructors-course',
   ];
   const transport = queued([
+    ok('members.findByEmail', { member: { id: 'member_cert' } }),
     ok('members.grantBundleEntitlement', { already_existed: false }),
     ok('members.grantBundleEntitlement', { already_existed: false }),
     ok('members.grantBundleEntitlement', { already_existed: true }),
     ok('members.listBundleEntitlements', { items: entitlementKeys.map((bundle_slug) => ({ bundle_slug, status: 'active' })) }),
-    ok('members.findByEmail', { member: { id: 'member_cert' } }),
-    ok('members.checkAccess', { neverSignedIn: false }),
+    ok('members.checkAccess', { access: { granted: true, neverSignedIn: false } }),
   ]);
   const result = await createAutoCreatorClient(env, transport).grant({
     offer: 'certification', entitlementKeys, sessionId: 'cs_cert', email: 'coach@example.com',
   });
   assert.deepEqual(result, { verified: true, activationNeeded: false });
-  assert.deepEqual(transport.calls.slice(0, 3).map(({ body }) => body.args), entitlementKeys.map((bundle_slug) => ({
-    email: 'coach@example.com', bundle_slug, source: 'stripe_purchase', notes: 'Stripe Checkout cs_cert',
+  assert.deepEqual(transport.calls.slice(1, 4).map(({ body }) => body.args), entitlementKeys.map((bundle_slug) => ({
+    email: 'coach@example.com', bundle_slug, notes: 'Stripe Checkout cs_cert',
   })));
-  assert.deepEqual(transport.calls[3].body, { args: { email: 'coach@example.com' } });
+  assert.deepEqual(transport.calls[4].body, { args: { email: 'coach@example.com' } });
   assert.deepEqual(transport.calls[5].body, { args: { memberId: 'member_cert' } });
 });
 
@@ -73,6 +73,7 @@ test('Certification fails closed when any level is missing from bundle read-back
     'level-3-instructors-course',
   ];
   const transport = queued([
+    ok('members.findByEmail', { member: { id: 'member_cert' } }),
     ok('members.grantBundleEntitlement', { already_existed: true }),
     ok('members.grantBundleEntitlement', { already_existed: true }),
     ok('members.grantBundleEntitlement', { already_existed: true }),
@@ -90,7 +91,24 @@ test('Certification fails closed when any level is missing from bundle read-back
     assert.equal(error.retryable, true);
     return true;
   });
-  assert.equal(transport.calls.length, 4);
+  assert.equal(transport.calls.length, 5);
+});
+
+test('bundle fulfillment creates a brand-new buyer before granting access', async () => {
+  const transport = queued([
+    ok('members.findByEmail', { member: null }),
+    ok('members.create', { member: { id: 'member_new' } }),
+    ok('members.findByEmail', { member: { id: 'member_new' } }),
+    ok('members.grantBundleEntitlement', { already_existed: false }),
+    ok('members.listBundleEntitlements', { items: [{ bundle_slug: 'guard-retention', status: 'active' }] }),
+    ok('members.checkAccess', { access: { granted: true, neverSignedIn: true } }),
+  ]);
+  const result = await createAutoCreatorClient(env, transport).grant({
+    offer: 'bundle', entitlementKey: 'guard-retention', sessionId: 'cs_new', email: 'new@example.com',
+  });
+  assert.deepEqual(result, { verified: true, activationNeeded: true });
+  assert.equal(transport.calls[1].url, 'https://yfbjj.autocreator.ai/api/v1/tools/members.create');
+  assert.deepEqual(transport.calls[1].body, { args: { email: 'new@example.com' } });
 });
 
 test('plan grant attaches Stripe references and proves the exact active price', async () => {
@@ -98,8 +116,8 @@ test('plan grant attaches Stripe references and proves the exact active price', 
   const transport = queued([
     ok('members.setMembership', { updated: true }),
     ok('members.findByEmail', { id: 'member_2' }),
-    ok('subscriptions.getActive', { subscriptions: [{ price_id: 'price_plan', status: 'active' }] }),
-    ok('members.checkAccess', { neverSignedIn: false }),
+    ok('subscriptions.getActive', { subscription: { stripe_price_id: 'price_plan', status: 'active' } }),
+    ok('members.checkAccess', { access: { granted: true, neverSignedIn: false } }),
   ], calls);
   const result = await createAutoCreatorClient(env, transport).grant({
     offer: 'two_month', entitlementKey: 'price_plan', sessionId: 'cs_2', email: 'buyer@example.com',
@@ -134,6 +152,7 @@ test('transport, auth, rate, envelope, and read-back failures never verify a gra
   }
 
   const readback = queued([
+    ok('members.findByEmail', { member: { id: 'member_3' } }),
     ok('members.grantBundleEntitlement', { already_existed: false }),
     ok('members.listBundleEntitlements', { items: [] }),
   ]);
