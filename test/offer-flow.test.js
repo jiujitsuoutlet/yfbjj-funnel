@@ -15,7 +15,10 @@ const baseEnv = {
   STRIPE_PRICE_LIFETIME: 'price_lifetime', AUTOCREATOR_LIFETIME_ENTITLEMENT_TARGET: 'price_plan_lifetime',
   STRIPE_PRICE_TWO_MONTH: 'price_monthly', AUTOCREATOR_MONTHLY_ENTITLEMENT_TARGET: 'price_plan_monthly',
   STRIPE_PRODUCT_TWO_MONTH: 'prod_trial',
-  STRIPE_PRICE_CERTIFICATION: 'price_certification', AUTOCREATOR_CERTIFICATION_BUNDLE_SLUG: 'certification-levels-1-2-3',
+  STRIPE_PRICE_CERTIFICATION: 'price_certification',
+  AUTOCREATOR_CERTIFICATION_LEVEL_1_BUNDLE_SLUG: 'level-1-instructors-course',
+  AUTOCREATOR_CERTIFICATION_LEVEL_2_BUNDLE_SLUG: 'level-2-instructor-course',
+  AUTOCREATOR_CERTIFICATION_LEVEL_3_BUNDLE_SLUG: 'level-3-instructors-course',
 };
 
 function flowDatabase(overrides = {}) {
@@ -153,6 +156,7 @@ test('Certification checkout is server-derived, one-time, and fixed to the verif
   assert.equal(created[0].params.mode, 'payment');
   assert.equal(created[0].params.line_items[0].price, 'price_certification');
   assert.equal(created[0].params.metadata.offer, 'certification');
-  assert.equal(created[0].params.metadata.entitlement_key, 'certification-levels-1-2-3');
+  assert.equal(created[0].params.metadata.entitlement_key,
+    'level-1-instructors-course,level-2-instructor-course,level-3-instructors-course');
   assert.equal(created[0].options.idempotencyKey, `offer:${flowHash}:certification`);
 });

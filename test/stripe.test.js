@@ -26,7 +26,9 @@ const env = {
   AUTOCREATOR_GUARD_RETENTION_BUNDLE_SLUG: 'guard-retention',
   AUTOCREATOR_HEAD_TO_TOES_BUNDLE_SLUG: 'head-slug',
   AUTOCREATOR_MONTHLY_ENTITLEMENT_TARGET: 'full-monthly',
-  AUTOCREATOR_CERTIFICATION_BUNDLE_SLUG: 'certification-levels-1-2-3',
+  AUTOCREATOR_CERTIFICATION_LEVEL_1_BUNDLE_SLUG: 'level-1-instructors-course',
+  AUTOCREATOR_CERTIFICATION_LEVEL_2_BUNDLE_SLUG: 'level-2-instructor-course',
+  AUTOCREATOR_CERTIFICATION_LEVEL_3_BUNDLE_SLUG: 'level-3-instructors-course',
 };
 
 async function body(response) { return response.json(); }
@@ -45,16 +47,40 @@ test('preview defaults locked and never calls Stripe', async () => {
 
 test('all five offers require an explicit Stripe Price and AutoCreator entitlement mapping', () => {
   assert.deepEqual(OFFERS, {
-    bundle: { priceVar: 'STRIPE_PRICE_BUNDLE', entitlementKeyVar: 'AUTOCREATOR_GUARD_RETENTION_BUNDLE_SLUG', mode: 'payment' },
-    head_to_toes: { priceVar: 'STRIPE_PRICE_HEAD_TO_TOES', entitlementKeyVar: 'AUTOCREATOR_HEAD_TO_TOES_BUNDLE_SLUG', mode: 'payment' },
-    lifetime: { priceVar: 'STRIPE_PRICE_LIFETIME', entitlementKeyVar: 'AUTOCREATOR_LIFETIME_ENTITLEMENT_TARGET', mode: 'payment' },
-    two_month: { priceVar: 'STRIPE_PRICE_TWO_MONTH', entitlementKeyVar: 'AUTOCREATOR_MONTHLY_ENTITLEMENT_TARGET', mode: 'subscription' },
-    certification: { priceVar: 'STRIPE_PRICE_CERTIFICATION', entitlementKeyVar: 'AUTOCREATOR_CERTIFICATION_BUNDLE_SLUG', mode: 'payment' },
+    bundle: { priceVar: 'STRIPE_PRICE_BUNDLE', entitlementKeyVars: ['AUTOCREATOR_GUARD_RETENTION_BUNDLE_SLUG'], mode: 'payment' },
+    head_to_toes: { priceVar: 'STRIPE_PRICE_HEAD_TO_TOES', entitlementKeyVars: ['AUTOCREATOR_HEAD_TO_TOES_BUNDLE_SLUG'], mode: 'payment' },
+    lifetime: { priceVar: 'STRIPE_PRICE_LIFETIME', entitlementKeyVars: ['AUTOCREATOR_LIFETIME_ENTITLEMENT_TARGET'], mode: 'payment' },
+    two_month: { priceVar: 'STRIPE_PRICE_TWO_MONTH', entitlementKeyVars: ['AUTOCREATOR_MONTHLY_ENTITLEMENT_TARGET'], mode: 'subscription' },
+    certification: {
+      priceVar: 'STRIPE_PRICE_CERTIFICATION',
+      entitlementKeyVars: [
+        'AUTOCREATOR_CERTIFICATION_LEVEL_1_BUNDLE_SLUG',
+        'AUTOCREATOR_CERTIFICATION_LEVEL_2_BUNDLE_SLUG',
+        'AUTOCREATOR_CERTIFICATION_LEVEL_3_BUNDLE_SLUG',
+      ],
+      mode: 'payment',
+    },
   });
   assert.deepEqual(resolveOffer({ ...env, AUTOCREATOR_GUARD_RETENTION_BUNDLE_SLUG: '' }, 'bundle'), {
     ok: false,
     error: 'offer_not_configured',
     missing: ['AUTOCREATOR_GUARD_RETENTION_BUNDLE_SLUG'],
+  });
+  assert.deepEqual(resolveOffer(env, 'certification'), {
+    ok: true,
+    offer: OFFERS.certification,
+    priceId: 'price_certification',
+    entitlementKeys: [
+      'level-1-instructors-course',
+      'level-2-instructor-course',
+      'level-3-instructors-course',
+    ],
+    entitlementKey: 'level-1-instructors-course,level-2-instructor-course,level-3-instructors-course',
+  });
+  assert.deepEqual(resolveOffer({ ...env, AUTOCREATOR_CERTIFICATION_LEVEL_2_BUNDLE_SLUG: '' }, 'certification'), {
+    ok: false,
+    error: 'offer_not_configured',
+    missing: ['AUTOCREATOR_CERTIFICATION_LEVEL_2_BUNDLE_SLUG'],
   });
 });
 

@@ -24,6 +24,18 @@ long-form), decided server-side before render — no client redirect, no flash.
 - Downsell 2: 2-month trial, $8
 - Final OTO: Yoga for BJJ Certification, $297
 
+**Authenticated AutoCreator mappings** (verified 2026-09-01): Guard uses
+`14-guard-retention-bundle` (`f0b327de-4093-4873-9f47-3113ad50ead0`), Head to
+Toes uses `yoga-for-rocks-head-to-toes`
+(`3c3947f7-cb93-4d40-a8c9-1806b6ed7060`), and Certification grants all three
+level bundles: `level-1-instructors-course`
+(`231686c4-5ba9-4053-90dd-7411f608676b`),
+`level-2-instructor-course` (`b5bee770-e110-4c5b-abfd-ed43d6a09749`), and
+`level-3-instructors-course` (`3801c1a9-8405-48b0-93ea-fffcbfdc00c8`). Lifetime
+uses `price_1TdIGeARWKYPSBdfrFBG6rhT`; monthly uses
+`price_1TdIGdARWKYPSBdfNJFlXdwy`. These are code-owned mappings, not editor
+content.
+
 Full detail, routes, and operator knobs: [README.md](README.md). This file is
 the rules; the README is the reference.
 
@@ -64,9 +76,8 @@ any deploy; it fails non-zero on a secret-shaped key in served output. See
 personal detail about a real person that wasn't given to you. If a fact is
 missing, write a marked `[[PLACEHOLDER]]` and say out loud what's missing —
 `npm run preflight` will catch an unfilled one before it ships. This
-especially includes AutoCreator grant keys. Confirmed names and UUIDs are not
-bundle slugs. Leave the strict mapping value empty and let preflight fail until
-the exact authenticated key is retrieved.
+especially includes AutoCreator grant keys. Use only the authenticated mappings
+recorded above and in `docs/autocreator-fulfillment-contract.md`.
 
 **Which prices live where.** The five verified Stripe Price IDs in
 `wrangler.toml` own billing. `BUNDLE_PRICE_CENTS` is display-only for the landing
@@ -76,9 +87,9 @@ or duplicate Stripe Products or Prices as a shortcut.
 **Payment must never outrun access.** `src/stripe.js` keeps Checkout blocked
 while either implementation constant is false, a required secret is absent, a
 readiness flag is not the exact string `true`, the D1 readiness sentinel is
-missing, or any offer lacks its exact AutoCreator grant key. Do not flip
-the implementation constants until authenticated grant, read-back, retry, and
-an approved lifecycle policy exist and are tested.
+missing, or any offer lacks a required AutoCreator grant key. Do not flip the
+fulfillment lock or readiness flags until grant, read-back, retry, and
+revocation behavior pass against the deployed staging revision.
 
 **Webhook work is leased and idempotent.** Fresh `processing` events return a
 retryable error. Stale event and entitlement leases may be reclaimed. Every

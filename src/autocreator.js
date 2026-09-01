@@ -111,18 +111,29 @@ export function createAutoCreatorClient(env, deps = {}) {
     return payload.result;
   }
 
-  async function grant({ offer, entitlementKey, sessionId, email, customerId, subscriptionId }) {
+  async function grant({ offer, entitlementKey, entitlementKeys, sessionId, email, customerId, subscriptionId }) {
     if (!email) throw new AutoCreatorError('A buyer email is required for fulfillment', { code: 'email_missing' });
     if (offer === 'bundle' || offer === 'head_to_toes' || offer === 'certification') {
-      await tool('members.grantBundleEntitlement', {
-        email,
-        bundle_slug: entitlementKey,
-        source: 'stripe_purchase',
-        notes: `Stripe Checkout ${sessionId}`,
-      });
+      const bundleSlugs = Array.isArray(entitlementKeys) && entitlementKeys.length
+        ? entitlementKeys
+        : String(entitlementKey || '').split(',').map((value) => value.trim()).filter(Boolean);
+      if (!bundleSlugs.length) {
+        throw new AutoCreatorError('A bundle entitlement key is required for fulfillment', { code: 'entitlement_missing' });
+      }
+      for (const bundleSlug of bundleSlugs) {
+        await tool('members.grantBundleEntitlement', {
+          email,
+          bundle_slug: bundleSlug,
+          source: 'stripe_purchase',
+          notes: `Stripe Checkout ${sessionId}`,
+        });
+      }
       const entitlements = await tool('members.listBundleEntitlements', { email });
-      const record = exactRecord(entitlements, 'bundle_slug', entitlementKey);
-      if (!record || !isActive(record)) {
+      const allVerified = bundleSlugs.every((bundleSlug) => {
+        const record = exactRecord(entitlements, 'bundle_slug', bundleSlug);
+        return record && isActive(record);
+      });
+      if (!allVerified) {
         throw new AutoCreatorError('AutoCreator bundle read-back did not prove access', {
           retryable: true, code: 'readback_failed',
         });
