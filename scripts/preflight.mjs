@@ -11,6 +11,8 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CONFIG = join(ROOT, 'wrangler.toml');
 const LOCKED_STAGING = process.argv.includes('--locked-staging');
+const FUNCTIONAL_STAGING = process.argv.includes('--functional-staging');
+const USE_STAGING_CONFIG = LOCKED_STAGING || FUNCTIONAL_STAGING;
 
 /** Minimal reader for this file's flat `key = "value"` shape. */
 function readToml(path, staging = false) {
@@ -43,7 +45,7 @@ const pass = (msg) => passes.push(msg);
 
 let cfg = {};
 try {
-  cfg = readToml(CONFIG, LOCKED_STAGING);
+  cfg = readToml(CONFIG, USE_STAGING_CONFIG);
 } catch (err) {
   console.error(`PREFLIGHT FAILED\n  - cannot read wrangler.toml: ${err.message}`);
   process.exit(1);
@@ -100,6 +102,15 @@ for (const key of ['STRIPE_WEBHOOK_READY', 'AUTOCREATOR_FULFILLMENT_READY']) {
   } else if (cfg[key] !== 'true') {
     fail(`${key} is not the exact string "true". Complete and record the live readiness proof first.`);
   } else pass(`${key} = "true"`);
+}
+
+if (FUNCTIONAL_STAGING) {
+  if (cfg.QA_PROOF_MODE !== 'true') fail('QA_PROOF_MODE must be "true" for functional staging.');
+  else pass('QA_PROOF_MODE protects functional staging');
+  if (!String(cfg.QA_STRIPE_COUPON_ID || '').trim()) fail('QA_STRIPE_COUPON_ID is required for no-charge functional proof.');
+  else pass('QA_STRIPE_COUPON_ID is configured for functional staging');
+} else if (!LOCKED_STAGING && cfg.QA_PROOF_MODE === 'true') {
+  fail('QA_PROOF_MODE must never be enabled in production.');
 }
 
 const stripeSource = readFileSync(join(ROOT, 'src', 'stripe.js'), 'utf8');

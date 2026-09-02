@@ -242,6 +242,15 @@ Refuses to deploy a half-configured page. Checks, all reported in one run:
 
 `npm run deploy` runs preflight first and stops on any failure.
 
+Functional staging proof is a separate gate:
+
+    npm run preflight:staging:functional
+    npm run deploy:staging:functional
+
+It requires `QA_PROOF_MODE="true"`, a staging-only coupon ID, and the
+`QA_PROOF_SECRET` Cloudflare Secret. Requests without the matching proof header
+fail closed. Production preflight rejects QA proof mode.
+
 ## Setup
 
 Both remote D1 databases are already provisioned. Do not recreate them. Apply

@@ -107,7 +107,7 @@ test('server derives the sole allowed child offer and accept replay returns one 
   assert.equal(created[0].params.metadata.root_session_id, 'cs_root');
   assert.equal(created[0].params.metadata.parent_session_id, 'cs_parent');
   assert.equal(created[0].params.metadata.variant, 'b');
-  assert.equal(created[0].options.idempotencyKey, `offer:${flowHash}:head_to_toes`);
+  assert.equal(created[0].options.idempotencyKey, `offer:${flowHash}:head_to_toes:v1`);
   const replay = await handleOfferCheckout(request('/api/offer-checkout'), { ...baseEnv, DB }, deps);
   assert.equal(replay.status, 200);
   assert.equal((await replay.json()).replay, true);
@@ -165,6 +165,25 @@ test('monthly downsell charges $8 now and starts $19.99 billing 30 days after co
   assert.equal((await response.json()).trial_end, null);
 });
 
+test('isolated monthly proof can start without a card while production terms stay unchanged', async () => {
+  const DB = flowDatabase({ current_offer: 'two_month' });
+  const created = [];
+  const proofRequest = request('/api/offer-checkout');
+  proofRequest.headers.set('x-yfbjj-qa-proof', 'proof-secret');
+  const response = await handleOfferCheckout(proofRequest, {
+    ...baseEnv,
+    DB,
+    QA_PROOF_MODE: 'true',
+    QA_PROOF_SECRET: 'proof-secret',
+    QA_STRIPE_COUPON_ID: 'coupon-proof',
+  }, { stripe: stripe(created), fulfillmentImplemented: true });
+  assert.equal(response.status, 200);
+  assert.deepEqual(created[0].params.discounts, [{ coupon: 'coupon-proof' }]);
+  assert.equal(created[0].params.payment_method_collection, 'if_required');
+  assert.equal(created[0].params.metadata.qa_proof, 'true');
+  assert.equal(created[0].params.subscription_data.metadata.qa_proof, 'true');
+});
+
 test('Certification checkout is server-derived, one-time, and fixed to the verified $297 Price', async () => {
   const DB = flowDatabase({ current_offer: 'certification' });
   const created = [];
@@ -178,5 +197,5 @@ test('Certification checkout is server-derived, one-time, and fixed to the verif
   assert.equal(created[0].params.metadata.offer, 'certification');
   assert.equal(created[0].params.metadata.entitlement_key,
     'level-1-instructors-course,level-2-instructor-course,level-3-instructors-course');
-  assert.equal(created[0].options.idempotencyKey, `offer:${flowHash}:certification`);
+  assert.equal(created[0].options.idempotencyKey, `offer:${flowHash}:certification:v1`);
 });
