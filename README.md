@@ -1,20 +1,21 @@
 # yfbjj-funnel
 
 Cloudflare Worker behind `welcome.yogaforbjj.net`. The landing page for the $14
-Guard Retention Bundle, plus lead capture. That is the whole job.
+Guard Retention Bundle, post-purchase offer path, fulfillment, conversion
+measurement, and visual content editor.
 
 Checkout uses five verified Stripe Prices. The Worker captures
 leads, creates guarded Stripe-hosted Checkout Sessions, verifies webhook
 signatures, records orders in D1, and reports health.
 
-Payment remains intentionally locked. A Checkout Session cannot be created
+Checkout fails closed. A Checkout Session cannot be created
 unless `PREVIEW_MODE` is the exact string `false`, the selected offer has its
 Stripe Price and every required AutoCreator grant key, and the authenticated
 fulfillment implementation, required Cloudflare Secrets, readiness flags, and
 D1 schema sentinel all pass. The bundle slugs and authenticated AutoCreator
 contract were verified by authenticated inspection on 2026-09-01. Live
-fulfillment remains locked until the deployed staging revision passes grant,
-read-back, retry, and revocation proof and both readiness flags are enabled.
+fulfillment requires the deployed revision, grant, read-back, retry, and
+revocation proof plus both readiness flags.
 
 ## Routes
 
@@ -23,27 +24,30 @@ read-back, retry, and revocation proof and both readiness flags are enabled.
 | `/`                    | GET    | landing page                                      |
 | `/offer`               | GET    | cookie-bound next step after prior payment and access are durable |
 | `/thanks`              | GET    | reads D1 order and fulfillment state; pending copy never claims access and granted copy requires a durable grant |
-| `/health`              | GET    | 200 when D1 is reachable and all 9 active tables exist; 503 otherwise |
+| `/health`              | GET    | 200 when D1 is reachable and all 12 active tables exist; 503 otherwise |
 | `/preview-checkout`    | GET    | stand-in for the cart while `PREVIEW_MODE` is on |
 | `/api/lead`            | POST   | live - rate limited, validates email, inserts into `leads` with its variant |
-| `/api/stats`           | GET    | per-variant counts, JSON. `Authorization: Bearer $STATS_SECRET` |
+| `/api/event`           | POST   | rate-limited directional funnel events; never treated as payment truth |
+| `/api/stats`           | GET    | conversion, source, device, offer, revenue and A/B gate data. `Authorization: Bearer $STATS_SECRET` |
 | `/api/checkout`        | POST   | creates Guard Checkout only; every other offer key is rejected |
 | `/api/offer-checkout`  | POST   | accepts the sole D1-authorized next offer in a fresh hosted Checkout |
 | `/api/offer-skip`      | POST   | records an explicit decline and advances the D1 state machine |
 | `/api/customer-portal` | POST   | creates a portal only after retrieving and verifying a completed Checkout Session |
 | `/api/stripe-webhook`  | POST   | verifies the raw signed body, then processes it through the D1 retry ledger |
 | `/admin/editor`        | GET    | authenticated visual editor; drafts never affect public pages until explicit publish |
-| `/api/admin/*`         | varies | no-store, same-origin and CSRF-protected editor session, draft, publish, history, and restore API |
+| `/media/:id`           | GET    | immutable validated image uploaded through the editor |
+| `/api/admin/*`         | varies | no-store, same-origin and CSRF-protected editor, media, analytics, history, and publish API |
 
 ## Visual content editor
 
-Run migration `0008_content_editor.sql`, then set `ADMIN_PASSWORD` as a
+Run migrations through `0010_conversion_and_media.sql`, then set `ADMIN_PASSWORD` as a
 Cloudflare Secret. It must be a unique, generated high-entropy value, not a
 human-memorable or reused password. Sign in at `/admin/login` and open
 `/admin/editor`.
 
 The editor owns only validated presentation JSON for a fixed page registry.
-It supports sections, rows, columns, safe content elements, responsive preview,
+It supports sections, rows, columns, safe content elements, quotes, approved
+video embeds, validated image uploads, responsive preview, conversion results,
 autosaved drafts, explicit publish, and version restore. A restore creates a new
 draft revision and never changes the public page by itself. If D1 or published
 content is missing, unavailable, malformed, or unsupported, the Worker serves
@@ -58,8 +62,8 @@ edited, but they cannot be deleted or duplicated. See
 
 ## Stripe staging
 
-The production and staging D1 databases are provisioned and migrations `0001`
-through `0009` are applied. Their non-secret resource IDs live in
+The production and staging D1 databases are provisioned. Apply migrations
+through `0010` before deploying this revision. Their non-secret resource IDs live in
 `wrangler.toml`; verification evidence is in
 [`docs/exc-128-d1-proof.md`](docs/exc-128-d1-proof.md).
 

@@ -78,6 +78,7 @@ function functionalMarkup(element, pageKey, env, context) {
     <p class="faint" data-offer-status aria-live="polite"></p>
   </div>`;
   if (element.type === 'price') return priceMarkup(pageKey, env, context);
+  if (element.type === 'accessLink') return `<a class="cta editor-access-link" href="https://yfbjj.autocreator.ai/login" data-access-link>${escapeHtml(element.label || 'Access your courses')}</a>`;
   if (element.type === 'legalFooter') return `<footer><p>Yoga for BJJ</p><nav aria-label="Legal and support">
     <a href="https://yfbjj.autocreator.ai/legal/terms">Terms</a> &middot;
     <a href="https://yfbjj.autocreator.ai/legal/privacy">Privacy</a> &middot;
@@ -91,7 +92,7 @@ function renderElement(element, pageKey, env, context, global) {
   const attr = styleAttribute(element.style, global);
   const cls = classes(element, 'editor-element');
   let body = '';
-  if (['checkoutForm', 'offerActions', 'price', 'legalFooter', 'previewBanner'].includes(element.type)) {
+  if (['checkoutForm', 'offerActions', 'price', 'accessLink', 'legalFooter', 'previewBanner'].includes(element.type)) {
     body = functionalMarkup(element, pageKey, env, context);
   } else if (element.type === 'heading') {
     const level = [1, 2, 3].includes(element.level) ? element.level : 2;
@@ -99,6 +100,8 @@ function renderElement(element, pageKey, env, context, global) {
   } else if (element.type === 'text') body = `<p>${escapeHtml(element.content)}</p>`;
   else if (element.type === 'list') body = `<ul>${element.items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
   else if (element.type === 'image') body = `<img src="${escapeHtml(element.src)}" alt="${escapeHtml(element.alt)}" loading="lazy">`;
+  else if (element.type === 'quote') body = `<blockquote><p>${escapeHtml(element.content)}</p><cite>${escapeHtml(element.attribution)}</cite></blockquote>`;
+  else if (element.type === 'video') body = `<div class="editor-video"><iframe src="${escapeHtml(element.src)}" title="${escapeHtml(element.title)}" loading="lazy" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
   else if (element.type === 'divider') body = '<hr>';
   else if (element.type === 'spacer') body = `<div aria-hidden="true" style="height:${Number(element.size)}px"></div>`;
   return `<div class="${cls}" data-editor-id="${escapeHtml(element.id)}"${attr}>${body}</div>`;

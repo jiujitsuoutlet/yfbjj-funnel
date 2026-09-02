@@ -139,6 +139,7 @@ if (!readinessMigration.includes('fulfillment_readiness') || !readinessMigration
 const flowMigration = readFileSync(join(ROOT, 'migrations', '0007_offer_journey.sql'), 'utf8');
 const editorMigration = readFileSync(join(ROOT, 'migrations', '0008_content_editor.sql'), 'utf8');
 const certificationMigration = readFileSync(join(ROOT, 'migrations', '0009_certification_offer.sql'), 'utf8');
+const conversionMigration = readFileSync(join(ROOT, 'migrations', '0010_conversion_and_media.sql'), 'utf8');
 const autoCreatorSource = readFileSync(join(ROOT, 'src', 'autocreator.js'), 'utf8');
 if (!flowMigration.includes('checkout_flows') || !flowMigration.includes('offer_transitions')) {
   fail('migration 0007 does not contain the cookie-bound offer state machine.');
@@ -155,6 +156,9 @@ if (!stripeSource.includes("offerKey !== 'bundle'") || !stripeSource.includes('F
 if (!editorMigration.includes('editor_pages') || !editorMigration.includes('editor_sessions') || !editorMigration.includes('editor_page_versions')) {
   fail('migration 0008 does not contain the editor page, session, and version tables.');
 } else pass('editor migration contains page, session, and version tables');
+if (!conversionMigration.includes('conversion_events') || !conversionMigration.includes('conversion_rate_limits') || !conversionMigration.includes('editor_media')) {
+  fail('migration 0010 does not contain conversion event, rate limit, and editor media tables.');
+} else pass('conversion analytics and managed media migration present');
 if (!certificationMigration.includes("'certification'")
   || !certificationMigration.includes("'offer-certification'")
   || !stripeSource.includes("two_month: 'certification'")

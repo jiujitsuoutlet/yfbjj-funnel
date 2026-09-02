@@ -3,11 +3,13 @@ import { EDITOR_IMAGE_PATHS } from './images.js';
 import { loadEditorPage, listVersions, publishDraft, restoreVersion, saveDraft } from './repository.js';
 import { renderContentDocument } from './renderer.js';
 import { validateContentDocument } from './schema.js';
+import { listMedia, mediaPaths, saveMedia } from './media.js';
+import { AB_DECISION_RULE, conversionSnapshot } from '../analytics.js';
 
 const HEADERS = {
   'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY',
   'Referrer-Policy': 'no-referrer',
-  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self'; frame-src https://iframe.mediadelivery.net; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
 };
 function json(body, status = 200, extra = {}) { return new Response(JSON.stringify(body), { status, headers: { ...HEADERS, 'Content-Type': 'application/json; charset=utf-8', ...extra } }); }
 function html(body, status = 200) { return new Response(body, { status, headers: { ...HEADERS, 'Content-Type': 'text/html; charset=utf-8' } }); }
@@ -38,6 +40,38 @@ export async function handleEditorRoute(request, env, assets) {
   if (method === 'POST' && path === '/api/admin/logout') {
     const value = await logout(request, env); return result(value, value.ok ? { 'Set-Cookie': clearSessionCookie() } : {});
   }
+  if (method === 'GET' && path === '/api/admin/analytics') {
+    const session = await authenticate(request, env); if (!session.ok) return result(session);
+    try {
+      const [visits, leads, orders, conversion] = await Promise.all([
+        env.DB.prepare('SELECT variant, sum(count) AS n FROM variant_visits GROUP BY variant').all(),
+        env.DB.prepare('SELECT variant, count(*) AS n FROM leads GROUP BY variant').all(),
+        env.DB.prepare(`SELECT json_extract(metadata, '$.variant') AS variant, count(*) AS n, sum(amount_cents) AS cents
+          FROM stripe_orders WHERE status IN ('paid', 'complete') GROUP BY json_extract(metadata, '$.variant')`).all(),
+        conversionSnapshot(env),
+      ]);
+      const find = (rows, variant, field) => Number((rows.results || []).find((row) => row.variant === variant)?.[field] || 0);
+      const variants = {};
+      for (const variant of ['a', 'b']) {
+        const visitors = find(visits, variant, 'n'); const purchases = find(orders, variant, 'n'); const revenue = find(orders, variant, 'cents');
+        variants[variant] = { visitors, leads: find(leads, variant, 'n'), purchases, revenue_cents: revenue,
+          paid_conversion_rate: visitors ? Number((purchases / visitors).toFixed(4)) : null,
+          revenue_per_visitor_cents: visitors ? Math.round(revenue / visitors) : null,
+          sample_gate_met: visitors >= AB_DECISION_RULE.minimum_visitors_per_variant && purchases >= AB_DECISION_RULE.minimum_purchases_per_variant };
+      }
+      return json({ ok: true, variants, conversion, abDecisionRule: AB_DECISION_RULE });
+    }
+    catch { return json({ ok: false, error: 'analytics_unavailable' }, 503); }
+  }
+  if (method === 'GET' && path === '/api/admin/media') {
+    const session = await authenticate(request, env); if (!session.ok) return result(session);
+    try { return json({ ok: true, media: await listMedia(env) }); } catch { return json({ ok: false, error: 'media_unavailable' }, 503); }
+  }
+  if (method === 'POST' && path === '/api/admin/media') {
+    const session = await authorizeMutation(request, env); if (!session.ok) return result(session);
+    const body = await boundedJson(request, 1_100_000); if (!body.ok) return result(body);
+    try { return result(await saveMedia(env, body.value, session.actor)); } catch { return json({ ok: false, error: 'media_save_failed' }, 503); }
+  }
   const match = path.match(/^\/api\/admin\/pages\/([a-z0-9-]+)(?:\/(draft|publish|versions|restore|preview))?$/);
   if (!match) return json({ ok: false, error: 'not_found' }, 404);
   const pageKey = match[1]; const action = match[2] || 'page';
@@ -51,7 +85,8 @@ export async function handleEditorRoute(request, env, assets) {
   if (method === 'POST' && action === 'publish') return result(await publishDraft(env, pageKey, body.value.expectedRevision, { actor: session.actor, imagePaths: EDITOR_IMAGE_PATHS }));
   if (method === 'POST' && action === 'restore') return result(await restoreVersion(env, pageKey, body.value.versionId, body.value.expectedRevision, { actor: session.actor, imagePaths: EDITOR_IMAGE_PATHS }));
   if (method === 'POST' && action === 'preview') {
-    const checked = validateContentDocument(body.value.document, { pageKey, imagePaths: EDITOR_IMAGE_PATHS });
+    const approved = [...EDITOR_IMAGE_PATHS, ...await mediaPaths(env)];
+    const checked = validateContentDocument(body.value.document, { pageKey, imagePaths: approved });
     if (!checked.ok) return json({ ok: false, error: 'invalid_document', details: checked.errors }, 400);
     const rendered = renderContentDocument(checked.value, { pageKey, env, context: body.value.context || {} });
     return json({ ok: true, rendered });

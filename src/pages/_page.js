@@ -11,6 +11,17 @@
   var VARIANT = CFG.VARIANT || '';
   var ATTRIBUTION_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'gclid'];
 
+  function deviceClass() {
+    return innerWidth < 600 ? 'mobile' : innerWidth < 1024 ? 'tablet' : 'desktop';
+  }
+
+  function event(name, offer, source) {
+    if (PREVIEW) return;
+    var data = attribution();
+    data.event = name; data.offer = offer || ''; data.source = source || CFG.PAGE_KEY || location.pathname; data.device = deviceClass();
+    fetch('/api/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), keepalive: true }).catch(function () {});
+  }
+
   function withAttribution(raw) {
     if (!raw) return raw;
     try {
@@ -54,7 +65,10 @@
     return values;
   }
 
+  if (String(CFG.PAGE_KEY || '').indexOf('landing-') === 0) event('landing_view', 'bundle', 'landing');
+
   function checkout(kind) {
+    event('checkout_start', kind, 'checkout');
     var key = 'yfbjj_checkout_' + kind;
     var idempotencyKey = '';
     try {
@@ -69,7 +83,7 @@
       body: JSON.stringify({ offer: kind, attribution: attribution() })
     }).then(function (res) {
       return res.json().catch(function () { return {}; }).then(function (payload) {
-        if (!res.ok || !payload.url) throw new Error(payload.error || 'checkout_failed');
+        if (!res.ok || !payload.url) { event('checkout_error', kind, payload.error || 'checkout_failed'); throw new Error(payload.error || 'checkout_failed'); }
         return payload.url;
       });
     });
@@ -191,6 +205,8 @@
     var accept = document.querySelector('[data-offer-accept]');
     var skip = document.querySelector('[data-offer-skip]');
     if (!accept || !skip) return;
+    var offer = String(CFG.PAGE_KEY || '').replace('offer-', '').replace(/-/g, '_');
+    event('offer_view', offer, 'offer-page');
     var status = document.querySelector('[data-offer-status]');
     function transition(path) {
       if (PREVIEW) return Promise.resolve(PREVIEW_PATH);
@@ -215,9 +231,13 @@
         if (status) status.textContent = 'That step is not ready yet. Please try again.';
       });
     }
-    accept.addEventListener('click', function () { go('/api/offer-checkout'); });
-    skip.addEventListener('click', function () { go('/api/offer-skip'); });
+    accept.addEventListener('click', function () { event('offer_accept', offer, 'offer-page'); go('/api/offer-checkout'); });
+    skip.addEventListener('click', function () { event('offer_decline', offer, 'offer-page'); go('/api/offer-skip'); });
   })();
+
+  [].forEach.call(document.querySelectorAll('[data-access-link]'), function (link) {
+    link.addEventListener('click', function () { event('access_click', '', CFG.PAGE_KEY || 'thanks'); });
+  });
 
   /* ---------------------------------------------------------- buy bar */
   // Appears once the hero CTA is off screen, so the offer is always one tap away.

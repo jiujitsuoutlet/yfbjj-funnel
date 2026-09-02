@@ -1,16 +1,23 @@
 # Yoga for BJJ visual editor
 
-The editor is available at `/admin/editor` after migration `0008` and the
+The editor is available at `/admin/editor` after migrations through `0010` and the
 `ADMIN_PASSWORD` Cloudflare Secret are configured. The secret must be a unique,
 generated high-entropy value.
 
 ## Editing
 
 Choose one of the fixed pages, then select a layer or canvas element. Text,
-lists, checked-in images, typography, palette colors, and spacing use a strict
+lists, quotes, approved Yoga for BJJ videos, uploaded images, typography,
+palette colors, and spacing use a strict
 allowlist. Use the layout controls to move sections, rows, columns, and
 elements. The inspector also provides keyboard and touch-friendly move buttons.
 Desktop, tablet, and mobile buttons resize the canvas.
+
+The image uploader accepts JPG, PNG, WebP, and AVIF files under 750 KB. The
+server verifies the actual file signature before storing it. Select an image
+block after upload to use the file. The **Results** button shows visitor, lead,
+paid conversion, revenue, offer, source, and device data. Purchases and revenue
+come only from signed Stripe webhook records.
 
 Draft changes autosave after a short pause. **Save draft** forces an immediate
 save. Drafts are private. **Publish** saves the current draft and creates an
@@ -19,7 +26,7 @@ older version into a new draft revision, so it still needs an explicit publish.
 
 ## Locked behavior
 
-Checkout forms, displayed prices, offer actions, legal links, and preview
+Checkout forms, displayed prices, offer actions, the course access link, legal links, and preview
 banners are functional components. Their routes, actions, prices, identifiers,
 and behavior come from server code. They cannot be deleted or duplicated.
 There is no raw HTML, CSS, JavaScript, arbitrary URL, route, price ID,
