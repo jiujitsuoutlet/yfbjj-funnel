@@ -57,7 +57,7 @@ after returning to the bare URL, the $14 CTA and lead form were present, no
 horizontal overflow occurred, and the browser console had no warnings or
 errors.
 
-## Failed monthly cancellation proof
+## Monthly cancellation proof and approved policy
 
 Paul explicitly approved a live-mode, no-payment-method lifecycle test. The
 test created Stripe customer `cus_VBRjh3lKcwnSsP` and trialing subscription
@@ -69,11 +69,10 @@ returned `granted: true` with reason `active`. No charge occurred. Cleanup was
 verified: the subscription is canceled, the Stripe customer is deleted, and
 the AutoCreator QA member no longer appears in lookup.
 
-This proves that AutoCreator's native Stripe synchronization does not revoke
-the locally granted plan for this funnel path. AutoCreator exposes no symmetric
-local paid-plan revoke tool. `members.delete` is not a safe substitute because
-every funnel buyer owns Guard and may own other one-time bundles that must stay
-available after a monthly cancellation.
+This proves that AutoCreator retains course access after cancellation. The
+approved policy now matches that behavior: cancellation stops future Stripe
+charges and the buyer keeps course access. The Worker must not delete the member
+or revoke one-time bundle entitlements.
 
-Production preview and fulfillment readiness remain locked. Linear EXC-131
-tracks the required AutoCreator plan-revoke contract and repeat proof.
+Production preview and fulfillment readiness remain locked until the updated
+$8 first-month checkout and the rest of the launch gates pass.

@@ -21,7 +21,7 @@ long-form), decided server-side before render — no client redirect, no flash.
 - Front: Guard Retention Bundle, $14
 - Upsell 1: Head to Toes, $29 (was $59.99)
 - Upsell 2: Lifetime access, $247 (was $297 — the site's own price)
-- Downsell 2: 2-month trial, $8
+- Downsell 2: $8 first month, then $19.99/month until canceled
 - Final OTO: Yoga for BJJ Certification, $297
 
 **Authenticated AutoCreator mappings** (verified 2026-09-01): Guard uses
@@ -88,6 +88,11 @@ recorded above and in `docs/autocreator-fulfillment-contract.md`.
 `wrangler.toml` own billing. `BUNDLE_PRICE_CENTS` is display-only for the landing
 page. The Certification product and price were created for EXC-127. Never create
 or duplicate Stripe Products or Prices as a shortcut.
+
+**Cancellation policy for the monthly downsell.** Canceling stops future Stripe
+charges. Per the approved business rule, the buyer keeps Yoga for BJJ course
+access after cancellation. Do not delete the AutoCreator member or revoke their
+one-time bundle entitlements.
 
 **Payment must never outrun access.** `src/stripe.js` keeps Checkout blocked
 while either implementation constant is false, a required secret is absent, a

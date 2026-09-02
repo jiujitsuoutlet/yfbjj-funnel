@@ -267,11 +267,11 @@ function offerCopy(offer, trialEnd) {
   };
   const starts = trialEnd
     ? new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' }).format(new Date(trialEnd)) + ' UTC'
-    : 'two calendar months after checkout';
+    : '30 days after you complete checkout';
   return {
-    title: 'Two-month access', kicker: 'Optional lower-cost option', headline: 'Start with two months.',
-    message: 'This is not lifetime access. It becomes a monthly membership unless you cancel.',
-    price: '$8 today', terms: `Then $19.99 per month starting ${starts}, until canceled. Stripe shows the same terms before you confirm.`,
+    title: '$8 first month', kicker: 'Optional lower-cost option', headline: 'Start your first month for $8.',
+    message: 'Then it continues at $19.99 per month unless you cancel. Canceling stops future charges. Your course access remains.',
+    price: '$8 first month', terms: `Then $19.99 per month starting ${starts}, until canceled. Stripe shows the same terms before you confirm.`,
     accept: 'Start for $8', skip: 'No thanks. Show me the final option.',
   };
 }

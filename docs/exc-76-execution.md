@@ -39,7 +39,8 @@ not changed or duplicated.
 | Guard Retention Bundle | `prod_V9byhVHYqHCNRI` | `price_1U9IkNIwpEtt4FIedvXFb9tC` |
 | Head to Toes | `prod_V9byVgpmkfyP1n` | `price_1U9IkOIwpEtt4FIeqq3edSnR` |
 | Lifetime Access | `prod_V9byHjUccoS6PN` | `price_1U9IkPIwpEtt4FIeD0mbQvCK` |
-| Two-Month Access | `prod_V9byHoYGBGpDpc` | `price_1U9IkQIwpEtt4FIenOTDpw8e` |
+| Original $20 monthly price (superseded) | `prod_V9byHoYGBGpDpc` | `price_1U9IkQIwpEtt4FIenOTDpw8e` |
+| $19.99 monthly price | `prod_V9byHoYGBGpDpc` | `price_1UB58oIwpEtt4FIe6C6UqWKy` |
 
 ## Activation blockers
 
