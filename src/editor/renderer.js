@@ -58,7 +58,7 @@ function priceMarkup(pageKey, env, context) {
   if (pageKey === 'offer-two-month') {
     const starts = context.trialEnd
       ? `${new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' }).format(new Date(context.trialEnd))} UTC`
-      : 'one calendar month after checkout';
+      : '30 days after you complete checkout';
     return `<p class="offer-price">$8 first month</p><p class="dim">Then $19.99 per month starting ${escapeHtml(starts)}, until canceled. Canceling stops future charges. Course access remains.</p>`;
   }
   return '';

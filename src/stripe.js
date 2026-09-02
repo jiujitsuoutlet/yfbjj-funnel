@@ -360,14 +360,13 @@ function childCheckoutParams(env, mapping, offerKey, auth, request, deps) {
   if (mapping.offer.mode === 'payment') {
     params.payment_intent_data = { metadata };
   } else {
-    trialEnd = auth.flow.two_month_trial_end
-      ? new Date(auth.flow.two_month_trial_end)
-      : addCalendarMonths(clock(deps), 1);
     params.line_items.unshift({
       price_data: { currency: 'usd', product: env.STRIPE_PRODUCT_TWO_MONTH, unit_amount: 800 },
       quantity: 1,
     });
-    params.subscription_data = { metadata, trial_end: Math.floor(trialEnd.getTime() / 1000) };
+    // Stripe starts this period when Checkout completes, so every buyer receives
+    // the full first 30 days even if they leave the Checkout Session open.
+    params.subscription_data = { metadata, trial_period_days: 30 };
   }
   return { params, metadata, trialEnd };
 }
@@ -429,8 +428,8 @@ export async function handleOfferSkip(request, env, deps = {}) {
   }
   const next = SKIP_OFFER[current];
   // `two_month` and `two_month_trial_end` are retained as database compatibility
-  // names. The live offer is now one $8 first month, then monthly billing.
-  const trialEnd = next === 'two_month' ? addCalendarMonths(clock(deps), 1).toISOString() : null;
+  // names. Stripe anchors the live 30-day first period to completed Checkout.
+  const trialEnd = null;
   const changed = await env.DB.prepare(
     `UPDATE checkout_flows SET current_offer = ?2, status = ?3,
       pending_session_id = NULL, pending_checkout_url = NULL,

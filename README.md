@@ -83,10 +83,10 @@ Five Price IDs are mapped in configuration. Do not create, edit, or duplicate
 them without an approved offer change. The Certification price is the one-time $297 Price
 `price_1UAvcCIwpEtt4FIeaPk7pUzB`. Each offer also requires every exact AutoCreator grant key in its mapping.
 Confirmed names and UUIDs are not accepted as bundle slugs. The monthly
-downsell Checkout contains a one-time $8 item and trials the $19.99/month
-recurring item until exactly one UTC calendar month later. Month-end dates
-clamp to the last valid day. The internal `two_month` key remains for database
-compatibility only.
+downsell Checkout contains a one-time $8 item and a 30-day trial on the
+$19.99/month recurring item. Stripe starts those 30 days when Checkout
+completes, so leaving a Checkout Session open never shortens the first period.
+The internal `two_month` key remains for database compatibility only.
 
 The authenticated AutoCreator bundle slugs, UUIDs, plan references, tool
 contract, scopes, and remaining activation proof are recorded in
@@ -120,8 +120,8 @@ sequence is server-owned: Guard, optional Head to Toes, optional Lifetime, then
 the $8 first-month offer after a Lifetime decline, followed by the final optional Certification
 offer. D1 derives each step from an opaque HttpOnly
 flow-cookie hash. Every accept opens a new Stripe-hosted Checkout. Two-Month
-persists one exact timestamp for the `$8 first month, then $19.99/month` terms shown
-both before Checkout and to Stripe.
+uses Stripe's completion-anchored 30-day period for the `$8 first month, then
+$19.99/month` terms shown before Checkout and in Stripe.
 
 Paid events write through `entitlement_outbox`. A stable operation key guards
 the documented idempotent AutoCreator grant tools; no undocumented HTTP

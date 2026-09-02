@@ -267,7 +267,7 @@ function offerCopy(offer, trialEnd) {
   };
   const starts = trialEnd
     ? new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' }).format(new Date(trialEnd)) + ' UTC'
-    : 'one calendar month after checkout';
+    : '30 days after you complete checkout';
   return {
     title: '$8 first month', kicker: 'Optional lower-cost option', headline: 'Start your first month for $8.',
     message: 'Then it continues at $19.99 per month unless you cancel. Canceling stops future charges. Your course access remains.',
