@@ -8,7 +8,7 @@ AutoCreator accounts. No secret values are recorded here.
 - Worker: `yfbjj-funnel-stripe-staging`
 - Final proof revision: `9d7566c0-d509-4d14-b17e-b6c1d8515367`
 - Stripe webhook: `we_1UAyGsIwpEtt4FIefPa7LIS1`
-- Webhook state: enabled with only the four supported Checkout events
+- Webhook state during proof: enabled with only the four supported Checkout events
 - Ordinary staging checkout without the proof secret: HTTP 403
 - Unsigned staging webhook: HTTP 400
 - Automated checks: 51 passed, 0 failed
@@ -19,6 +19,10 @@ It created live Stripe objects but charged no card and collected no money. The
 proof discount and no-card collection behavior are available only when the
 staging QA proof mode and secret are both present. Production preflight rejects
 QA proof mode.
+
+After proof, the staging webhook was disabled, the temporary coupon was
+deleted, and the staging proof secret was removed. The proof checkout path is
+therefore no longer usable.
 
 ## Full one-time offer path
 
@@ -68,3 +72,22 @@ without weakening replay protection.
 Production uses the same code without `QA_PROOF_MODE`, `QA_PROOF_SECRET`, or a
 coupon. Buyers see and pay the real configured prices. The campaign deadline
 remains intentionally unset, so its block stays hidden.
+
+- Live domain: `https://welcome.yogaforbjj.net`
+- Active Worker version: `98b8a9ea-ee99-45a9-a7bc-95b6c2f5e430`
+- Rollback version: `fdc96b16-dbdb-4530-bb84-bb4897fed5a4`
+- Production webhook: `we_1UB665IwpEtt4FIens71l4mR`
+- Webhook state: enabled with only the four supported Checkout events
+- Production health: HTTP 200 with D1 connected and schema valid
+- Unsigned production webhook: HTTP 400
+- Production editor login and every configured page: verified
+
+A real-price production Checkout smoke session displayed the $14 Guard
+Retention offer with no discount and required a payment method. It was not
+completed, was expired immediately, and remained unpaid. No launch-smoke card
+charge was made.
+
+The isolated AutoCreator bundle entitlements created for staging proof were
+soft-revoked after the evidence was recorded. The proof Monthly subscription
+was canceled immediately and cannot renew. Stripe and D1 proof records remain
+as the durable audit trail.
