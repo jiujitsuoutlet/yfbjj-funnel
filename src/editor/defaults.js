@@ -77,9 +77,9 @@ const documents = {
     element('offer-life-copy', 'text', { preset: 'lede', content: 'This is a separate one-time purchase.' }),
     element('offer-life-price', 'price'), element('offer-life-actions', 'offerActions', { acceptText: 'Choose lifetime', skipText: 'No thanks. Show me the lower-cost option.' }), legal('offer-lifetime'),
   ]),
-  'offer-two-month': documentFor('offer-two-month', 'Two-month access', 'Optional lower-cost offer.', [
-    element('offer-two-heading', 'heading', { level: 1, content: 'Start with two months.' }),
-    element('offer-two-copy', 'text', { preset: 'lede', content: 'This is not lifetime access. It becomes a monthly membership unless you cancel.' }),
+  'offer-two-month': documentFor('offer-two-month', '$8 first month', 'Optional lower-cost offer.', [
+    element('offer-two-heading', 'heading', { level: 1, content: 'Start your first month for $8.' }),
+    element('offer-two-copy', 'text', { preset: 'lede', content: 'Then it continues at $19.99 per month unless you cancel. Canceling stops future charges. Your course access remains.' }),
     element('offer-two-price', 'price'), element('offer-two-actions', 'offerActions', { acceptText: 'Start for $8', skipText: 'No thanks. Show me the final option.' }), legal('offer-two-month'),
   ]),
   'offer-certification': documentFor('offer-certification', 'Instructor certification', 'Final optional post-purchase offer.', [

@@ -131,7 +131,7 @@ test('a live pending Checkout cannot be declined and ready declines follow the a
   const lifetime = flowDatabase({ current_offer: 'lifetime' });
   await handleOfferSkip(request('/api/offer-skip'), { ...baseEnv, DB: lifetime }, { stripe: stripe([]), now: () => new Date('2027-01-31T12:00:00Z') });
   assert.equal(lifetime.state.current_offer, 'two_month');
-  assert.equal(lifetime.state.two_month_trial_end, '2027-03-31T12:00:00.000Z');
+  assert.equal(lifetime.state.two_month_trial_end, '2027-02-28T12:00:00.000Z');
 
   const twoMonth = flowDatabase({ current_offer: 'two_month' });
   await handleOfferSkip(request('/api/offer-skip'), { ...baseEnv, DB: twoMonth }, { stripe: stripe([]) });
@@ -143,6 +143,24 @@ test('a live pending Checkout cannot be declined and ready declines follow the a
   assert.equal(certification.state.current_offer, null);
   assert.equal(certification.state.status, 'complete');
   assert.equal((await finished.json()).url, '/thanks?session_id=cs_parent');
+});
+
+test('monthly downsell charges $8 now and starts $19.99 billing after one calendar month', async () => {
+  const DB = flowDatabase({ current_offer: 'two_month' });
+  const created = [];
+  const response = await handleOfferCheckout(request('/api/offer-checkout'), { ...baseEnv, DB }, {
+    stripe: stripe(created), fulfillmentImplemented: true,
+    now: () => new Date('2027-01-31T12:00:00Z'),
+  });
+  assert.equal(response.status, 200);
+  assert.equal(created.length, 1);
+  assert.equal(created[0].params.mode, 'subscription');
+  assert.deepEqual(created[0].params.line_items, [
+    { price_data: { currency: 'usd', product: 'prod_trial', unit_amount: 800 }, quantity: 1 },
+    { price: 'price_monthly', quantity: 1 },
+  ]);
+  assert.equal(created[0].params.subscription_data.trial_end, 1803816000);
+  assert.equal((await response.json()).trial_end, '2027-02-28T12:00:00.000Z');
 });
 
 test('Certification checkout is server-derived, one-time, and fixed to the verified $297 Price', async () => {

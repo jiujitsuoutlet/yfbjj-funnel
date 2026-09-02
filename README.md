@@ -67,9 +67,11 @@ Locked functional staging is deployed at
 `https://yfbjj-funnel-stripe-staging.sebastian-brosche.workers.dev`. Deployment,
 webhook, live AutoCreator grant, cleanup, and browser evidence are recorded in
 [`docs/exc-130-staging-proof.md`](docs/exc-130-staging-proof.md).
-The live monthly cancellation proof failed because AutoCreator retained plan
-access after Stripe cancellation. Production stays locked until EXC-131 adds a
-supported plan-revoke contract that preserves purchased bundle access.
+The approved $8 first-month pricing change and locked-staging proof are recorded
+in [`docs/exc-132-first-month-membership.md`](docs/exc-132-first-month-membership.md).
+The live monthly cancellation proof confirmed that AutoCreator retains course
+access after Stripe cancellation. That matches the approved policy: canceling
+stops future charges while the buyer keeps course access.
 
 The `staging` Wrangler environment has a separate Worker name, no custom
 routes, a separate D1 binding, and `PREVIEW_MODE = "true"`. It is safe to put
@@ -78,11 +80,13 @@ The lock returns HTTP 423 with `{"ok":false,"error":"preview_locked"}` before
 constructing a Stripe client, so no Checkout Session is created.
 
 Five Price IDs are mapped in configuration. Do not create, edit, or duplicate
-them. The Certification price is the one-time $297 Price
+them without an approved offer change. The Certification price is the one-time $297 Price
 `price_1UAvcCIwpEtt4FIeaPk7pUzB`. Each offer also requires every exact AutoCreator grant key in its mapping.
-Confirmed names and UUIDs are not accepted as bundle slugs. The Two-Month Checkout contains the one-time $8 item and trials
-the existing $20/month recurring item until exactly two UTC calendar months
-later. Month-end dates clamp to the last valid day.
+Confirmed names and UUIDs are not accepted as bundle slugs. The monthly
+downsell Checkout contains a one-time $8 item and trials the $19.99/month
+recurring item until exactly one UTC calendar month later. Month-end dates
+clamp to the last valid day. The internal `two_month` key remains for database
+compatibility only.
 
 The authenticated AutoCreator bundle slugs, UUIDs, plan references, tool
 contract, scopes, and remaining activation proof are recorded in
@@ -113,10 +117,10 @@ those locks are closed.
 The client uses the documented `{ "args": { ... } }` tool envelope and marks
 D1 granted only after exact bundle or active-plan read-back. The post-purchase
 sequence is server-owned: Guard, optional Head to Toes, optional Lifetime, then
-Two-Month after a Lifetime decline, followed by the final optional Certification
+the $8 first-month offer after a Lifetime decline, followed by the final optional Certification
 offer. D1 derives each step from an opaque HttpOnly
 flow-cookie hash. Every accept opens a new Stripe-hosted Checkout. Two-Month
-persists one exact timestamp for the `$8 today, then $19.99/month` terms shown
+persists one exact timestamp for the `$8 first month, then $19.99/month` terms shown
 both before Checkout and to Stripe.
 
 Paid events write through `entitlement_outbox`. A stable operation key guards

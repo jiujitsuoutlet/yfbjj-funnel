@@ -362,7 +362,7 @@ function childCheckoutParams(env, mapping, offerKey, auth, request, deps) {
   } else {
     trialEnd = auth.flow.two_month_trial_end
       ? new Date(auth.flow.two_month_trial_end)
-      : addCalendarMonths(clock(deps), 2);
+      : addCalendarMonths(clock(deps), 1);
     params.line_items.unshift({
       price_data: { currency: 'usd', product: env.STRIPE_PRODUCT_TWO_MONTH, unit_amount: 800 },
       quantity: 1,
@@ -428,7 +428,9 @@ export async function handleOfferSkip(request, env, deps = {}) {
     return response({ ok: false, error: 'checkout_still_open' }, 409);
   }
   const next = SKIP_OFFER[current];
-  const trialEnd = next === 'two_month' ? addCalendarMonths(clock(deps), 2).toISOString() : null;
+  // `two_month` and `two_month_trial_end` are retained as database compatibility
+  // names. The live offer is now one $8 first month, then monthly billing.
+  const trialEnd = next === 'two_month' ? addCalendarMonths(clock(deps), 1).toISOString() : null;
   const changed = await env.DB.prepare(
     `UPDATE checkout_flows SET current_offer = ?2, status = ?3,
       pending_session_id = NULL, pending_checkout_url = NULL,

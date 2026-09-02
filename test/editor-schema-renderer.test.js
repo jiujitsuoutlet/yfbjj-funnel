@@ -56,7 +56,7 @@ test('renderer escapes content and derives locked prices and actions from server
   assert.doesNotMatch(rendered.body, /<script>charge/);
   assert.match(rendered.body, /&lt;script&gt;charge\(\)&lt;\/script&gt;/);
   assert.doesNotMatch(rendered.body, /price_secret/);
-  assert.match(rendered.body, /\$8 today/);
+  assert.match(rendered.body, /\$8 first month/);
   assert.match(rendered.body, /March 31, 2027/);
   assert.match(rendered.body, /data-offer-accept/);
   assert.match(rendered.body, /--editor-page-bg/);

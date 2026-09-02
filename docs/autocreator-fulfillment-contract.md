@@ -9,7 +9,7 @@ checkout by themselves.
 | Guard Retention | bundle UUID `f0b327de-4093-4873-9f47-3113ad50ead0` | `14-guard-retention-bundle` | same slug through `members.grantBundleEntitlement` |
 | Head to Toes | bundle UUID `3c3947f7-cb93-4d40-a8c9-1806b6ed7060` | `yoga-for-rocks-head-to-toes` | same slug through `members.grantBundleEntitlement` |
 | Lifetime | published one-time plan | `price_1TdIGeARWKYPSBdfrFBG6rhT` | same Price ID through `members.setMembership` |
-| Two-Month then monthly | published Full monthly plan | `price_1TdIGdARWKYPSBdfNJFlXdwy` | same Price ID through `members.setMembership` |
+| $8 first month, then monthly | published Full monthly plan | `price_1TdIGdARWKYPSBdfNJFlXdwy` | same Price ID through `members.setMembership` |
 | Certification Level 1 | bundle UUID `231686c4-5ba9-4053-90dd-7411f608676b` | `level-1-instructors-course` | grant as part of the Certification offer |
 | Certification Level 2 | bundle UUID `b5bee770-e110-4c5b-abfd-ed43d6a09749` | `level-2-instructor-course` | grant as part of the Certification offer |
 | Certification Level 3 | bundle UUID `3801c1a9-8405-48b0-93ea-fffcbfdc00c8` | `level-3-instructors-course` | grant as part of the Certification offer |
@@ -43,10 +43,10 @@ Confirmed paid-plan tools:
 - `members.findByEmail`, `members.checkAccess`, `subscriptions.getActive`,
   `members.syncStatus`, and `content.accessCheck`: required read-back surfaces.
 
-No symmetric local paid-plan revoke tool is documented. `subscriptions.cancel`
-changes real Stripe billing and requires `billing:manage` plus confirmation;
-`subscriptions.revokeAccess` only clears manual free access. Neither belongs in
-this Worker without a separately approved cancellation/refund design.
+No symmetric local paid-plan revoke tool is documented. The approved funnel
+policy does not require one: Stripe cancellation stops future billing and the
+buyer keeps course access. The Worker must never delete the member or revoke
+one-time bundle entitlements on cancellation.
 
 The dedicated Worker key needs `videos:read`, `members:read`, and
 `members:grant`. `tenant:read` is optional. The key used for the 2026-09-01
