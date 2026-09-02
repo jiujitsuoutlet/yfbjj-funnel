@@ -67,6 +67,9 @@ Locked functional staging is deployed at
 `https://yfbjj-funnel-stripe-staging.sebastian-brosche.workers.dev`. Deployment,
 webhook, live AutoCreator grant, cleanup, and browser evidence are recorded in
 [`docs/exc-130-staging-proof.md`](docs/exc-130-staging-proof.md).
+The live monthly cancellation proof failed because AutoCreator retained plan
+access after Stripe cancellation. Production stays locked until EXC-131 adds a
+supported plan-revoke contract that preserves purchased bundle access.
 
 The `staging` Wrangler environment has a separate Worker name, no custom
 routes, a separate D1 binding, and `PREVIEW_MODE = "true"`. It is safe to put
