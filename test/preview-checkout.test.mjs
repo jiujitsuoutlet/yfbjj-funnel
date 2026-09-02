@@ -11,7 +11,10 @@ let output = '';
 before(async () => {
   worker = spawn(
     process.execPath,
-    ['./node_modules/wrangler/bin/wrangler.js', 'dev', '--local', '--ip', '127.0.0.1', '--port', String(port)],
+    [
+      './node_modules/wrangler/bin/wrangler.js', 'dev', '--local', '--ip', '127.0.0.1', '--port', String(port),
+      '--var', 'PREVIEW_MODE:true', '--var', 'PREVIEW_NO_D1:true',
+    ],
     { stdio: ['ignore', 'pipe', 'pipe'] }
   );
   worker.stdout.on('data', (chunk) => { output += chunk; });

@@ -117,6 +117,11 @@ fresh Stripe-hosted Checkout. A Stripe cancel is not a decline.
 tool name, invalid JSON, or a write without exact bundle/plan read-back is
 failure. Never mark D1 granted from the write response alone.
 
+For bundle offers, the exact active bundle entitlement is the authoritative
+access read-back. AutoCreator's `members.checkAccess` tool is subscription-only
+and returns `no_subscription` for a valid bundle-only buyer. Paid plans still
+require exact active-plan read-back plus `members.checkAccess`.
+
 **The visual editor owns presentation only.** `/admin/editor` may publish only
 strict versioned JSON for the fixed page registry. It must never persist raw
 HTML, CSS, JavaScript, arbitrary links, routes, Stripe identifiers, offer

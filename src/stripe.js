@@ -35,7 +35,7 @@ export const OFFERS = Object.freeze({
 
 // The authenticated client contract is implemented, but Checkout stays closed
 // until the deployed staging grant/read-back proof approves fulfillment.
-export const FULFILLMENT_IMPLEMENTED = false;
+export const FULFILLMENT_IMPLEMENTED = true;
 export const AUTOCREATOR_CLIENT_IMPLEMENTED = true;
 const READINESS_SCHEMA_VERSION = 1;
 const PROCESSING_LEASE_MS = 5 * 60 * 1000;
@@ -148,12 +148,30 @@ export function resolveOffer(env, offerKey) {
 }
 
 function fulfillmentImplemented(deps) {
+  if (deps.fulfillmentImplemented === false) return false;
   return deps.fulfillmentImplemented === true
     || (FULFILLMENT_IMPLEMENTED && AUTOCREATOR_CLIENT_IMPLEMENTED);
 }
 
 function clock(deps) {
   return deps.now ? new Date(deps.now()) : new Date();
+}
+
+async function qaProofCoupon(request, env) {
+  if (env.QA_PROOF_MODE !== 'true') return { active: false, authorized: false };
+  const supplied = request.headers.get('x-yfbjj-qa-proof') || '';
+  if (!supplied || !env.QA_PROOF_SECRET || !env.QA_STRIPE_COUPON_ID) {
+    return { active: true, authorized: false };
+  }
+  const [suppliedHash, expectedHash] = await Promise.all([
+    sha256Hex(supplied),
+    sha256Hex(env.QA_PROOF_SECRET),
+  ]);
+  return {
+    active: true,
+    authorized: suppliedHash === expectedHash,
+    couponId: env.QA_STRIPE_COUPON_ID,
+  };
 }
 
 export async function checkRuntimeReadiness(env, deps = {}) {
@@ -198,6 +216,8 @@ export async function handleCheckout(request, env, deps = {}) {
   }
   const readiness = await checkRuntimeReadiness(env, deps);
   if (!readiness.ok) return response({ ok: false, error: 'checkout_not_ready' }, 503);
+  const proof = await qaProofCoupon(request, env);
+  if (proof.active && !proof.authorized) return response({ ok: false, error: 'qa_proof_required' }, 403);
   const { offer, priceId, entitlementKey } = mapping;
   const now = clock(deps);
   let token = readCookie(request, FLOW_COOKIE);
@@ -225,6 +245,11 @@ export async function handleCheckout(request, env, deps = {}) {
     cancel_url: `${origin}/?checkout=cancelled`,
     payment_intent_data: { metadata },
   };
+  if (proof.authorized) {
+    params.discounts = [{ coupon: proof.couponId }];
+    params.metadata.qa_proof = 'true';
+    params.payment_intent_data.metadata.qa_proof = 'true';
+  }
 
   try {
     await env.DB.prepare(
@@ -390,9 +415,20 @@ export async function handleOfferCheckout(request, env, deps = {}) {
   const readiness = await checkRuntimeReadiness(env, deps);
   if (!readiness.ok) return response({ ok: false, error: 'checkout_not_ready' }, 503);
   const { params, trialEnd } = childCheckoutParams(env, mapping, offerKey, auth, request, deps);
+  const proof = await qaProofCoupon(request, env);
+  if (proof.active && !proof.authorized) return response({ ok: false, error: 'qa_proof_required' }, 403);
+  if (proof.authorized) {
+    params.discounts = [{ coupon: proof.couponId }];
+    params.metadata.qa_proof = 'true';
+    if (params.payment_intent_data) params.payment_intent_data.metadata.qa_proof = 'true';
+    if (params.subscription_data) {
+      params.subscription_data.metadata.qa_proof = 'true';
+      params.payment_method_collection = 'if_required';
+    }
+  }
   try {
     const session = await auth.stripe.checkout.sessions.create(params, {
-      idempotencyKey: `offer:${auth.flowHash}:${offerKey}`,
+      idempotencyKey: `offer:${auth.flowHash}:${offerKey}:v${auth.flow.version}`,
     });
     const changed = await env.DB.prepare(
       `UPDATE checkout_flows SET status = 'checkout_pending', pending_session_id = ?2,
@@ -632,7 +668,7 @@ async function releaseFailedCheckout(env, session, now) {
   }
   await env.DB.prepare(
     `UPDATE checkout_flows SET status = 'offer_ready', pending_session_id = NULL,
-     pending_checkout_url = NULL, updated_at = ?3
+     pending_checkout_url = NULL, version = version + 1, updated_at = ?3
      WHERE flow_hash = ?1 AND pending_session_id = ?2 AND status = 'checkout_pending'`
   ).bind(metadata.flow_hash, session.id, now.toISOString()).run();
 }

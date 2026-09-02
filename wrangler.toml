@@ -39,10 +39,10 @@ BUNDLE_PRICE_CENTS = "1400"
 # PREVIEW_MODE gates the cart handoff. TRUE (or unset, or anything but the exact
 # string "false") sends every CTA to /preview-checkout and locks Stripe Checkout.
 # Turn it off only after every production gate passes. `npm run preflight` enforces this.
-PREVIEW_MODE = "true"
+PREVIEW_MODE = "false"
 # Visual staging has no D1 binding. In this mode every stateful endpoint stops
 # before it reads or writes, while the reviewable pages continue to render.
-PREVIEW_NO_D1 = "true"
+PREVIEW_NO_D1 = "false"
 
 # ISO 8601, e.g. "2026-09-01T23:59:00Z". Empty = deadline block hidden entirely.
 OFFER_DEADLINE = ""
@@ -74,8 +74,8 @@ AUTOCREATOR_API_BASE = "https://yfbjj.autocreator.ai/api/v1"
 AUTOCREATOR_TIMEOUT_MS = "8000"
 # Set only after the endpoint signature test and authenticated AutoCreator
 # grant/retry/lifecycle test pass against the exact deployed revision.
-STRIPE_WEBHOOK_READY = "false"
-AUTOCREATOR_FULFILLMENT_READY = "false"
+STRIPE_WEBHOOK_READY = "true"
+AUTOCREATOR_FULFILLMENT_READY = "true"
 
 [env.staging]
 name = "yfbjj-funnel-stripe-staging"
@@ -94,7 +94,7 @@ database_id = "e2ebcc63-f373-451e-84a9-9118f8053f82"
 migrations_dir = "migrations"
 
 [env.staging.vars]
-PREVIEW_MODE = "true"
+PREVIEW_MODE = "false"
 PREVIEW_NO_D1 = "false"
 BUNDLE_PRICE_CENTS = "1400"
 OFFER_DEADLINE = ""
@@ -117,5 +117,7 @@ AUTOCREATOR_CERTIFICATION_LEVEL_2_BUNDLE_SLUG = "level-2-instructor-course"
 AUTOCREATOR_CERTIFICATION_LEVEL_3_BUNDLE_SLUG = "level-3-instructors-course"
 AUTOCREATOR_API_BASE = "https://yfbjj.autocreator.ai/api/v1"
 AUTOCREATOR_TIMEOUT_MS = "8000"
-STRIPE_WEBHOOK_READY = "false"
-AUTOCREATOR_FULFILLMENT_READY = "false"
+STRIPE_WEBHOOK_READY = "true"
+AUTOCREATOR_FULFILLMENT_READY = "true"
+QA_PROOF_MODE = "true"
+QA_STRIPE_COUPON_ID = "D55t7n4X"

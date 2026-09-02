@@ -90,10 +90,44 @@ test('checkout fails closed before Stripe when fulfillment is not implemented', 
   const request = new Request('https://staging.test/api/checkout', {
     method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ offer: 'bundle' }),
   });
-  const response = await handleCheckout(request, { ...env, DB: database() }, { stripe });
+  const response = await handleCheckout(request, { ...env, DB: database() }, { stripe, fulfillmentImplemented: false });
   assert.equal(response.status, 503);
   assert.deepEqual(await body(response), { ok: false, error: 'checkout_not_ready' });
   assert.equal(calls, 0);
+});
+
+test('functional staging requires its proof secret and applies only the configured no-charge coupon', async () => {
+  let created;
+  const stripe = { checkout: { sessions: { create: async (params) => {
+    created = params;
+    return { url: 'https://checkout.test/proof' };
+  } } } };
+  const proofEnv = {
+    ...env,
+    DB: database(),
+    QA_PROOF_MODE: 'true',
+    QA_PROOF_SECRET: 'proof-secret',
+    QA_STRIPE_COUPON_ID: 'coupon-proof',
+  };
+  const requestFor = (proof) => new Request('https://staging.test/api/checkout', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      ...(proof ? { 'x-yfbjj-qa-proof': proof } : {}),
+    },
+    body: JSON.stringify({ offer: 'bundle' }),
+  });
+
+  const blocked = await handleCheckout(requestFor(null), proofEnv, { stripe });
+  assert.equal(blocked.status, 403);
+  assert.deepEqual(await body(blocked), { ok: false, error: 'qa_proof_required' });
+  assert.equal(created, undefined);
+
+  const allowed = await handleCheckout(requestFor('proof-secret'), proofEnv, { stripe });
+  assert.equal(allowed.status, 200);
+  assert.deepEqual(created.discounts, [{ coupon: 'coupon-proof' }]);
+  assert.equal(created.metadata.qa_proof, 'true');
+  assert.equal(created.payment_intent_data.metadata.qa_proof, 'true');
 });
 
 test('checkout preserves first-party attribution in session and payment metadata', async () => {

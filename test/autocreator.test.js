@@ -23,10 +23,9 @@ function queued(responses, calls = []) {
 
 test('bundle grant uses the documented envelope and requires exact read-back', async () => {
   const transport = queued([
-    ok('members.findByEmail', { member: { id: 'member_1' } }),
+    ok('members.findByEmail', { member: { id: 'member_1', last_sign_in_at: null } }),
     ok('members.grantBundleEntitlement', { already_existed: true }),
     ok('members.listBundleEntitlements', { items: [{ bundle_slug: 'guard-retention', status: 'active' }] }),
-    ok('members.checkAccess', { access: { granted: true, neverSignedIn: true } }),
   ]);
   const client = createAutoCreatorClient(env, transport);
   const result = await client.grant({
@@ -38,7 +37,7 @@ test('bundle grant uses the documented envelope and requires exact read-back', a
   assert.deepEqual(transport.calls[1].body, { args: {
     email: 'buyer@example.com', bundle_slug: 'guard-retention', notes: 'Stripe Checkout cs_1',
   } });
-  assert.deepEqual(transport.calls[3].body, { args: { memberId: 'member_1' } });
+  assert.equal(transport.calls.length, 3);
 });
 
 test('Certification grants all three level bundles and requires every exact read-back', async () => {
@@ -48,12 +47,11 @@ test('Certification grants all three level bundles and requires every exact read
     'level-3-instructors-course',
   ];
   const transport = queued([
-    ok('members.findByEmail', { member: { id: 'member_cert' } }),
+    ok('members.findByEmail', { member: { id: 'member_cert', last_sign_in_at: '2026-01-01T00:00:00Z' } }),
     ok('members.grantBundleEntitlement', { already_existed: false }),
     ok('members.grantBundleEntitlement', { already_existed: false }),
     ok('members.grantBundleEntitlement', { already_existed: true }),
     ok('members.listBundleEntitlements', { items: entitlementKeys.map((bundle_slug) => ({ bundle_slug, status: 'active' })) }),
-    ok('members.checkAccess', { access: { granted: true, neverSignedIn: false } }),
   ]);
   const result = await createAutoCreatorClient(env, transport).grant({
     offer: 'certification', entitlementKeys, sessionId: 'cs_cert', email: 'coach@example.com',
@@ -63,7 +61,7 @@ test('Certification grants all three level bundles and requires every exact read
     email: 'coach@example.com', bundle_slug, notes: 'Stripe Checkout cs_cert',
   })));
   assert.deepEqual(transport.calls[4].body, { args: { email: 'coach@example.com' } });
-  assert.deepEqual(transport.calls[5].body, { args: { memberId: 'member_cert' } });
+  assert.equal(transport.calls.length, 5);
 });
 
 test('Certification fails closed when any level is missing from bundle read-back', async () => {
@@ -98,10 +96,9 @@ test('bundle fulfillment creates a brand-new buyer before granting access', asyn
   const transport = queued([
     ok('members.findByEmail', { member: null }),
     ok('members.create', { member: { id: 'member_new' } }),
-    ok('members.findByEmail', { member: { id: 'member_new' } }),
+    ok('members.findByEmail', { member: { id: 'member_new', last_sign_in_at: null } }),
     ok('members.grantBundleEntitlement', { already_existed: false }),
     ok('members.listBundleEntitlements', { items: [{ bundle_slug: 'guard-retention', status: 'active' }] }),
-    ok('members.checkAccess', { access: { granted: true, neverSignedIn: true } }),
   ]);
   const result = await createAutoCreatorClient(env, transport).grant({
     offer: 'bundle', entitlementKey: 'guard-retention', sessionId: 'cs_new', email: 'new@example.com',

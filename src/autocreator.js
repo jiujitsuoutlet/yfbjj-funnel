@@ -54,6 +54,7 @@ function memberId(value) {
 function needsActivation(value) {
   if (!value || typeof value !== 'object') return false;
   if (value.neverSignedIn === true || value.never_signed_in === true) return true;
+  if (Object.hasOwn(value, 'last_sign_in_at') && value.last_sign_in_at === null) return true;
   return Object.values(value).some((child) => needsActivation(child));
 }
 
@@ -149,13 +150,10 @@ export function createAutoCreatorClient(env, deps = {}) {
           retryable: true, code: 'readback_failed',
         });
       }
-      const access = await tool('members.checkAccess', { memberId: id });
-      if (!exactRecord(access, 'granted', true)) {
-        throw new AutoCreatorError('AutoCreator access read-back did not prove effective access', {
-          retryable: true, code: 'readback_failed',
-        });
-      }
-      return { verified: true, activationNeeded: needsActivation(access) };
+      // Bundle access is owned by the exact active entitlement. AutoCreator's
+      // members.checkAccess tool reports subscription access only and returns
+      // no_subscription for valid bundle-only buyers.
+      return { verified: true, activationNeeded: needsActivation(member) };
     }
 
     if (offer === 'lifetime' || offer === 'two_month') {

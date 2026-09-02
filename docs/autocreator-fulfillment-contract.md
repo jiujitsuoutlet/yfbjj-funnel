@@ -30,8 +30,9 @@ Confirmed bundle tools:
   idempotent and reports `already_existed=true`.
 - `members.revokeBundleEntitlement`: soft revoke by `entitlement_id`, or by
   `email` plus exact `bundle_slug`.
-- `members.listBundleEntitlements`, `members.checkAccess`, and
-  `content.accessCheck`: read-back verification.
+- `members.listBundleEntitlements`: exact bundle-access read-back. The
+  `members.checkAccess` tool is subscription-only and returns
+  `no_subscription` for valid bundle-only buyers, so it is not a bundle gate.
 
 Confirmed paid-plan tools:
 
