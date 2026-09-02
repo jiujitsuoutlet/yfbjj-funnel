@@ -26,6 +26,8 @@ import { EDITOR_IMAGE_PATHS } from './editor/images.js';
 import { loadPublishedDocument } from './editor/repository.js';
 import { renderContentDocument } from './editor/renderer.js';
 import { handleEditorRoute } from './editor/routes.js';
+import { serveMedia } from './editor/media.js';
+import { AB_DECISION_RULE, conversionSnapshot, recordConversionEvent } from './analytics.js';
 import {
   getOfferJourneyState,
   getOrderFulfillmentState,
@@ -48,6 +50,7 @@ const SECURITY_HEADERS = {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data:",
     "connect-src 'self'",
+    "frame-src https://iframe.mediadelivery.net",
     "form-action 'self'",
     "base-uri 'none'",
     "frame-ancestors 'none'",
@@ -207,7 +210,7 @@ async function renderPublishedPage(env, pageKey, variant, extra = {}, context = 
     .replace(/\{\{EDITOR_TITLE\}\}/g, () => rendered.title)
     .replace(/\{\{EDITOR_DESCRIPTION\}\}/g, () => rendered.description)
     .replace(/\{\{EDITOR_BODY\}\}/g, () => rendered.body);
-  return renderPage(template, env, variant, extra);
+  return renderPage(template, env, variant, { PAGE_KEY: pageKey, ...extra });
 }
 
 function renderThanksPage(env, state) {
@@ -403,10 +406,10 @@ async function handleHealth(env) {
   try {
     const row = await env.DB.prepare(
       `SELECT count(*) AS n FROM sqlite_master
-        WHERE type = 'table' AND name IN ('leads', 'rate_limits', 'variant_visits', 'stripe_events', 'stripe_orders', 'fulfillment_readiness', 'entitlement_outbox', 'checkout_flows', 'offer_transitions')`
+        WHERE type = 'table' AND name IN ('leads', 'rate_limits', 'variant_visits', 'stripe_events', 'stripe_orders', 'fulfillment_readiness', 'entitlement_outbox', 'checkout_flows', 'offer_transitions', 'conversion_events', 'conversion_rate_limits', 'editor_media')`
     ).first();
     const tables = row ? row.n : 0;
-    if (tables < 9) {
+    if (tables < 12) {
       return json(
         { ok: false, d1: 'connected', schema: 'incomplete', tables_found: tables, at: nowIso() },
         503
@@ -501,7 +504,7 @@ async function handleStats(request, env) {
   }
 
   try {
-    const [visits, leads, orders] = await Promise.all([
+    const [visits, leads, orders, conversion] = await Promise.all([
       env.DB.prepare('SELECT variant, sum(count) AS n FROM variant_visits GROUP BY variant').all(),
       env.DB.prepare('SELECT variant, count(*) AS n FROM leads GROUP BY variant').all(),
       env.DB.prepare(`SELECT json_extract(metadata, '$.variant') AS variant,
@@ -509,6 +512,7 @@ async function handleStats(request, env) {
         FROM stripe_orders
         WHERE status IN ('paid', 'complete')
         GROUP BY json_extract(metadata, '$.variant')`).all(),
+      conversionSnapshot(env),
     ]);
 
     const tally = (rows, field = 'n') => {
@@ -526,12 +530,16 @@ async function handleStats(request, env) {
     for (const v of VARIANTS) {
       const seen = visitors[v] || 0;
       const captured = leadCounts[v] || 0;
+      const purchases = orderCounts[v] || 0;
       variants[v] = {
         visitors: seen,
         leads: captured,
         lead_rate: seen ? Number((captured / seen).toFixed(4)) : null,
-        purchases: orderCounts[v] || 0,
+        purchases,
+        paid_conversion_rate: seen ? Number((purchases / seen).toFixed(4)) : null,
+        revenue_per_visitor_cents: seen ? Math.round((orderCents[v] || 0) / seen) : null,
         revenue_cents: orderCents[v] || 0,
+        sample_gate_met: seen >= AB_DECISION_RULE.minimum_visitors_per_variant && purchases >= AB_DECISION_RULE.minimum_purchases_per_variant,
       };
     }
 
@@ -539,6 +547,8 @@ async function handleStats(request, env) {
       ok: true,
       at: nowIso(),
       variants,
+      conversion,
+      ab_decision_rule: AB_DECISION_RULE,
       unassigned_leads: leadCounts.unassigned || 0,
       notes: {
         visitors: 'Counted once per newly assigned human. Returning visitors, ?v= overrides and bots are excluded.',
@@ -568,6 +578,8 @@ export default {
     }
 
     if (method === 'HEAD' || method === 'GET') {
+      const mediaMatch = path.match(/^\/media\/([0-9a-f-]{36})$/);
+      if (mediaMatch) return await serveMedia(env, mediaMatch[1]) || json({ ok: false, error: 'not_found' }, 404);
       if (path === '/') return handleLanding(request, env, ctx);
       if (path === '/thanks') {
         if (isPreviewMode(env)) return html(await renderPublishedPage(env, 'thanks-preview', null) || renderThanksPage(env, 'preview'), 200, BUYER_STATE_HEADERS);
@@ -599,6 +611,11 @@ export default {
         return json({ ok: false, error: 'preview_locked' }, 423);
       }
       if (path === '/api/lead') return handleLead(request, env, ctx);
+      if (path === '/api/event') {
+        if (isPreviewMode(env)) return json({ ok: true, preview: true });
+        const value = await recordConversionEvent(request, env);
+        return json(value.ok ? { ok: true } : { ok: false, error: value.error }, value.status);
+      }
       if (path === '/api/checkout') return handleCheckout(request, env);
       if (path === '/api/offer-checkout') return handleOfferCheckout(request, env);
       if (path === '/api/offer-skip') return handleOfferSkip(request, env);
@@ -606,7 +623,7 @@ export default {
       if (path === '/api/stripe-webhook') return handleWebhook(request, env);
     }
 
-    const known = ['/', '/offer', '/thanks', '/preview-checkout', '/health', '/api/lead', '/api/stats', '/api/checkout', '/api/offer-checkout', '/api/offer-skip', '/api/customer-portal', '/api/stripe-webhook', '/admin/login', '/admin/editor'];
+    const known = ['/', '/offer', '/thanks', '/preview-checkout', '/health', '/api/lead', '/api/event', '/api/stats', '/api/checkout', '/api/offer-checkout', '/api/offer-skip', '/api/customer-portal', '/api/stripe-webhook', '/admin/login', '/admin/editor'];
     if (known.includes(path)) return json({ ok: false, error: 'method_not_allowed' }, 405);
 
     return json({ ok: false, error: 'not_found' }, 404);

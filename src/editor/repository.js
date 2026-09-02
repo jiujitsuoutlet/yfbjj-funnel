@@ -1,7 +1,13 @@
 import { defaultDocument } from './defaults.js';
 import { EDITOR_PAGE_KEYS, validateContentDocument } from './schema.js';
+import { upgradeContentDocument } from './upgrade.js';
+import { mediaPaths } from './media.js';
 
 function iso(now = new Date()) { return new Date(now).toISOString(); }
+async function imagePathsFor(env, document, checkedIn) {
+  if (!JSON.stringify(document).includes('"/media/')) return checkedIn;
+  return [...checkedIn, ...await mediaPaths(env)];
+}
 async function checksum(value) {
   const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
   return [...new Uint8Array(bytes)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
@@ -26,15 +32,15 @@ export async function loadEditorPage(env, pageKey, { actor = 'admin', imagePaths
     ).bind(pageKey).first();
   }
   let document;
-  try { document = JSON.parse(row.draft_json); } catch { return { ok: false, status: 500, error: 'draft_corrupt' }; }
-  const checked = validateContentDocument(document, { pageKey, imagePaths });
+  try { document = upgradeContentDocument(pageKey, JSON.parse(row.draft_json)); } catch { return { ok: false, status: 500, error: 'draft_corrupt' }; }
+  const checked = validateContentDocument(document, { pageKey, imagePaths: await imagePathsFor(env, document, imagePaths) });
   if (!checked.ok) return { ok: false, status: 500, error: 'draft_invalid', details: checked.errors };
   return { ok: true, page: { ...row, document: checked.value, draft_json: undefined } };
 }
 
 export async function saveDraft(env, pageKey, document, expectedRevision, { actor = 'admin', imagePaths = [] } = {}) {
   if (!Number.isInteger(expectedRevision) || expectedRevision < 0) return { ok: false, status: 400, error: 'invalid_revision' };
-  const checked = validateContentDocument(document, { pageKey, imagePaths });
+  const checked = validateContentDocument(document, { pageKey, imagePaths: await imagePathsFor(env, document, imagePaths) });
   if (!checked.ok) return { ok: false, status: 400, error: 'invalid_document', details: checked.errors };
   const now = iso();
   const nextRevision = expectedRevision + 1;
@@ -65,8 +71,8 @@ export async function publishDraft(env, pageKey, expectedRevision, { actor = 'ad
   ).bind(pageKey).first();
   if (!row || row.draft_revision !== expectedRevision || !row.draft_json) return { ok: false, status: 409, error: 'stale_draft' };
   let document;
-  try { document = JSON.parse(row.draft_json); } catch { return { ok: false, status: 400, error: 'invalid_document' }; }
-  const checked = validateContentDocument(document, { pageKey, imagePaths });
+  try { document = upgradeContentDocument(pageKey, JSON.parse(row.draft_json)); } catch { return { ok: false, status: 400, error: 'invalid_document' }; }
+  const checked = validateContentDocument(document, { pageKey, imagePaths: await imagePathsFor(env, document, imagePaths) });
   if (!checked.ok) return { ok: false, status: 400, error: 'invalid_document', details: checked.errors };
   const value = JSON.stringify(checked.value);
   const now = iso();
@@ -76,14 +82,14 @@ export async function publishDraft(env, pageKey, expectedRevision, { actor = 'ad
     env.DB.prepare(
       `INSERT INTO editor_page_versions
        (id, page_key, revision, document_json, checksum, created_at, created_by)
-       SELECT ?1, page_key, draft_revision, draft_json, ?2, ?3, ?4
-       FROM editor_pages WHERE page_key = ?5 AND draft_revision = ?6`
-    ).bind(versionId, digest, now, actor, pageKey, expectedRevision),
+       SELECT ?1, page_key, draft_revision, ?2, ?3, ?4, ?5
+       FROM editor_pages WHERE page_key = ?6 AND draft_revision = ?7`
+    ).bind(versionId, value, digest, now, actor, pageKey, expectedRevision),
     env.DB.prepare(
-      `UPDATE editor_pages SET published_json = draft_json, published_revision = draft_revision,
-       published_at = ?2, updated_at = ?2, updated_by = ?3
-       WHERE page_key = ?1 AND draft_revision = ?4`
-    ).bind(pageKey, now, actor, expectedRevision),
+      `UPDATE editor_pages SET draft_json = ?2, published_json = ?2, published_revision = draft_revision,
+       published_at = ?3, updated_at = ?3, updated_by = ?4
+       WHERE page_key = ?1 AND draft_revision = ?5`
+    ).bind(pageKey, value, now, actor, expectedRevision),
     env.DB.prepare(
       `INSERT INTO editor_audit_log (id, actor, action, page_key, revision, created_at)
        SELECT ?1, ?2, 'publish', page_key, published_revision, ?3
@@ -125,7 +131,7 @@ export async function restoreVersion(env, pageKey, versionId, expectedRevision, 
   ).bind(versionId, pageKey).first();
   if (!version) return { ok: false, status: 404, error: 'version_not_found' };
   let document;
-  try { document = JSON.parse(version.document_json); } catch { return { ok: false, status: 500, error: 'version_corrupt' }; }
+  try { document = upgradeContentDocument(pageKey, JSON.parse(version.document_json)); } catch { return { ok: false, status: 500, error: 'version_corrupt' }; }
   const saved = await saveDraft(env, pageKey, document, expectedRevision, { actor, imagePaths });
   if (!saved.ok) return saved;
   try {
@@ -146,8 +152,8 @@ export async function loadPublishedDocument(env, pageKey, { imagePaths = [] } = 
       'SELECT published_json FROM editor_pages WHERE page_key = ?1'
     ).bind(pageKey).first();
     if (!row || !row.published_json) return null;
-    const document = JSON.parse(row.published_json);
-    const checked = validateContentDocument(document, { pageKey, imagePaths });
+    const document = upgradeContentDocument(pageKey, JSON.parse(row.published_json));
+    const checked = validateContentDocument(document, { pageKey, imagePaths: await imagePathsFor(env, document, imagePaths) });
     return checked.ok ? checked.value : null;
   } catch (error) {
     console.error('published editor content unavailable', { pageKey, message: error && error.message });

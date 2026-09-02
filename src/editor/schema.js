@@ -7,10 +7,10 @@ export const EDITOR_PAGE_KEYS = Object.freeze([
 
 const PAGE_KEYS = new Set(EDITOR_PAGE_KEYS);
 const ELEMENT_TYPES = new Set([
-  'heading', 'text', 'list', 'image', 'divider', 'spacer',
-  'checkoutForm', 'offerActions', 'price', 'legalFooter', 'previewBanner', 'announcement', 'backgroundImage',
+  'heading', 'text', 'list', 'image', 'quote', 'video', 'divider', 'spacer',
+  'checkoutForm', 'offerActions', 'price', 'accessLink', 'legalFooter', 'previewBanner', 'announcement', 'backgroundImage',
 ]);
-const FUNCTIONAL_TYPES = new Set(['checkoutForm', 'offerActions', 'price', 'legalFooter', 'previewBanner', 'announcement', 'backgroundImage']);
+const FUNCTIONAL_TYPES = new Set(['checkoutForm', 'offerActions', 'price', 'accessLink', 'legalFooter', 'previewBanner', 'announcement', 'backgroundImage']);
 const FUNCTIONAL_RULES = Object.freeze({
   'landing-a': { checkoutForm: 1, price: 1, legalFooter: 1, previewBanner: 1, announcement: 1, backgroundImage: 1 },
   'landing-b': { checkoutForm: 1, price: 1, legalFooter: 1, previewBanner: 1, announcement: 1, backgroundImage: 1 },
@@ -21,8 +21,8 @@ const FUNCTIONAL_RULES = Object.freeze({
   'thanks-preview': { legalFooter: 1, previewBanner: 1 },
   'thanks-pending': { legalFooter: 1 },
   'thanks-failed': { legalFooter: 1 },
-  'thanks-granted': { legalFooter: 1 },
-  'thanks-activation': { legalFooter: 1 },
+  'thanks-granted': { accessLink: 1, legalFooter: 1 },
+  'thanks-activation': { accessLink: 1, legalFooter: 1 },
   'preview-checkout': { legalFooter: 1, previewBanner: 1 },
 });
 const ID_RE = /^[a-z][a-z0-9-]{0,63}$/;
@@ -46,11 +46,14 @@ const ELEMENT_KEYS = Object.freeze({
   text: new Set(['id', 'type', 'preset', 'content', 'style', 'hiddenOn']),
   list: new Set(['id', 'type', 'preset', 'items', 'style', 'hiddenOn']),
   image: new Set(['id', 'type', 'preset', 'src', 'alt', 'style', 'hiddenOn']),
+  quote: new Set(['id', 'type', 'preset', 'content', 'attribution', 'style', 'hiddenOn']),
+  video: new Set(['id', 'type', 'preset', 'src', 'title', 'style', 'hiddenOn']),
   divider: new Set(['id', 'type', 'preset', 'style', 'hiddenOn']),
   spacer: new Set(['id', 'type', 'preset', 'size', 'hiddenOn']),
   checkoutForm: new Set(['id', 'type', 'preset', 'label', 'placeholder', 'note', 'buttonText', 'style', 'hiddenOn']),
   offerActions: new Set(['id', 'type', 'preset', 'acceptText', 'skipText', 'style', 'hiddenOn']),
   price: new Set(['id', 'type', 'preset', 'style', 'hiddenOn']),
+  accessLink: new Set(['id', 'type', 'preset', 'label', 'style', 'hiddenOn']),
   legalFooter: new Set(['id', 'type', 'preset', 'style', 'hiddenOn']),
   previewBanner: new Set(['id', 'type', 'preset', 'style', 'hiddenOn']),
   announcement: new Set(['id', 'type', 'content', 'preset', 'style']),
@@ -136,7 +139,18 @@ function validateElement(element, path, errors, ids, manifest) {
   if (element.type === 'image' || element.type === 'backgroundImage') {
     string(element.src, `${path}.src`, errors, 300);
     string(element.alt, `${path}.alt`, errors, 500, false);
-    if (!manifest.has(element.src)) issue(errors, `${path}.src`, 'must be a checked-in image manifest path');
+    if (!manifest.has(element.src)) issue(errors, `${path}.src`, 'must be an approved image path');
+  }
+  if (element.type === 'quote') {
+    string(element.content, `${path}.content`, errors, 1000);
+    string(element.attribution, `${path}.attribution`, errors, 200);
+  }
+  if (element.type === 'video') {
+    string(element.src, `${path}.src`, errors, 500);
+    string(element.title, `${path}.title`, errors, 200);
+    let approved = false;
+    try { approved = new URL(element.src).hostname === 'iframe.mediadelivery.net'; } catch { /* invalid */ }
+    if (!approved) issue(errors, `${path}.src`, 'must be an approved Yoga for BJJ video URL');
   }
   if (element.type === 'announcement') string(element.content, `${path}.content`, errors, 500);
   if (element.type === 'spacer') number(element.size, `${path}.size`, errors, 0, 160);
@@ -153,7 +167,7 @@ export function validateContentDocument(input, { pageKey, imagePaths = [], maxBy
   if (!PAGE_KEYS.has(pageKey)) issue(errors, '$.pageKey', 'unknown fixed page key');
   if (!plain(input)) return { ok: false, errors: [...errors, '$: must be an object'] };
   unknownKeys(input, ROOT_KEYS, '$', errors);
-  if (input.version !== 1) issue(errors, '$.version', 'must equal 1');
+  if (input.version !== 2) issue(errors, '$.version', 'must equal 2');
   if (input.seo !== undefined) {
     if (!plain(input.seo)) issue(errors, '$.seo', 'must be an object');
     else {

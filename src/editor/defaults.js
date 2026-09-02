@@ -1,4 +1,5 @@
 import { EDITOR_PAGE_KEYS } from './schema.js';
+import { upgradeContentDocument } from './upgrade.js';
 
 const globalStyles = Object.freeze({
   backgroundColor: 'black', bodyColor: 'white', headingColor: 'white', accentColor: 'red',
@@ -95,6 +96,7 @@ const documents = {
   'preview-checkout': documentFor('preview-checkout', 'Checkout is not connected yet', 'Preview checkout state.', [preview('preview-checkout'), element('preview-checkout-heading', 'heading', { level: 1, content: 'Checkout is not connected yet' }), element('preview-checkout-copy', 'text', { content: 'On the live page, this button opens a Stripe-hosted checkout. This preview cannot create a session, customer, payment, subscription, or entitlement.' }), element('preview-checkout-detail', 'heading', { level: 2, content: 'What happens when it goes live' }), element('preview-checkout-list', 'list', { preset: 'valueList', items: ['The email address is captured first', 'The buyer lands on Stripe Checkout', 'Access follows the verified offer mapping'] }), element('preview-checkout-locks', 'text', { content: 'Checkout stays locked until preflight verifies the Stripe prices, AutoCreator grant keys, deadline, D1 database, and fulfillment implementation.' }), legal('preview-checkout')], 'support'),
 };
 
+for (const pageKey of Object.keys(documents)) documents[pageKey] = upgradeContentDocument(pageKey, documents[pageKey]);
 export const DEFAULT_PAGE_DOCUMENTS = Object.freeze(documents);
 export function defaultDocument(pageKey) {
   if (!EDITOR_PAGE_KEYS.includes(pageKey)) return null;

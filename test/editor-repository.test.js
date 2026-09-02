@@ -30,7 +30,7 @@ class MemoryDB {
     const results = [];
     for (const statement of statements) {
       const { _sql: sql, _args: a } = statement;
-      if (sql.startsWith('UPDATE editor_pages SET draft_json')) {
+      if (sql.startsWith('UPDATE editor_pages SET draft_json') && sql.includes('draft_revision = draft_revision + 1')) {
         if (this.page.page_key === a[0] && this.page.draft_revision === a[5]) {
           this.page.draft_json = a[1]; this.page.draft_revision += 1; this.page.last_operation_id = a[4];
           results.push({ meta: { changes: 1 } });
@@ -39,10 +39,10 @@ class MemoryDB {
         if (this.page.draft_revision === a[4] && this.page.last_operation_id === a[5]) this.audit.push({ action: 'draft_save', revision: a[4] });
         results.push({ meta: { changes: 1 } });
       } else if (sql.startsWith('INSERT INTO editor_page_versions')) {
-        if (this.page.draft_revision === a[5]) this.versions.push({ id: a[0], revision: a[5], document_json: this.page.draft_json });
+        if (this.page.draft_revision === a[6]) this.versions.push({ id: a[0], revision: a[6], document_json: a[1] });
         results.push({ meta: { changes: 1 } });
-      } else if (sql.startsWith('UPDATE editor_pages SET published_json')) {
-        if (this.page.draft_revision === a[3]) { this.page.published_json = this.page.draft_json; this.page.published_revision = a[3]; }
+      } else if (sql.startsWith('UPDATE editor_pages SET draft_json =')) {
+        if (this.page.draft_revision === a[4]) { this.page.draft_json = a[1]; this.page.published_json = a[1]; this.page.published_revision = a[4]; }
         results.push({ meta: { changes: 1 } });
       } else if (sql.includes("'publish'")) {
         if (this.page.published_revision === a[4]) this.audit.push({ action: 'publish', revision: a[4] });
