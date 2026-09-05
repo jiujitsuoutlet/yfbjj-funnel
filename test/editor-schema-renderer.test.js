@@ -81,7 +81,7 @@ test('landing defaults preserve the current offer copy before first publish', ()
     assert.match(serialized, /Im too busy for Yoga/);
     assert.match(serialized, /8 mobility collections/);
     assert.match(serialized, /One payment\. Not a subscription\. Optional offers come next\./);
-    const rendered = renderContentDocument(DEFAULT_PAGE_DOCUMENTS[pageKey], { pageKey, env: { BUNDLE_PRICE_CENTS: '1400' } }).body;
+    const rendered = renderContentDocument(DEFAULT_PAGE_DOCUMENTS[pageKey], { pageKey, env: { BUNDLE_PRICE_CENTS: '1400', HEAD_TO_TOES_BUMP_PRICE_CENTS: '900' } }).body;
     assert.match(rendered, /Mobility for Brazilian Jiu-Jitsu athletes\./);
     assert.match(rendered, /class="editor-background(?: is-flipped)?"/);
     assert.match(rendered, /\/img\/guard-pass-800\.webp/);
@@ -89,7 +89,7 @@ test('landing defaults preserve the current offer copy before first publish', ()
     assert.match(rendered, /id="lead-form"/);
     assert.match(rendered, /id="head-to-toes-bump"/);
     assert.match(rendered, /Yes\.\.\. add Head to Toes/);
-    assert.match(rendered, /\+ \$29/);
+    assert.match(rendered, /\+ \$9/);
     assert.doesNotMatch(rendered, /price_secret/);
   }
 });

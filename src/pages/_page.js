@@ -100,10 +100,10 @@
     if (!isFinite(n)) return null;
     return '$' + (n % 100 === 0 ? String(n / 100) : (n / 100).toFixed(2));
   }
-  var PRICES = { bundle: money(CFG.BUNDLE_PRICE_CENTS) };
+  var PRICES = { bundle: money(CFG.BUNDLE_PRICE_CENTS), head_to_toes_bump: money(CFG.HEAD_TO_TOES_BUMP_PRICE_CENTS) };
   [].forEach.call(document.querySelectorAll('[data-price]'), function (el) {
     var v = PRICES[el.getAttribute('data-price')];
-    if (v) el.textContent = v;
+    if (v) el.textContent = el.getAttribute('data-price') === 'head_to_toes_bump' ? '+ ' + v : v;
   });
 
   /* ----------------------------------------------------------- deadline */

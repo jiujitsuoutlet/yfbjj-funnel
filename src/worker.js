@@ -95,6 +95,7 @@ const PAGE_CONFIG_KEYS = [
   'PREVIEW_MODE',
   'OFFER_DEADLINE',
   'BUNDLE_PRICE_CENTS',
+  'HEAD_TO_TOES_BUMP_PRICE_CENTS',
 ];
 
 /* --------------------------------------------------------------- A/B test */

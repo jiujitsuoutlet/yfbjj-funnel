@@ -20,6 +20,7 @@ const env = {
   AUTOCREATOR_FULFILLMENT_READY: 'true',
   STRIPE_PRICE_BUNDLE: 'price_bundle',
   STRIPE_PRICE_HEAD_TO_TOES: 'price_head',
+  STRIPE_PRICE_HEAD_TO_TOES_BUMP: 'price_head_bump',
   STRIPE_PRICE_TWO_MONTH: 'price_monthly',
   STRIPE_PRODUCT_TWO_MONTH: 'prod_trial',
   STRIPE_PRICE_CERTIFICATION: 'price_certification',
@@ -175,12 +176,12 @@ test('checkout adds the server-owned Head to Toes order bump to the same payment
   assert.equal(response.status, 200);
   assert.deepEqual(created.line_items, [
     { price: 'price_bundle', quantity: 1 },
-    { price: 'price_head', quantity: 1 },
+    { price: 'price_head_bump', quantity: 1 },
   ]);
   assert.equal(created.metadata.price_id, 'price_bundle');
   assert.equal(created.metadata.entitlement_key, 'guard-retention');
   assert.equal(created.metadata.order_bump, 'head_to_toes');
-  assert.equal(created.metadata.order_bump_price_id, 'price_head');
+  assert.equal(created.metadata.order_bump_price_id, 'price_head_bump');
   assert.equal(created.metadata.order_bump_entitlement_key, 'head-slug');
   assert.deepEqual(created.payment_intent_data.metadata, created.metadata);
 });
@@ -430,10 +431,10 @@ test('paid order bump grants both products and skips the duplicate Head to Toes 
   const timestamp = 2_000_000_000;
   const DB = database();
   const event = checkoutEvent('checkout.session.completed');
-  event.data.object.amount_total = 4300;
+  event.data.object.amount_total = 2300;
   Object.assign(event.data.object.metadata, {
     order_bump: 'head_to_toes',
-    order_bump_price_id: 'price_head',
+    order_bump_price_id: 'price_head_bump',
     order_bump_entitlement_key: 'head-slug',
   });
   let grant;

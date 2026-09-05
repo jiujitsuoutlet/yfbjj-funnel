@@ -104,6 +104,15 @@ function checkoutFulfillmentMapping(base, bump = null) {
   };
 }
 
+function resolveHeadToToesBump(env) {
+  const mapping = resolveOffer(env, HEAD_TO_TOES_BUMP);
+  if (!mapping.ok) return mapping;
+  if (!String(env.STRIPE_PRICE_HEAD_TO_TOES_BUMP || '').trim()) {
+    return { ok: false, error: 'offer_not_configured', missing: ['STRIPE_PRICE_HEAD_TO_TOES_BUMP'] };
+  }
+  return { ...mapping, priceId: String(env.STRIPE_PRICE_HEAD_TO_TOES_BUMP).trim() };
+}
+
 function response(body, status = 200, headers = {}) {
   return new Response(JSON.stringify(body), {
     status,
@@ -232,7 +241,7 @@ export async function handleCheckout(request, env, deps = {}) {
     return response({ ok: false, error: mapping.error, missing: mapping.missing }, status);
   }
   const bumpRequested = body && body.order_bump === HEAD_TO_TOES_BUMP;
-  const bumpMapping = bumpRequested ? resolveOffer(env, HEAD_TO_TOES_BUMP) : null;
+  const bumpMapping = bumpRequested ? resolveHeadToToesBump(env) : null;
   if (bumpMapping && !bumpMapping.ok) {
     return response({ ok: false, error: bumpMapping.error, missing: bumpMapping.missing }, 503);
   }
@@ -754,7 +763,7 @@ export async function handleWebhook(request, env, deps = {}) {
         if (offerKey !== 'bundle' || session.metadata.order_bump !== HEAD_TO_TOES_BUMP) {
           throw new Error('checkout metadata contains an unsupported order bump');
         }
-        const bumpMapping = resolveOffer(env, HEAD_TO_TOES_BUMP);
+        const bumpMapping = resolveHeadToToesBump(env);
         if (!bumpMapping.ok
           || session.metadata.order_bump_price_id !== bumpMapping.priceId
           || session.metadata.order_bump_entitlement_key !== bumpMapping.entitlementKey) {
