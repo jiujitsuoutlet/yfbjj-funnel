@@ -65,17 +65,21 @@ function priceMarkup(pageKey, env, context) {
 }
 
 function functionalMarkup(element, pageKey, env, context) {
-  if (element.type === 'checkoutForm') return `<form id="lead-form" class="lead-form" novalidate>
+  if (element.type === 'checkoutForm') {
+    const bumpCents = Number(env.HEAD_TO_TOES_BUMP_PRICE_CENTS || 900);
+    const bumpPrice = `$${(bumpCents / 100).toFixed(bumpCents % 100 ? 2 : 0)}`;
+    return `<form id="lead-form" class="lead-form" novalidate>
     <label for="email">${escapeHtml(element.label || 'Email address')}</label>
     <input id="email" name="email" type="email" autocomplete="email" placeholder="${escapeHtml(element.placeholder || 'you@example.com')}" required>
     <label class="order-bump" for="head-to-toes-bump">
       <input id="head-to-toes-bump" name="order_bump" type="checkbox" value="head_to_toes">
-      <span><strong>${escapeHtml(element.bumpHeadline || 'Yes... add Head to Toes')} <b>+ $29</b></strong><small>${escapeHtml(element.bumpDescription || 'Three guided, 15-minute mobility sessions for inflexible grapplers.')}</small></span>
+      <span><strong>${escapeHtml(element.bumpHeadline || 'Yes... add Head to Toes')} <b>+ ${escapeHtml(bumpPrice)}</b></strong><small>${escapeHtml(element.bumpDescription || 'Three guided, 15-minute mobility sessions for inflexible grapplers.')}</small></span>
     </label>
     <button id="lead-submit" class="cta" type="submit" data-cart="bundle">${escapeHtml(element.buttonText || 'Get the bundle')}</button>
     <p id="lead-msg" class="form-msg" aria-live="polite"></p>
     <p class="cta-note">${escapeHtml(element.note || '')}</p>
   </form>`;
+  }
   if (element.type === 'offerActions') return `<div class="form-actions">
     <button class="cta" type="button" data-offer-accept>${escapeHtml(element.acceptText || 'Continue')}</button>
     <button class="decline" type="button" data-offer-skip>${escapeHtml(element.skipText || 'No thanks')}</button>

@@ -55,6 +55,7 @@ try {
 const STRIPE_PRICE_VARS = [
   'STRIPE_PRICE_BUNDLE',
   'STRIPE_PRICE_HEAD_TO_TOES',
+  'STRIPE_PRICE_HEAD_TO_TOES_BUMP',
   'STRIPE_PRICE_LIFETIME',
   'STRIPE_PRICE_TWO_MONTH',
   'STRIPE_PRICE_CERTIFICATION',
@@ -80,8 +81,11 @@ for (const key of STRIPE_PRICE_VARS) {
   }
 }
 if (priceIds.length === STRIPE_PRICE_VARS.length && new Set(priceIds).size !== priceIds.length) {
-  fail('Stripe offer mapping reuses a Price ID. Each of the five offers must map to its own verified Price.');
+  fail('Stripe offer mapping reuses a Price ID. Each checkout amount must map to its own verified Price.');
 }
+if (cfg.HEAD_TO_TOES_BUMP_PRICE_CENTS !== '900') {
+  fail('HEAD_TO_TOES_BUMP_PRICE_CENTS must be exactly "900" so the protected checkout copy matches Stripe.');
+} else pass('Head to Toes order bump display price is locked to $9');
 
 const twoMonthProduct = String(cfg.STRIPE_PRODUCT_TWO_MONTH || '').trim();
 if (!twoMonthProduct) fail('STRIPE_PRODUCT_TWO_MONTH is empty. Use the verified Two-Month Access Product ID.');
@@ -247,7 +251,7 @@ for (const variant of ['a', 'b']) {
   if (!page.includes('data-cart="bundle"')) missing.push('a bundle CTA');
   if (!page.includes('data-price="bundle"')) missing.push('the price block');
   if (!page.includes('id="lead-form"')) missing.push('the lead capture form');
-  if (!page.includes('id="head-to-toes-bump"') || !page.includes('value="head_to_toes"')) missing.push('the $29 Head to Toes order bump');
+  if (!page.includes('id="head-to-toes-bump"') || !page.includes('value="head_to_toes"') || !page.includes('data-price="head_to_toes_bump"')) missing.push('the $9 Head to Toes order bump');
   if (!page.includes('{{PAGE_CONFIG_JSON}}')) missing.push('the page config island');
   if (!page.includes('>8</b>') || !page.includes('mobility collections')) missing.push('the eight-collection offer summary');
   if (missing.length) fail(`variant ${variant.toUpperCase()} (${file}) is missing ${missing.join('; ')}`);
