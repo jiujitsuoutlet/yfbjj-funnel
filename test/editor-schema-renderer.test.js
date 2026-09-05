@@ -87,5 +87,9 @@ test('landing defaults preserve the current offer copy before first publish', ()
     assert.match(rendered, /\/img\/guard-pass-800\.webp/);
     assert.match(rendered, /class="announce"/);
     assert.match(rendered, /id="lead-form"/);
+    assert.match(rendered, /id="head-to-toes-bump"/);
+    assert.match(rendered, /Yes\.\.\. add Head to Toes/);
+    assert.match(rendered, /\+ \$29/);
+    assert.doesNotMatch(rendered, /price_secret/);
   }
 });

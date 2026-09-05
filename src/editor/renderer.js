@@ -68,6 +68,10 @@ function functionalMarkup(element, pageKey, env, context) {
   if (element.type === 'checkoutForm') return `<form id="lead-form" class="lead-form" novalidate>
     <label for="email">${escapeHtml(element.label || 'Email address')}</label>
     <input id="email" name="email" type="email" autocomplete="email" placeholder="${escapeHtml(element.placeholder || 'you@example.com')}" required>
+    <label class="order-bump" for="head-to-toes-bump">
+      <input id="head-to-toes-bump" name="order_bump" type="checkbox" value="head_to_toes">
+      <span><strong>${escapeHtml(element.bumpHeadline || 'Yes... add Head to Toes')} <b>+ $29</b></strong><small>${escapeHtml(element.bumpDescription || 'Three guided, 15-minute mobility sessions for inflexible grapplers.')}</small></span>
+    </label>
     <button id="lead-submit" class="cta" type="submit" data-cart="bundle">${escapeHtml(element.buttonText || 'Get the bundle')}</button>
     <p id="lead-msg" class="form-msg" aria-live="polite"></p>
     <p class="cta-note">${escapeHtml(element.note || '')}</p>

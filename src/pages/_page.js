@@ -80,7 +80,12 @@
     return fetch('/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
-      body: JSON.stringify({ offer: kind, attribution: attribution() })
+      body: JSON.stringify({
+        offer: kind,
+        order_bump: kind === 'bundle' && document.getElementById('head-to-toes-bump') && document.getElementById('head-to-toes-bump').checked
+          ? 'head_to_toes' : null,
+        attribution: attribution()
+      })
     }).then(function (res) {
       return res.json().catch(function () { return {}; }).then(function (payload) {
         if (!res.ok || !payload.url) { event('checkout_error', kind, payload.error || 'checkout_failed'); throw new Error(payload.error || 'checkout_failed'); }

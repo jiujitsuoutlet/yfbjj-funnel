@@ -158,6 +158,48 @@ test('checkout preserves first-party attribution in session and payment metadata
   assert.equal(DB.calls.some(({ sql }) => sql.includes('INSERT INTO stripe_orders')), false);
 });
 
+test('checkout adds the server-owned Head to Toes order bump to the same payment', async () => {
+  let created;
+  const stripe = { checkout: { sessions: { create: async (params) => {
+    created = params;
+    return { id: 'cs_bump', url: 'https://checkout.test/bump' };
+  } } } };
+  const request = new Request('https://staging.test/api/checkout', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      offer: 'bundle', order_bump: 'head_to_toes',
+      price_id: 'price_attacker', entitlement_key: 'attacker',
+    }),
+  });
+  const response = await handleCheckout(request, { ...env, DB: database() }, { stripe });
+  assert.equal(response.status, 200);
+  assert.deepEqual(created.line_items, [
+    { price: 'price_bundle', quantity: 1 },
+    { price: 'price_head', quantity: 1 },
+  ]);
+  assert.equal(created.metadata.price_id, 'price_bundle');
+  assert.equal(created.metadata.entitlement_key, 'guard-retention');
+  assert.equal(created.metadata.order_bump, 'head_to_toes');
+  assert.equal(created.metadata.order_bump_price_id, 'price_head');
+  assert.equal(created.metadata.order_bump_entitlement_key, 'head-slug');
+  assert.deepEqual(created.payment_intent_data.metadata, created.metadata);
+});
+
+test('checkout ignores unsupported browser-supplied order bumps', async () => {
+  let created;
+  const stripe = { checkout: { sessions: { create: async (params) => {
+    created = params;
+    return { id: 'cs_plain', url: 'https://checkout.test/plain' };
+  } } } };
+  const request = new Request('https://staging.test/api/checkout', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ offer: 'bundle', order_bump: 'certification' }),
+  });
+  assert.equal((await handleCheckout(request, { ...env, DB: database() }, { stripe })).status, 200);
+  assert.deepEqual(created.line_items, [{ price: 'price_bundle', quantity: 1 }]);
+  assert.equal(created.metadata.order_bump, undefined);
+});
+
 test('initial checkout rejects every non-Guard offer and calendar months clamp', async () => {
   assert.equal(addCalendarMonths(new Date('2027-01-31T12:00:00Z'), 1).toISOString(), '2027-02-28T12:00:00.000Z');
   assert.equal(addCalendarMonths(new Date('2028-01-31T12:00:00Z'), 1).toISOString(), '2028-02-29T12:00:00.000Z');
@@ -382,6 +424,50 @@ test('paid completion grants once and records durable fulfillment', async () => 
   assert.equal(DB.state.orderStatus, 'paid');
   assert.equal(DB.state.fulfillmentStatus, 'granted');
   assert.equal(DB.state.eventStatus, 'processed');
+});
+
+test('paid order bump grants both products and skips the duplicate Head to Toes offer', async () => {
+  const timestamp = 2_000_000_000;
+  const DB = database();
+  const event = checkoutEvent('checkout.session.completed');
+  event.data.object.amount_total = 4300;
+  Object.assign(event.data.object.metadata, {
+    order_bump: 'head_to_toes',
+    order_bump_price_id: 'price_head',
+    order_bump_entitlement_key: 'head-slug',
+  });
+  let grant;
+  const result = await handleWebhook(await webhookRequest(event, timestamp), { ...env, DB }, {
+    timestamp: timestamp * 1000,
+    autocreator: { grant: async (input) => { grant = input; } },
+  });
+  assert.equal(result.status, 200);
+  assert.deepEqual(grant.entitlementKeys, ['guard-retention', 'head-slug']);
+  assert.equal(grant.operationKey, 'grant:cs_fixture:guard-retention,head-slug');
+  const order = DB.calls.find(({ sql }) => sql.includes('INSERT INTO stripe_orders'));
+  assert.equal(order.values[6], 'guard-retention,head-slug');
+  assert.deepEqual(JSON.parse(order.values[10]), { variant: 'a', order_bump: 'head_to_toes' });
+  const transition = DB.calls.find(({ sql }) => sql.includes('UPDATE checkout_flows SET customer_id'));
+  assert.equal(transition.values[4], 'lifetime');
+});
+
+test('tampered order bump metadata fails before fulfillment', async () => {
+  const timestamp = 2_000_000_000;
+  const DB = database();
+  const event = checkoutEvent('checkout.session.completed');
+  Object.assign(event.data.object.metadata, {
+    order_bump: 'head_to_toes',
+    order_bump_price_id: 'price_attacker',
+    order_bump_entitlement_key: 'head-slug',
+  });
+  let grants = 0;
+  const result = await handleWebhook(await webhookRequest(event, timestamp), { ...env, DB }, {
+    timestamp: timestamp * 1000,
+    autocreator: { grant: async () => { grants++; } },
+  });
+  assert.equal(result.status, 500);
+  assert.equal(grants, 0);
+  assert.equal(DB.calls.some(({ sql }) => sql.includes('INSERT INTO stripe_orders')), false);
 });
 
 test('fresh event claims return retryable 503 while stale processing is reclaimed', async () => {
