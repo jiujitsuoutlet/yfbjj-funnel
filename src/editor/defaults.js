@@ -54,7 +54,12 @@ function landingDocument(pageKey, headline) {
         { id: `${pageKey}-offer`, name: 'Checkout', width: 4, elements: [
           element(`${pageKey}-summary`, 'text', { preset: 'offerSummary', content: 'Guard Retention Bundle | 8 mobility collections' }),
           element(`${pageKey}-price`, 'price'),
-          element(`${pageKey}-form`, 'checkoutForm', { label: 'Where should we send it?', placeholder: 'you@example.com', buttonText: 'Get the bundle', note: 'One payment. Not a subscription. Optional offers come next.' }),
+          element(`${pageKey}-form`, 'checkoutForm', {
+            label: 'Where should we send it?', placeholder: 'you@example.com', buttonText: 'Get the bundle',
+            bumpHeadline: 'Yes... add Head to Toes',
+            bumpDescription: 'Three guided, 15-minute mobility sessions for inflexible grapplers.',
+            note: 'One payment. Not a subscription. Optional offers come next.',
+          }),
           legal(pageKey),
         ] },
       ] }],

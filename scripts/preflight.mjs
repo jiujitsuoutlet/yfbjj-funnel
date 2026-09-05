@@ -247,6 +247,7 @@ for (const variant of ['a', 'b']) {
   if (!page.includes('data-cart="bundle"')) missing.push('a bundle CTA');
   if (!page.includes('data-price="bundle"')) missing.push('the price block');
   if (!page.includes('id="lead-form"')) missing.push('the lead capture form');
+  if (!page.includes('id="head-to-toes-bump"') || !page.includes('value="head_to_toes"')) missing.push('the $29 Head to Toes order bump');
   if (!page.includes('{{PAGE_CONFIG_JSON}}')) missing.push('the page config island');
   if (!page.includes('>8</b>') || !page.includes('mobility collections')) missing.push('the eight-collection offer summary');
   if (missing.length) fail(`variant ${variant.toUpperCase()} (${file}) is missing ${missing.join('; ')}`);
@@ -263,6 +264,9 @@ if (!pageJs.includes('variant: VARIANT') || !pageJs.includes("utm_content: VARIA
 if (!stripeSource.includes("entitlement_key: entitlementKey")) {
   fail('src/stripe.js does not snapshot the configured AutoCreator entitlement in Checkout metadata.');
 } else pass('Checkout metadata snapshots the configured AutoCreator grant key');
+if (!pageJs.includes("? 'head_to_toes' : null") || !stripeSource.includes('order_bump_price_id')) {
+  fail('the Head to Toes order bump is not connected to server-owned Stripe and fulfillment mappings.');
+} else pass('Head to Toes order bump uses server-owned Stripe and fulfillment mappings');
 
 /* 5e. every image a page references actually exists */
 // A renamed original or a skipped `npm run build:img` would otherwise ship a

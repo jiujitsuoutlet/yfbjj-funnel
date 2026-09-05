@@ -96,6 +96,7 @@ body{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;height:100vh;h
       <form id="lead-form" novalidate>
         <label for="email">Where should we send it?</label>
         <input id="email" name="email" type="email" inputmode="email" autocomplete="email" required placeholder="you@example.com" aria-describedby="lead-msg">
+        <label class="order-bump" for="head-to-toes-bump"><input id="head-to-toes-bump" name="order_bump" type="checkbox" value="head_to_toes"><span><strong>Yes... add Head to Toes <b>+ $29</b></strong><small>Three guided, 15-minute mobility sessions for inflexible grapplers.</small></span></label>
         <button id="lead-submit" class="cta" data-cart="bundle" data-source="landing-hero" type="submit">Get the bundle &middot; $14</button>
         <p id="lead-msg" class="msg" role="status" aria-live="polite"></p>
       </form>

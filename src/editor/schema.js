@@ -50,7 +50,7 @@ const ELEMENT_KEYS = Object.freeze({
   video: new Set(['id', 'type', 'preset', 'src', 'title', 'style', 'hiddenOn']),
   divider: new Set(['id', 'type', 'preset', 'style', 'hiddenOn']),
   spacer: new Set(['id', 'type', 'preset', 'size', 'hiddenOn']),
-  checkoutForm: new Set(['id', 'type', 'preset', 'label', 'placeholder', 'note', 'buttonText', 'style', 'hiddenOn']),
+  checkoutForm: new Set(['id', 'type', 'preset', 'label', 'placeholder', 'note', 'buttonText', 'bumpHeadline', 'bumpDescription', 'style', 'hiddenOn']),
   offerActions: new Set(['id', 'type', 'preset', 'acceptText', 'skipText', 'style', 'hiddenOn']),
   price: new Set(['id', 'type', 'preset', 'style', 'hiddenOn']),
   accessLink: new Set(['id', 'type', 'preset', 'label', 'style', 'hiddenOn']),
@@ -157,7 +157,7 @@ function validateElement(element, path, errors, ids, manifest) {
   }
   if (element.type === 'announcement') string(element.content, `${path}.content`, errors, 500);
   if (element.type === 'spacer') number(element.size, `${path}.size`, errors, 0, 160);
-  for (const key of ['label', 'placeholder', 'note', 'buttonText', 'acceptText', 'skipText']) {
+  for (const key of ['label', 'placeholder', 'note', 'buttonText', 'bumpHeadline', 'bumpDescription', 'acceptText', 'skipText']) {
     if (key in element) string(element[key], `${path}.${key}`, errors, 500, false);
   }
 }

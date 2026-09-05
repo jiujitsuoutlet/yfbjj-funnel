@@ -22,6 +22,12 @@ export function upgradeContentDocument(pageKey, input) {
   if (pageKey.startsWith('landing-')) {
     for (const element of allElements(document)) {
       if (element.type === 'backgroundImage' && element.flipHorizontal === undefined) element.flipHorizontal = true;
+      if (element.type === 'checkoutForm') {
+        if (element.bumpHeadline === undefined) element.bumpHeadline = 'Yes... add Head to Toes';
+        if (element.bumpDescription === undefined) {
+          element.bumpDescription = 'Three guided, 15-minute mobility sessions for inflexible grapplers.';
+        }
+      }
     }
     if (!document.sections.some((section) => section.id === `${pageKey}-proof-section`)) {
       document.sections.push({

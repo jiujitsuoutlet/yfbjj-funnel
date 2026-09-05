@@ -63,6 +63,7 @@ export const SKIP_OFFER = Object.freeze({
 });
 
 const ATTRIBUTION_KEYS = ['variant', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'gclid'];
+const HEAD_TO_TOES_BUMP = 'head_to_toes';
 
 export function isPreviewMode(env) {
   return env.PREVIEW_MODE !== 'false';
@@ -85,6 +86,22 @@ export function cleanAttribution(input = {}) {
     if (typeof input[key] === 'string' && input[key].trim()) metadata[key] = input[key].trim().slice(0, 200);
   }
   return metadata;
+}
+
+function cleanOrderMetadata(input = {}) {
+  const metadata = cleanAttribution(input);
+  if (input.order_bump === HEAD_TO_TOES_BUMP) metadata.order_bump = HEAD_TO_TOES_BUMP;
+  return metadata;
+}
+
+function checkoutFulfillmentMapping(base, bump = null) {
+  if (!bump) return base;
+  const entitlementKeys = [...new Set([...base.entitlementKeys, ...bump.entitlementKeys])];
+  return {
+    ...base,
+    entitlementKeys,
+    entitlementKey: entitlementKeys.join(','),
+  };
 }
 
 function response(body, status = 200, headers = {}) {
@@ -214,6 +231,11 @@ export async function handleCheckout(request, env, deps = {}) {
     const status = mapping.error === 'invalid_offer' ? 400 : 503;
     return response({ ok: false, error: mapping.error, missing: mapping.missing }, status);
   }
+  const bumpRequested = body && body.order_bump === HEAD_TO_TOES_BUMP;
+  const bumpMapping = bumpRequested ? resolveOffer(env, HEAD_TO_TOES_BUMP) : null;
+  if (bumpMapping && !bumpMapping.ok) {
+    return response({ ok: false, error: bumpMapping.error, missing: bumpMapping.missing }, 503);
+  }
   const readiness = await checkRuntimeReadiness(env, deps);
   if (!readiness.ok) return response({ ok: false, error: 'checkout_not_ready' }, 503);
   const proof = await qaProofCoupon(request, env);
@@ -235,10 +257,18 @@ export async function handleCheckout(request, env, deps = {}) {
   flowHash = await sha256Hex(token);
   const attribution = cleanAttribution(body.attribution);
   const metadata = { ...attribution, offer: offerKey, price_id: priceId, entitlement_key: entitlementKey, flow_hash: flowHash };
+  if (bumpMapping) {
+    metadata.order_bump = HEAD_TO_TOES_BUMP;
+    metadata.order_bump_price_id = bumpMapping.priceId;
+    metadata.order_bump_entitlement_key = bumpMapping.entitlementKey;
+  }
   const origin = new URL(request.url).origin;
   const params = {
     mode: offer.mode,
-    line_items: [{ price: priceId, quantity: 1 }],
+    line_items: [
+      { price: priceId, quantity: 1 },
+      ...(bumpMapping ? [{ price: bumpMapping.priceId, quantity: 1 }] : []),
+    ],
     metadata,
     customer_creation: 'always',
     success_url: `${origin}/offer?session_id={CHECKOUT_SESSION_ID}`,
@@ -540,7 +570,7 @@ function orderStatement(env, session, mapping, status, now) {
   ).bind(session.id, session.customer || null, session.payment_intent || null, session.subscription || null,
     session.metadata.offer, mapping.priceId, mapping.entitlementKey, session.amount_total || null,
     session.customer_details && session.customer_details.email || null, status,
-    JSON.stringify(cleanAttribution(session.metadata)), session.metadata.root_session_id || session.id,
+    JSON.stringify(cleanOrderMetadata(session.metadata)), session.metadata.root_session_id || session.id,
     session.metadata.parent_session_id || null, session.metadata.flow_hash || null, now.toISOString());
 }
 
@@ -616,14 +646,15 @@ async function advanceFlowAfterGrant(env, session, now) {
   const email = session.customer_details && session.customer_details.email || null;
   let changed;
   if (metadata.offer === 'bundle') {
+    const next = metadata.order_bump === HEAD_TO_TOES_BUMP ? 'lifetime' : 'head_to_toes';
     changed = await env.DB.prepare(
       `UPDATE checkout_flows SET customer_id = ?2, email = ?3,
-        authorized_session_id = ?4, current_offer = 'head_to_toes', status = 'offer_ready',
+        authorized_session_id = ?4, current_offer = ?5, status = 'offer_ready',
         pending_session_id = NULL, pending_checkout_url = NULL, version = version + 1,
-        updated_at = ?5
+        updated_at = ?6
        WHERE flow_hash = ?1 AND root_session_id = ?4 AND status = 'front_checkout'
        RETURNING flow_hash`
-    ).bind(flowHash, session.customer || null, email, session.id, now.toISOString()).first();
+    ).bind(flowHash, session.customer || null, email, session.id, next, now.toISOString()).first();
   } else {
     const next = NEXT_OFFER[metadata.offer];
     changed = await env.DB.prepare(
@@ -718,16 +749,29 @@ export async function handleWebhook(request, env, deps = {}) {
       if (session.metadata.price_id !== mapping.priceId || session.metadata.entitlement_key !== mapping.entitlementKey) {
         throw new Error('checkout metadata does not match configured offer mapping');
       }
+      let fulfillmentMapping = mapping;
+      if (session.metadata.order_bump) {
+        if (offerKey !== 'bundle' || session.metadata.order_bump !== HEAD_TO_TOES_BUMP) {
+          throw new Error('checkout metadata contains an unsupported order bump');
+        }
+        const bumpMapping = resolveOffer(env, HEAD_TO_TOES_BUMP);
+        if (!bumpMapping.ok
+          || session.metadata.order_bump_price_id !== bumpMapping.priceId
+          || session.metadata.order_bump_entitlement_key !== bumpMapping.entitlementKey) {
+          throw new Error('checkout metadata does not match configured order bump mapping');
+        }
+        fulfillmentMapping = checkoutFulfillmentMapping(mapping, bumpMapping);
+      }
 
       const failed = event.type === 'checkout.session.async_payment_failed' || event.type === 'checkout.session.expired';
       const paid = event.type === 'checkout.session.async_payment_succeeded'
         || ['paid', 'no_payment_required'].includes(session.payment_status);
       const orderStatus = failed ? 'failed' : paid ? 'paid' : 'pending';
-      await orderStatement(env, session, mapping, orderStatus, now).run();
+      await orderStatement(env, session, fulfillmentMapping, orderStatus, now).run();
       if (failed) await releaseFailedCheckout(env, session, clock(deps));
       if (paid && !failed) {
         if (await flowCanFulfill(env, session)) {
-          await processEntitlementOperation(env, session, mapping, deps);
+          await processEntitlementOperation(env, session, fulfillmentMapping, deps);
           await advanceFlowAfterGrant(env, session, clock(deps));
         } else {
           await env.DB.prepare(
