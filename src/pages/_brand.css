@@ -1,0 +1,47 @@
+/* Measured from yogaforbjj.net on 2026-09-05. Shared by live and editor. */
+.editor-page{
+  --brand-red:#dc2626;
+  --brand-red-end:#e02020;
+  --brand-black:#0a0a0a;
+  --brand-charcoal:#0d0d10;
+  --brand-cream:#f3f4ee;
+}
+.editor-page .cta,
+.editor-page .editor-element:has(>button) >button:first-of-type{
+  background:linear-gradient(135deg,var(--brand-red),var(--brand-red-end));
+  color:#fff;border:1px solid var(--brand-red);border-radius:9999px;
+  font-family:Arial,Helvetica,sans-serif;font-weight:900;
+  padding:1rem 1.5rem;min-height:48px;white-space:normal;
+}
+.editor-page .editor-element:has(>button) >button+button{
+  background:transparent;color:inherit;border:1px solid currentColor;
+  border-radius:9999px;padding:.8rem 1.25rem;min-height:44px;
+}
+.editor-page .editor-element button:disabled{opacity:1}
+.editor-page .announce{background:var(--brand-red);color:#fff}
+.editor-page .editor-preset-bonus{border-left-color:var(--brand-red)}
+.editor-page .order-bump{border-color:var(--brand-red);background:rgba(220,38,38,.08)}
+/* Normal-flow sales sections default to the main site's light treatment.
+   An explicit owner background remains authoritative. */
+.editor-page[data-page-key^="offer-"] section:not([style*="background-color"]){
+  background:var(--brand-cream);color:var(--brand-black);
+  --editor-heading-color:#0a0a0a;--ink-2:rgba(10,10,10,.72);
+}
+.editor-page[data-page-key^="offer-"] .editor-element:has(>h1){
+  border-top:6px solid var(--brand-red);padding-top:1.5rem;
+}
+.editor-page[data-page-key^="offer-"] .editor-element h2{
+  border-left:4px solid var(--brand-red);padding-left:1rem;
+  font-size:clamp(1.4rem,2.6vw,2rem);line-height:1.15;
+}
+.editor-page[data-page-key^="offer-"] .editor-element:has(>ul){
+  background:var(--brand-charcoal);color:#fff;border-top:4px solid var(--brand-red);
+  border-radius:1rem;padding:1.25rem 1.5rem;margin-block:1.5rem;
+}
+.editor-page[data-page-key^="offer-"] .editor-element li{line-height:1.6}
+.editor-page[data-page-key^="offer-"] .editor-element img{width:100%;height:auto;border-radius:.75rem}
+.editor-page[data-page-key^="offer-"] .editor-element p{line-height:1.6}
+.editor-page[data-page-key^="offer-"]>footer{background:var(--brand-black);color:#fff;padding:1.5rem}
+.editor-page[data-page-key^="offer-"] .decline{color:inherit}
+.editor-page[data-page-key^="offer-"] .offer-price{font-weight:900}
+.editor-page .editor-element button:focus-visible,.editor-page a:focus-visible{outline:3px solid currentColor;outline-offset:4px}

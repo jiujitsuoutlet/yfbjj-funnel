@@ -18,6 +18,7 @@ import publishedHtml from './pages/published.html';
 import adminLoginHtml from './pages/admin-login.html';
 import adminEditorHtml from './pages/admin-editor.html';
 import baseCss from './pages/_base.css';
+import brandCss from './pages/_brand.css';
 import pageJs from './pages/_page.js';
 import adminCss from './pages/_admin.css';
 import adminJs from './pages/_admin.js';
@@ -198,7 +199,7 @@ function renderPage(template, env, variant, extra = {}) {
   // and $' as patterns, which silently mangles any injected JS or URL that
   // contains them (`return '$' + ...` became `return '` and broke the page).
   return template
-    .replace(/\{\{BASE_CSS\}\}/g, () => baseCss)
+    .replace(/\{\{BASE_CSS\}\}/g, () => baseCss + brandCss)
     .replace(/\{\{PAGE_JS\}\}/g, () => pageJs)
     .replace(/\{\{PAGE_CONFIG_JSON\}\}/g, () => payload);
 }
@@ -573,7 +574,7 @@ export default {
     if (path === '/admin') return new Response(null, { status: 302, headers: { ...SECURITY_HEADERS, 'Cache-Control': 'no-store', Location: '/admin/editor' } });
     if (path.startsWith('/admin/') || path.startsWith('/api/admin/')) {
       const editorResponse = await handleEditorRoute(request, env, {
-        loginHtml: adminLoginHtml, editorHtml: adminEditorHtml, css: adminCss, js: adminJs, loginJs: adminLoginJs,
+        loginHtml: adminLoginHtml, editorHtml: adminEditorHtml, css: adminCss + brandCss, js: adminJs, loginJs: adminLoginJs,
       });
       if (editorResponse) return editorResponse;
     }

@@ -142,6 +142,6 @@ export function renderContentDocument(document, { pageKey, env = {}, context = {
   return {
     title: escapeHtml(document.seo && document.seo.title || 'Yoga for BJJ'),
     description: escapeHtml(document.seo && document.seo.description || ''),
-    body: `<div class="editor-page" style="${variables}">${announcement ? `<div class="announce">${escapeHtml(announcement.content)}</div>` : ''}${allElements.some((element) => element.type === 'previewBanner') ? functionalMarkup({ type: 'previewBanner' }, pageKey, env, context) : ''}${sections}${allElements.some((element) => element.type === 'legalFooter') ? functionalMarkup({ type: 'legalFooter' }, pageKey, env, context) : ''}</div>`,
+    body: `<div class="editor-page" data-page-key="${escapeHtml(pageKey)}" style="${variables}">${announcement ? `<div class="announce">${escapeHtml(announcement.content)}</div>` : ''}${allElements.some((element) => element.type === 'previewBanner') ? functionalMarkup({ type: 'previewBanner' }, pageKey, env, context) : ''}${sections}${allElements.some((element) => element.type === 'legalFooter') ? functionalMarkup({ type: 'legalFooter' }, pageKey, env, context) : ''}</div>`,
   };
 }
