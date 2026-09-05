@@ -20,6 +20,9 @@ export function upgradeContentDocument(pageKey, input) {
     if (!existing.has(element.id)) insertBefore(target, before, [element]);
   };
   if (pageKey.startsWith('landing-')) {
+    for (const element of allElements(document)) {
+      if (element.type === 'backgroundImage' && element.flipHorizontal === undefined) element.flipHorizontal = true;
+    }
     if (!document.sections.some((section) => section.id === `${pageKey}-proof-section`)) {
       document.sections.push({
         id: `${pageKey}-proof-section`, name: 'Proof and introduction', preset: 'none',

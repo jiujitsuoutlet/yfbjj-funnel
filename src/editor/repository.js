@@ -67,7 +67,7 @@ export async function saveDraft(env, pageKey, document, expectedRevision, { acto
 export async function publishDraft(env, pageKey, expectedRevision, { actor = 'admin', imagePaths = [] } = {}) {
   if (!Number.isInteger(expectedRevision) || expectedRevision < 0) return { ok: false, status: 400, error: 'invalid_revision' };
   const row = await env.DB.prepare(
-    'SELECT draft_json, draft_revision FROM editor_pages WHERE page_key = ?1'
+    'SELECT draft_json, draft_revision, published_json, published_revision, published_at FROM editor_pages WHERE page_key = ?1'
   ).bind(pageKey).first();
   if (!row || row.draft_revision !== expectedRevision || !row.draft_json) return { ok: false, status: 409, error: 'stale_draft' };
   let document;
@@ -75,6 +75,15 @@ export async function publishDraft(env, pageKey, expectedRevision, { actor = 'ad
   const checked = validateContentDocument(document, { pageKey, imagePaths: await imagePathsFor(env, document, imagePaths) });
   if (!checked.ok) return { ok: false, status: 400, error: 'invalid_document', details: checked.errors };
   const value = JSON.stringify(checked.value);
+  if (row.published_revision === expectedRevision && row.published_json) {
+    try {
+      const published = upgradeContentDocument(pageKey, JSON.parse(row.published_json));
+      const publishedChecked = validateContentDocument(published, { pageKey, imagePaths: await imagePathsFor(env, published, imagePaths) });
+      if (publishedChecked.ok && JSON.stringify(publishedChecked.value) === value) {
+        return { ok: true, revision: expectedRevision, publishedAt: row.published_at };
+      }
+    } catch { /* continue through the guarded publish path */ }
+  }
   const now = iso();
   const versionId = crypto.randomUUID();
   const digest = await checksum(value);

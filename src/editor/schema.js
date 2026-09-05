@@ -57,7 +57,7 @@ const ELEMENT_KEYS = Object.freeze({
   legalFooter: new Set(['id', 'type', 'preset', 'style', 'hiddenOn']),
   previewBanner: new Set(['id', 'type', 'preset', 'style', 'hiddenOn']),
   announcement: new Set(['id', 'type', 'content', 'preset', 'style']),
-  backgroundImage: new Set(['id', 'type', 'src', 'alt', 'preset', 'style']),
+  backgroundImage: new Set(['id', 'type', 'src', 'alt', 'flipHorizontal', 'preset', 'style']),
 });
 
 function issue(errors, path, message) { errors.push(`${path}: ${message}`); }
@@ -140,6 +140,9 @@ function validateElement(element, path, errors, ids, manifest) {
     string(element.src, `${path}.src`, errors, 300);
     string(element.alt, `${path}.alt`, errors, 500, false);
     if (!manifest.has(element.src)) issue(errors, `${path}.src`, 'must be an approved image path');
+  }
+  if (element.type === 'backgroundImage' && typeof element.flipHorizontal !== 'boolean') {
+    issue(errors, `${path}.flipHorizontal`, 'must be true or false');
   }
   if (element.type === 'quote') {
     string(element.content, `${path}.content`, errors, 1000);
