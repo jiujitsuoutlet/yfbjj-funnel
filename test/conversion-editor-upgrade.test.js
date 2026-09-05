@@ -31,6 +31,7 @@ test('landing upgrade uses verified proof in a separate responsive section', () 
   assert.ok(types.includes('video'));
   assert.equal(document.sections.length, 2);
   assert.match(JSON.stringify(document), /15,000\+ BJJ athletes/);
+  assert.equal(elements(document).find((element) => element.type === 'backgroundImage').flipHorizontal, true);
   assert.equal(validateContentDocument(document, { pageKey: 'landing-a', imagePaths: EDITOR_IMAGE_PATHS }).ok, true);
 });
 
@@ -40,6 +41,7 @@ test('renderer exposes a locked course access action and approved video', () => 
   assert.match(granted.body, /data-access-link/);
   const landing = renderContentDocument(defaultDocument('landing-a'), { pageKey: 'landing-a' });
   assert.match(landing.body, /iframe\.mediadelivery\.net/);
+  assert.match(landing.body, /editor-background is-flipped/);
 });
 
 test('conversion and managed media migration is complete and constrained', () => {

@@ -15,7 +15,7 @@ class MemoryDB {
     const db = this;
     return { bind(...args) { return {
       async first() {
-        if (sql.includes('SELECT draft_json, draft_revision')) return { draft_json: db.page.draft_json, draft_revision: db.page.draft_revision };
+        if (sql.includes('SELECT draft_json, draft_revision')) return { draft_json: db.page.draft_json, draft_revision: db.page.draft_revision, published_json: db.page.published_json, published_revision: db.page.published_revision, published_at: db.page.published_at };
         if (sql.includes('SELECT draft_revision FROM')) return { draft_revision: db.page.draft_revision };
         if (sql.includes('SELECT published_revision')) return { published_revision: db.page.published_revision };
         if (sql.includes('SELECT published_json')) return { published_json: db.page.published_json };
@@ -76,6 +76,9 @@ test('publish validates revision and exposes only the published document', async
   assert.equal(db.versions.length, 1);
   assert.equal(db.audit.filter((row) => row.action === 'publish').length, 1);
   assert.deepEqual(await loadPublishedDocument({ DB: db }, 'thanks-granted'), document);
+  const retry = await publishDraft({ DB: db }, 'thanks-granted', 3);
+  assert.equal(retry.ok, true);
+  assert.equal(db.versions.length, 1);
 });
 
 test('public published lookup falls back safely on unavailable or malformed storage', async () => {

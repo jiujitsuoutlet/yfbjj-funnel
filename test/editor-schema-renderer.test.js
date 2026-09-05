@@ -83,7 +83,7 @@ test('landing defaults preserve the current offer copy before first publish', ()
     assert.match(serialized, /One payment\. Not a subscription\. Optional offers come next\./);
     const rendered = renderContentDocument(DEFAULT_PAGE_DOCUMENTS[pageKey], { pageKey, env: { BUNDLE_PRICE_CENTS: '1400' } }).body;
     assert.match(rendered, /Mobility for Brazilian Jiu-Jitsu athletes\./);
-    assert.match(rendered, /class="editor-background"/);
+    assert.match(rendered, /class="editor-background(?: is-flipped)?"/);
     assert.match(rendered, /\/img\/guard-pass-800\.webp/);
     assert.match(rendered, /class="announce"/);
     assert.match(rendered, /id="lead-form"/);

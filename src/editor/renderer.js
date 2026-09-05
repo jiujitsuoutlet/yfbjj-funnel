@@ -113,7 +113,7 @@ export function renderContentDocument(document, { pageKey, env = {}, context = {
   const announcement = allElements.find((element) => element.type === 'announcement');
   const background = (section) => section.rows.flatMap((row) => row.columns.flatMap((column) => column.elements)).find((element) => element.type === 'backgroundImage');
   const sections = document.sections.map((section) => `<section class="${classes(section, 'editor-section')}" data-editor-id="${escapeHtml(section.id)}"${styleAttribute(section.style, global)}>
-    ${background(section) ? `<picture class="editor-background"><img src="${escapeHtml(background(section).src)}" alt="${escapeHtml(background(section).alt)}" loading="eager" fetchpriority="high"></picture>` : ''}
+    ${background(section) ? `<picture class="editor-background${background(section).flipHorizontal ? ' is-flipped' : ''}"><img src="${escapeHtml(background(section).src)}" alt="${escapeHtml(background(section).alt)}" loading="eager" fetchpriority="high"></picture>` : ''}
     <div class="editor-section-inner">
       ${section.rows.map((row) => `<div class="${classes(row, 'editor-row')}" data-editor-id="${escapeHtml(row.id)}"${styleAttribute(row.style, global)}>
         ${row.columns.map((column) => `<div class="${classes(column, 'editor-column')}" data-editor-id="${escapeHtml(column.id)}" style="--editor-column:${Number(column.width)};${styleAttribute(column.style, global).replace(/^ style="|"$/g, '')}">
