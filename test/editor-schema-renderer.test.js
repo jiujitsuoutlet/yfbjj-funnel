@@ -3,8 +3,9 @@ import test from 'node:test';
 import { DEFAULT_PAGE_DOCUMENTS, defaultDocument } from '../src/editor/defaults.js';
 import { EDITOR_PAGE_KEYS, validateContentDocument } from '../src/editor/schema.js';
 import { renderContentDocument } from '../src/editor/renderer.js';
+import { EDITOR_IMAGE_PATHS } from '../src/editor/images.js';
 
-const images = ['/img/guard-pass-800.webp'];
+const images = EDITOR_IMAGE_PATHS;
 
 test('all fixed page defaults pass strict schema invariants', () => {
   for (const pageKey of EDITOR_PAGE_KEYS) {

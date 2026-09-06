@@ -46,6 +46,24 @@
 .editor-page[data-page-key^="offer-"] .offer-price{font-weight:900}
 .editor-page .editor-element button:focus-visible,.editor-page a:focus-visible{outline:3px solid currentColor;outline-offset:4px}
 
+/* Membership offer: lead with a real Yoga for BJJ training image while keeping
+   the sales page in a single, readable column on every viewport. */
+.editor-page[data-page-key="offer-two-month"] [data-editor-id="offer-two-membership-image"],
+.canvas .editor-page[data-page-key="offer-two-month"] [data-element="offer-two-membership-image"]{
+  margin:.75rem 0 1.25rem;padding:0;overflow:hidden;border-radius:1rem;
+  border-bottom:5px solid var(--brand-red);background:#fff;
+}
+.editor-page[data-page-key="offer-two-month"] [data-editor-id="offer-two-membership-image"] img,
+.canvas .editor-page[data-page-key="offer-two-month"] [data-element="offer-two-membership-image"] img{
+  display:block;width:100%;aspect-ratio:3/2;object-fit:cover;object-position:center;
+}
+@media(max-width:47.99rem){
+  .editor-page[data-page-key="offer-two-month"] [data-editor-id="offer-two-membership-image"],
+  .canvas .editor-page[data-page-key="offer-two-month"] [data-element="offer-two-membership-image"]{
+    margin:.5rem 0 1rem;border-radius:.75rem;
+  }
+}
+
 /* Lifetime offer: repeat the same server-owned action immediately after the
    opening paragraph, while retaining the canonical closing action below. */
 .editor-page[data-page-key="offer-lifetime"] .lifetime-hero-image{

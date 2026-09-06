@@ -35,6 +35,18 @@ test('landing upgrade uses verified proof in a separate responsive section', () 
   assert.equal(validateContentDocument(document, { pageKey: 'landing-a', imagePaths: EDITOR_IMAGE_PATHS }).ok, true);
 });
 
+test('membership offer upgrades with an editable Yoga for BJJ image', () => {
+  const source = defaultDocument('offer-two-month');
+  const membershipImages = elements(source).filter((element) => element.id === 'offer-two-membership-image');
+  assert.equal(membershipImages.length, 1);
+  assert.equal(membershipImages[0].src, '/img/membership-shoulders-1600-v1.webp');
+  assert.equal(validateContentDocument(source, { pageKey: 'offer-two-month', imagePaths: EDITOR_IMAGE_PATHS }).ok, true);
+  const rendered = renderContentDocument(source, { pageKey: 'offer-two-month' }).body;
+  assert.match(rendered, /membership-shoulders-1600-v1\.webp/);
+  assert.ok(rendered.indexOf('offer-two-heading') < rendered.indexOf('offer-two-membership-image'));
+  assert.ok(rendered.indexOf('offer-two-membership-image') < rendered.indexOf('offer-two-copy'));
+});
+
 test('renderer exposes a locked course access action and approved video', () => {
   const granted = renderContentDocument(defaultDocument('thanks-granted'), { pageKey: 'thanks-granted' });
   assert.match(granted.body, /href="https:\/\/yfbjj\.autocreator\.ai\/login"/);
