@@ -207,17 +207,22 @@
 
   /* ------------------------------------------------ post-purchase offers */
   (function () {
-    var accept = document.querySelector('[data-offer-accept]');
-    var skip = document.querySelector('[data-offer-skip]');
-    if (!accept || !skip) return;
+    var accepts = [].slice.call(document.querySelectorAll('[data-offer-accept]'));
+    var skips = [].slice.call(document.querySelectorAll('[data-offer-skip]'));
+    if (!accepts.length || !skips.length) return;
     var offer = String(CFG.PAGE_KEY || '').replace('offer-', '').replace(/-/g, '_');
     event('offer_view', offer, 'offer-page');
-    var status = document.querySelector('[data-offer-status]');
+    var statuses = [].slice.call(document.querySelectorAll('[data-offer-status]'));
+    function setDisabled(value) {
+      accepts.concat(skips).forEach(function (button) { button.disabled = value; });
+    }
+    function setStatus(message) {
+      statuses.forEach(function (status) { status.textContent = message; });
+    }
     function transition(path) {
       if (PREVIEW) return Promise.resolve(PREVIEW_PATH);
-      accept.disabled = true;
-      skip.disabled = true;
-      if (status) status.textContent = 'Opening the next step...';
+      setDisabled(true);
+      setStatus('Opening the next step...');
       return fetch(path, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -231,13 +236,16 @@
     }
     function go(path) {
       transition(path).then(function (url) { location.assign(url); }).catch(function () {
-        accept.disabled = false;
-        skip.disabled = false;
-        if (status) status.textContent = 'That step is not ready yet. Please try again.';
+        setDisabled(false);
+        setStatus('That step is not ready yet. Please try again.');
       });
     }
-    accept.addEventListener('click', function () { event('offer_accept', offer, 'offer-page'); go('/api/offer-checkout'); });
-    skip.addEventListener('click', function () { event('offer_decline', offer, 'offer-page'); go('/api/offer-skip'); });
+    accepts.forEach(function (accept) {
+      accept.addEventListener('click', function () { event('offer_accept', offer, 'offer-page'); go('/api/offer-checkout'); });
+    });
+    skips.forEach(function (skip) {
+      skip.addEventListener('click', function () { event('offer_decline', offer, 'offer-page'); go('/api/offer-skip'); });
+    });
   })();
 
   [].forEach.call(document.querySelectorAll('[data-access-link]'), function (link) {

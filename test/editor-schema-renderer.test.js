@@ -73,6 +73,25 @@ test('Certification editor page keeps the $297 price server-owned', () => {
   assert.doesNotMatch(rendered, /price_secret/);
 });
 
+test('lifetime page repeats one safe purchase action after its opening image copy', () => {
+  const document = defaultDocument('offer-lifetime');
+  const column = document.sections[0].rows[0].columns[0];
+  column.elements.splice(1, 0,
+    { id: 'lifetime-hero', type: 'image', src: '/img/lunge-wide-keep-reading-v1.webp', alt: 'Sebastian stretching' },
+    { id: 'lifetime-opening', type: 'text', content: 'Keep reading.' },
+    { id: 'lifetime-arrow', type: 'text', content: 'Choose below. ⬇️' },
+  );
+  const rendered = renderContentDocument(document, {
+    pageKey: 'offer-lifetime',
+  }).body;
+  assert.match(rendered, /lifetime-hero-image/);
+  assert.match(rendered, /data-commerce-repeat="lifetime-top"/);
+  assert.equal((rendered.match(/data-offer-accept/g) || []).length, 2);
+  assert.equal((rendered.match(/data-offer-skip/g) || []).length, 2);
+  assert.equal((rendered.match(/\$247 once/g) || []).length, 2);
+  assert.ok(rendered.indexOf('Choose below. ⬇️') < rendered.indexOf('data-commerce-repeat="lifetime-top"'));
+});
+
 test('landing defaults preserve the current offer copy before first publish', () => {
   for (const pageKey of ['landing-a', 'landing-b']) {
     const serialized = JSON.stringify(DEFAULT_PAGE_DOCUMENTS[pageKey]);

@@ -96,9 +96,17 @@ function functionalMarkup(element, pageKey, env, context) {
   return '';
 }
 
-function renderElement(element, pageKey, env, context, global) {
+function lifetimeQuickOfferMarkup(action, pageKey, env, context) {
+  if (!action || pageKey !== 'offer-lifetime') return '';
+  return `<div class="editor-element lifetime-quick-offer" data-commerce-repeat="lifetime-top">
+    <div class="lifetime-quick-price">${priceMarkup(pageKey, env, context)}</div>
+    ${functionalMarkup(action, pageKey, env, context)}
+  </div>`;
+}
+
+function renderElement(element, pageKey, env, context, global, lifetime = {}) {
   const attr = styleAttribute(element.style, global);
-  const cls = classes(element, 'editor-element');
+  const cls = `${classes(element, 'editor-element')}${element.id === lifetime.heroImageId ? ' lifetime-hero-image' : ''}`;
   let body = '';
   if (['checkoutForm', 'offerActions', 'price', 'accessLink', 'legalFooter', 'previewBanner'].includes(element.type)) {
     body = functionalMarkup(element, pageKey, env, context);
@@ -107,17 +115,33 @@ function renderElement(element, pageKey, env, context, global) {
     body = `<h${level}>${escapeHtml(element.content)}</h${level}>`;
   } else if (element.type === 'text') body = `<p>${escapeHtml(element.content)}</p>`;
   else if (element.type === 'list') body = `<ul>${element.items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
-  else if (element.type === 'image') body = `<img src="${escapeHtml(element.src)}" alt="${escapeHtml(element.alt)}" loading="lazy">`;
+  else if (element.type === 'image') body = `<img src="${escapeHtml(element.src)}" alt="${escapeHtml(element.alt)}" loading="${element.id === lifetime.heroImageId ? 'eager' : 'lazy'}"${element.id === lifetime.heroImageId ? ' fetchpriority="high"' : ''}>`;
   else if (element.type === 'quote') body = `<blockquote><p>${escapeHtml(element.content)}</p><cite>${escapeHtml(element.attribution)}</cite></blockquote>`;
   else if (element.type === 'video') body = `<div class="editor-video"><iframe src="${escapeHtml(element.src)}" title="${escapeHtml(element.title)}" loading="lazy" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
   else if (element.type === 'divider') body = '<hr>';
   else if (element.type === 'spacer') body = `<div aria-hidden="true" style="height:${Number(element.size)}px"></div>`;
-  return `<div class="${cls}" data-editor-id="${escapeHtml(element.id)}"${attr}>${body}</div>`;
+  const quickOffer = element.id === lifetime.afterId
+    ? lifetimeQuickOfferMarkup(lifetime.action, pageKey, env, context)
+    : '';
+  return `<div class="${cls}" data-editor-id="${escapeHtml(element.id)}"${attr}>${body}</div>${quickOffer}`;
 }
 
 export function renderContentDocument(document, { pageKey, env = {}, context = {} } = {}) {
   const global = document.globalStyles || {};
   const allElements = document.sections.flatMap((section) => section.rows.flatMap((row) => row.columns.flatMap((column) => column.elements)));
+  const heroImageIndex = pageKey === 'offer-lifetime' ? allElements.findIndex((element) => element.type === 'image') : -1;
+  const nextHeadingIndex = heroImageIndex >= 0
+    ? allElements.findIndex((element, index) => index > heroImageIndex && element.type === 'heading')
+    : -1;
+  const lifetimeIntro = heroImageIndex >= 0
+    ? allElements.slice(heroImageIndex + 1, nextHeadingIndex >= 0 ? nextHeadingIndex : undefined)
+    : [];
+  const lifetime = heroImageIndex >= 0 ? {
+    heroImageId: allElements[heroImageIndex].id,
+    afterId: [...lifetimeIntro].reverse().find((element) => element.type === 'text' && /⬇/.test(element.content || ''))?.id
+      || [...lifetimeIntro].reverse().find((element) => element.type === 'text')?.id,
+    action: allElements.find((element) => element.type === 'offerActions'),
+  } : {};
   const announcement = allElements.find((element) => element.type === 'announcement');
   const background = (section) => section.rows.flatMap((row) => row.columns.flatMap((column) => column.elements)).find((element) => element.type === 'backgroundImage');
   const sections = document.sections.map((section) => `<section class="${classes(section, 'editor-section')}" data-editor-id="${escapeHtml(section.id)}"${styleAttribute(section.style, global)}>
@@ -125,7 +149,7 @@ export function renderContentDocument(document, { pageKey, env = {}, context = {
     <div class="editor-section-inner">
       ${section.rows.map((row) => `<div class="${classes(row, 'editor-row')}" data-editor-id="${escapeHtml(row.id)}"${styleAttribute(row.style, global)}>
         ${row.columns.map((column) => `<div class="${classes(column, 'editor-column')}" data-editor-id="${escapeHtml(column.id)}" style="--editor-column:${Number(column.width)};${styleAttribute(column.style, global).replace(/^ style="|"$/g, '')}">
-          ${column.elements.filter((element) => !['announcement', 'backgroundImage', 'previewBanner', 'legalFooter'].includes(element.type)).map((element) => renderElement(element, pageKey, env, context, global)).join('')}
+          ${column.elements.filter((element) => !['announcement', 'backgroundImage', 'previewBanner', 'legalFooter'].includes(element.type)).map((element) => renderElement(element, pageKey, env, context, global, lifetime)).join('')}
         </div>`).join('')}
       </div>`).join('')}
     </div>

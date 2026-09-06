@@ -45,3 +45,83 @@
 .editor-page[data-page-key^="offer-"] .decline{color:inherit}
 .editor-page[data-page-key^="offer-"] .offer-price{font-weight:900}
 .editor-page .editor-element button:focus-visible,.editor-page a:focus-visible{outline:3px solid currentColor;outline-offset:4px}
+
+/* Lifetime offer: repeat the same server-owned action immediately after the
+   opening paragraph, while retaining the canonical closing action below. */
+.editor-page[data-page-key="offer-lifetime"] .lifetime-hero-image{
+  padding:0;margin:.5rem 0;overflow:hidden;border-radius:.75rem;
+}
+.editor-page[data-page-key="offer-lifetime"] .lifetime-hero-image img{
+  width:100%;height:auto;aspect-ratio:1600/672;object-fit:cover;
+}
+.editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer{
+  display:grid;grid-template-columns:1fr;
+  align-items:center;gap:1rem;margin:.5rem 0 2rem;padding:.8rem;
+  border:2px solid var(--brand-red);border-radius:.85rem;
+  background:rgba(255,255,255,.42);
+}
+.editor-page[data-page-key="offer-lifetime"] .lifetime-quick-price .offer-price{
+  margin:0;font-size:clamp(1.4rem,2.4vw,2rem);line-height:1;
+}
+.editor-page[data-page-key="offer-lifetime"] .lifetime-quick-price .dim{
+  margin:.35rem 0 0;font-size:.75rem;line-height:1.25;
+}
+.editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer .form-actions{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.55rem;
+}
+.editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer .decline,
+.editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer .editor-element button+button{
+  display:flex;align-items:center;justify-content:center;margin:0;min-height:48px;
+  text-decoration:none;
+}
+.editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer [data-offer-status]{
+  grid-column:1/-1;margin:0;text-align:center;
+}
+@media(min-width:48rem){
+  .editor-page[data-page-key="offer-lifetime"] .editor-column:has(>.lifetime-hero-image){display:block}
+  .editor-page[data-page-key="offer-lifetime"] .editor-section-inner{padding-top:1rem}
+  .editor-page[data-page-key="offer-lifetime"] .editor-element:has(>h1){padding-top:.75rem}
+  .editor-page[data-page-key="offer-lifetime"] .editor-element h1{margin:.25rem 0 .65rem}
+  .editor-page[data-page-key="offer-lifetime"] .lifetime-hero-image img{height:auto;max-height:none;max-width:56rem;margin:auto;object-fit:cover}
+  .editor-page[data-page-key="offer-lifetime"] .lifetime-hero-image~.editor-element:has(>p):has(~.lifetime-quick-offer){
+    margin:0!important;padding:.2rem .3rem;
+  }
+  .editor-page[data-page-key="offer-lifetime"] .lifetime-hero-image~.editor-element:has(>p):has(~.lifetime-quick-offer) p{
+    margin:.35rem 0;font-size:clamp(.9rem,1.35vw,1rem);line-height:1.3;
+  }
+  .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer{grid-template-columns:minmax(9rem,.3fr) minmax(0,1fr);margin:.35rem 0 1.25rem;gap:.65rem;padding:.65rem}
+  .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-price{display:block}
+  .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-price .dim{max-width:none;text-align:left}
+  .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer .cta{min-height:46px;padding:.75rem 1rem;font-size:.82rem}
+  .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer .decline{min-height:42px;padding:.55rem .7rem;font-size:.8rem}
+}
+.canvas .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer .decline{
+  background:transparent;color:var(--brand-black);border:1px solid currentColor;
+}
+@media(max-width:47.99rem){
+  .editor-page[data-page-key="offer-lifetime"] .editor-section-inner{padding:1rem .75rem}
+  .editor-page[data-page-key="offer-lifetime"] .editor-element:has(>h1){padding-top:.75rem}
+  .editor-page[data-page-key="offer-lifetime"] .editor-element h1{font-size:clamp(1.75rem,8vw,2.25rem);line-height:1.02;margin:.25rem 0}
+  .editor-page[data-page-key="offer-lifetime"] .lifetime-hero-image~.editor-element:has(>p):has(~.lifetime-quick-offer){margin:0!important;padding:.12rem .3rem}
+  .editor-page[data-page-key="offer-lifetime"] .lifetime-hero-image~.editor-element:has(>p):has(~.lifetime-quick-offer) p{margin:.18rem 0;font-size:.82rem;line-height:1.2}
+  .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer{grid-template-columns:1fr;gap:.5rem;margin:.35rem 0 1.25rem;padding:.65rem}
+  .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-price{display:flex;align-items:baseline;justify-content:space-between;gap:.5rem}
+  .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-price .dim{max-width:11rem;text-align:right}
+  .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer .form-actions{grid-template-columns:1fr;gap:.4rem}
+  .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer .cta{min-height:38px;padding:.5rem .8rem;font-size:.76rem}
+  .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer .decline{min-height:34px;padding:.35rem .65rem;font-size:.72rem}
+}
+/* The editor's device buttons resize its canvas, not the browser viewport. */
+.canvas.mobile .editor-page[data-page-key="offer-lifetime"] .editor-column:has(>.lifetime-hero-image){display:block}
+.canvas.mobile .editor-page[data-page-key="offer-lifetime"] .editor-section-inner{padding:1rem .75rem}
+.canvas.mobile .editor-page[data-page-key="offer-lifetime"] .editor-element:has(>h1){padding-top:.75rem}
+.canvas.mobile .editor-page[data-page-key="offer-lifetime"] .editor-element h1{font-size:2rem;line-height:1.02;margin:.25rem 0}
+.canvas.mobile .editor-page[data-page-key="offer-lifetime"] .lifetime-hero-image img{height:auto;max-height:none;object-fit:cover}
+.canvas.mobile .editor-page[data-page-key="offer-lifetime"] .lifetime-hero-image~.editor-element:has(>p):has(~.lifetime-quick-offer){margin:0!important;padding:.12rem .3rem}
+.canvas.mobile .editor-page[data-page-key="offer-lifetime"] .lifetime-hero-image~.editor-element:has(>p):has(~.lifetime-quick-offer) p{margin:.18rem 0;font-size:.82rem;line-height:1.2}
+.canvas.mobile .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer{grid-template-columns:1fr;gap:.5rem;margin:.35rem 0 1.25rem;padding:.65rem}
+.canvas.mobile .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-price{display:flex;align-items:baseline;justify-content:space-between;gap:.5rem}
+.canvas.mobile .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-price .dim{max-width:11rem;text-align:right}
+.canvas.mobile .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer .form-actions{grid-template-columns:1fr;gap:.4rem}
+.canvas.mobile .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer .cta{min-height:38px;padding:.5rem .8rem;font-size:.76rem}
+.canvas.mobile .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer .decline{min-height:34px;padding:.35rem .65rem;font-size:.72rem}
