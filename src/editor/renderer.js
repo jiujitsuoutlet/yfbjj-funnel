@@ -104,7 +104,15 @@ function lifetimeQuickOfferMarkup(action, pageKey, env, context) {
   </div>`;
 }
 
-function renderElement(element, pageKey, env, context, global, lifetime = {}) {
+function certificationQuickOfferMarkup(action, pageKey, env, context) {
+  if (!action || pageKey !== 'offer-certification') return '';
+  return `<div class="editor-element certification-quick-offer" data-commerce-repeat="certification-mid">
+    <div class="certification-quick-price">${priceMarkup(pageKey, env, context)}</div>
+    ${functionalMarkup(action, pageKey, env, context)}
+  </div>`;
+}
+
+function renderElement(element, pageKey, env, context, global, lifetime = {}, certification = {}) {
   const attr = styleAttribute(element.style, global);
   const cls = `${classes(element, 'editor-element')}${element.id === lifetime.heroImageId ? ' lifetime-hero-image' : ''}`;
   let body = '';
@@ -122,7 +130,9 @@ function renderElement(element, pageKey, env, context, global, lifetime = {}) {
   else if (element.type === 'spacer') body = `<div aria-hidden="true" style="height:${Number(element.size)}px"></div>`;
   const quickOffer = element.id === lifetime.afterId
     ? lifetimeQuickOfferMarkup(lifetime.action, pageKey, env, context)
-    : '';
+    : element.id === certification.afterId
+      ? certificationQuickOfferMarkup(certification.action, pageKey, env, context)
+      : '';
   return `<div class="${cls}" data-editor-id="${escapeHtml(element.id)}"${attr}>${body}</div>${quickOffer}`;
 }
 
@@ -142,6 +152,14 @@ export function renderContentDocument(document, { pageKey, env = {}, context = {
       || [...lifetimeIntro].reverse().find((element) => element.type === 'text')?.id,
     action: allElements.find((element) => element.type === 'offerActions'),
   } : {};
+  const certificationTarget = pageKey === 'offer-certification'
+    ? allElements.find((element) => ['heading', 'text'].includes(element.type)
+      && /grab\s+our\s+entire\s+3\s+part\s+instructor\s+certification\s+program\s+for\s+a\s+crazy\s+deal/i.test(element.content || ''))
+    : null;
+  const certification = certificationTarget ? {
+    afterId: certificationTarget.id,
+    action: allElements.find((element) => element.type === 'offerActions'),
+  } : {};
   const announcement = allElements.find((element) => element.type === 'announcement');
   const background = (section) => section.rows.flatMap((row) => row.columns.flatMap((column) => column.elements)).find((element) => element.type === 'backgroundImage');
   const sections = document.sections.map((section) => `<section class="${classes(section, 'editor-section')}" data-editor-id="${escapeHtml(section.id)}"${styleAttribute(section.style, global)}>
@@ -149,7 +167,7 @@ export function renderContentDocument(document, { pageKey, env = {}, context = {
     <div class="editor-section-inner">
       ${section.rows.map((row) => `<div class="${classes(row, 'editor-row')}" data-editor-id="${escapeHtml(row.id)}"${styleAttribute(row.style, global)}>
         ${row.columns.map((column) => `<div class="${classes(column, 'editor-column')}" data-editor-id="${escapeHtml(column.id)}" style="--editor-column:${Number(column.width)};${styleAttribute(column.style, global).replace(/^ style="|"$/g, '')}">
-          ${column.elements.filter((element) => !['announcement', 'backgroundImage', 'previewBanner', 'legalFooter'].includes(element.type)).map((element) => renderElement(element, pageKey, env, context, global, lifetime)).join('')}
+          ${column.elements.filter((element) => !['announcement', 'backgroundImage', 'previewBanner', 'legalFooter'].includes(element.type)).map((element) => renderElement(element, pageKey, env, context, global, lifetime, certification)).join('')}
         </div>`).join('')}
       </div>`).join('')}
     </div>

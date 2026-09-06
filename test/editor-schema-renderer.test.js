@@ -87,6 +87,26 @@ test('Certification editor page keeps the $297 price server-owned', () => {
   assert.doesNotMatch(rendered, /price_secret/);
 });
 
+test('certification page repeats its protected checkout actions after the mid-page deal heading', () => {
+  const document = defaultDocument('offer-certification');
+  const column = document.sections[0].rows[0].columns[0];
+  const priceIndex = column.elements.findIndex((element) => element.type === 'price');
+  column.elements.splice(priceIndex, 0, {
+    id: 'certification-mid-deal',
+    type: 'heading',
+    level: 2,
+    content: 'Grab Our Entire 3 Part Instructor Certification Program For A Crazy Deal...',
+  });
+  const rendered = renderContentDocument(document, { pageKey: 'offer-certification' }).body;
+  assert.equal((rendered.match(/data-offer-accept/g) || []).length, 2);
+  assert.equal((rendered.match(/data-offer-skip/g) || []).length, 2);
+  assert.equal((rendered.match(/\$297 once/g) || []).length, 2);
+  assert.ok(rendered.indexOf('Grab Our Entire 3 Part') < rendered.indexOf('data-commerce-repeat="certification-mid"'));
+  assert.ok(rendered.indexOf('data-commerce-repeat="certification-mid"') < rendered.lastIndexOf('data-offer-accept'));
+  const editor = fs.readFileSync(new URL('../src/pages/_admin.js', import.meta.url), 'utf8');
+  assert.match(editor, /data-commerce-repeat="certification-mid"/);
+});
+
 test('lifetime page repeats one safe purchase action after its opening image copy', () => {
   const document = defaultDocument('offer-lifetime');
   const column = document.sections[0].rows[0].columns[0];
