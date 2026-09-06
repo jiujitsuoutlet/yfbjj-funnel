@@ -35,3 +35,13 @@ test('membership mobile layout neutralizes saved negative spacing', () => {
   assert.match(css, /\[data-editor-id="offer-two-heading"\][\s\S]*?margin-top:0!important;margin-bottom:0!important/);
   assert.match(css, /\[data-editor-id="offer-two-copy"\][\s\S]*?\[data-editor-id="offer-two-month-facts"\][\s\S]*?margin-top:0!important;margin-bottom:0!important/);
 });
+
+test('coded landing fallbacks do not restore known copy mistakes', () => {
+  const defaults = readFileSync(new URL('../src/editor/defaults.js', import.meta.url), 'utf8');
+  const landingA = readFileSync(new URL('../src/pages/landing-a.html', import.meta.url), 'utf8');
+  const landingB = readFileSync(new URL('../src/pages/landing-b.html', import.meta.url), 'utf8');
+  const brandPreview = readFileSync(new URL('../scripts/brand-preview.mjs', import.meta.url), 'utf8');
+  for (const source of [defaults, landingA, landingB, brandPreview]) {
+    assert.doesNotMatch(source, /\bIm too busy\b|but i need it|14 year anniversary/);
+  }
+});

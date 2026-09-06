@@ -48,7 +48,7 @@ function landingDocument(pageKey, headline) {
             'Touch your toes for the first time since high school with our Stiffest Legs program',
           ] }),
           element(`${pageKey}-bonus-transition`, 'text', { content: "And for those of you who think you're too busy to do any of this?" }),
-          element(`${pageKey}-bonus`, 'text', { preset: 'bonusLine', content: 'We are also giving you access to our "Im too busy for Yoga... but i need it!" program' }),
+          element(`${pageKey}-bonus`, 'text', { preset: 'bonusLine', content: 'We are also giving you access to our "I’m too busy for yoga... but I need it!" program' }),
           element(`${pageKey}-image`, 'backgroundImage', { src: '/img/guard-pass-800.webp', alt: "A black and white competition photo of one grappler passing another grappler's guard.", flipHorizontal: true }),
         ] },
         { id: `${pageKey}-offer`, name: 'Checkout', width: 4, elements: [

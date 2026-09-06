@@ -154,7 +154,8 @@ export function renderContentDocument(document, { pageKey, env = {}, context = {
   } : {};
   const certificationTarget = pageKey === 'offer-certification'
     ? allElements.find((element) => ['heading', 'text'].includes(element.type)
-      && /grab\s+our\s+entire\s+3\s+part\s+instructor\s+certification\s+program\s+for\s+a\s+crazy\s+deal/i.test(element.content || ''))
+      && (element.id === 'heading-cfbc444a'
+        || /grab\s+our\s+entire\s+3(?:\s|-)+part\s+instructor\s+certification\s+program\s+for\s+a\s+crazy\s+deal/i.test(element.content || '')))
     : null;
   const certification = certificationTarget ? {
     afterId: certificationTarget.id,

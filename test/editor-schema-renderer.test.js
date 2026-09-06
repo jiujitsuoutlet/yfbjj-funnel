@@ -92,16 +92,16 @@ test('certification page repeats its protected checkout actions after the mid-pa
   const column = document.sections[0].rows[0].columns[0];
   const priceIndex = column.elements.findIndex((element) => element.type === 'price');
   column.elements.splice(priceIndex, 0, {
-    id: 'certification-mid-deal',
+    id: 'heading-cfbc444a',
     type: 'heading',
     level: 2,
-    content: 'Grab Our Entire 3 Part Instructor Certification Program For A Crazy Deal...',
+    content: 'This editable heading no longer controls protected checkout placement.',
   });
   const rendered = renderContentDocument(document, { pageKey: 'offer-certification' }).body;
   assert.equal((rendered.match(/data-offer-accept/g) || []).length, 2);
   assert.equal((rendered.match(/data-offer-skip/g) || []).length, 2);
   assert.equal((rendered.match(/\$297 once/g) || []).length, 2);
-  assert.ok(rendered.indexOf('Grab Our Entire 3 Part') < rendered.indexOf('data-commerce-repeat="certification-mid"'));
+  assert.ok(rendered.indexOf('This editable heading') < rendered.indexOf('data-commerce-repeat="certification-mid"'));
   assert.ok(rendered.indexOf('data-commerce-repeat="certification-mid"') < rendered.lastIndexOf('data-offer-accept'));
   const editor = fs.readFileSync(new URL('../src/pages/_admin.js', import.meta.url), 'utf8');
   assert.match(editor, /data-commerce-repeat="certification-mid"/);
@@ -131,7 +131,7 @@ test('landing defaults preserve the current offer copy before first publish', ()
     const serialized = JSON.stringify(DEFAULT_PAGE_DOCUMENTS[pageKey]);
     assert.match(serialized, /Guard Flexibility program/);
     assert.match(serialized, /Stiffest Legs program/);
-    assert.match(serialized, /Im too busy for Yoga/);
+    assert.match(serialized, /I’m too busy for yoga/);
     assert.match(serialized, /8 mobility collections/);
     assert.match(serialized, /One payment\. Not a subscription\. Optional offers come next\./);
     const rendered = renderContentDocument(DEFAULT_PAGE_DOCUMENTS[pageKey], { pageKey, env: { BUNDLE_PRICE_CENTS: '1400', HEAD_TO_TOES_BUMP_PRICE_CENTS: '900' } }).body;

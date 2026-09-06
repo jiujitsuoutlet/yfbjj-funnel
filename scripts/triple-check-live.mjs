@@ -35,12 +35,21 @@ const port = server.address().port;
 await mkdir(outputDir, { recursive: true });
 
 const requirements = {
-  'landing-a': [/Think You're Too Busy\?/, /too busy for Yoga/, /\$14/, /\+ \$9/],
+  'landing-a': [/Think You're Too Busy\?/, /too busy for yoga/, /\$14/, /\+ \$9/],
   'offer-head-to-toes': [/Head to Toes/i, /\$29/],
   'offer-lifetime': [/\$247/],
   'offer-two-month': [/first 30 days/i, /\$8/, /\$19\.99/],
-  'offer-certification': [/\$1,100/, /\$297/, /3 Part Instructor Certification/i],
+  'offer-certification': [/\$1,100/, /\$297/, /3-Part Instructor Certification/i],
 };
+const copyMistakes = [
+  /\bour hips\b/, /income steam/i, /\bIm too busy\b/, /but i need it/, /14 year anniversary/i,
+  /world class coaches/i, /\bJiu Jitsu\b/, /do private lessons/i, /allow you to have the ability/i,
+  /Yoga For BJJ/, /program which is made/i, /programs for everywhere/i,
+];
+const copyIssues = new Map(pages.map(({ key, document }) => {
+  const content = JSON.stringify(document);
+  return [key, copyMistakes.filter((pattern) => pattern.test(content)).map(String)];
+}));
 const viewports = [{ width: 375, height: 812 }, { width: 768, height: 900 }, { width: 1440, height: 900 }];
 const browser = await chromium.launch({ args: ['--disable-features=OverlayScrollbar'] });
 const failures = [];
@@ -90,6 +99,7 @@ for (const { key, revision } of pages) {
       };
     });
     const errors = [...runtimeErrors];
+    if (copyIssues.get(key).length) errors.push(`copy: ${copyIssues.get(key).join(', ')}`);
     if (result.overflowX > 1) errors.push(`horizontal overflow ${result.overflowX}px`);
     if (result.brokenImages.length) errors.push(`${result.brokenImages.length} broken image(s)`);
     if (result.clipped.length) errors.push(`clipped: ${result.clipped.join(', ')}`);
