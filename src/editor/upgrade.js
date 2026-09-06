@@ -45,6 +45,17 @@ export function upgradeContentDocument(pageKey, input) {
       });
     }
   }
+  if (pageKey === 'offer-lifetime') {
+    const coachingImage = allElements(document).find((element) =>
+      element.id === 'image-6e4b5e79'
+      && element.type === 'image'
+      && element.src === '/media/60cdaeb9-fd0b-4427-bb8f-71c4da9f9cb5'
+    );
+    if (coachingImage) {
+      coachingImage.src = '/img/lifetime-twist-chair-1600-v1.webp';
+      coachingImage.alt = 'Sebastian Brosche practicing a standing twist in the Yoga for BJJ studio.';
+    }
+  }
   const offerFacts = {
     'offer-head-to-toes': ['3 guided videos', 'About 15 minutes per session', 'Gentle movements built for inflexible grapplers'],
     'offer-lifetime': ['The full Yoga for BJJ library', '90+ programs and 1,200+ videos', '7 coaches and new content added regularly'],
