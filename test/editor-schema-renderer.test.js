@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import fs from 'node:fs';
 import { DEFAULT_PAGE_DOCUMENTS, defaultDocument } from '../src/editor/defaults.js';
 import { EDITOR_PAGE_KEYS, validateContentDocument } from '../src/editor/schema.js';
 import { renderContentDocument } from '../src/editor/renderer.js';
@@ -30,6 +31,18 @@ test('schema rejects unsafe fields, blank layouts, bad columns, and duplicate ID
   const duplicate = defaultDocument('thanks-pending');
   duplicate.sections[0].rows[0].columns[0].elements[1].id = duplicate.sections[0].id;
   assert.match(validateContentDocument(duplicate, { pageKey: 'thanks-pending' }).errors.join(' '), /duplicate ID/);
+});
+
+test('editor and server both allow intentional negative spacing through -160px', () => {
+  const document = defaultDocument('offer-two-month');
+  const heading = document.sections[0].rows[0].columns[0].elements.find((element) => element.type === 'heading');
+  heading.style = { marginTop: -70, marginBottom: -10 };
+  assert.equal(validateContentDocument(document, { pageKey: 'offer-two-month', imagePaths: images }).ok, true);
+  heading.style.marginTop = -161;
+  assert.match(validateContentDocument(document, { pageKey: 'offer-two-month', imagePaths: images }).errors.join(' '), /from -160 to 160/);
+  const editor = fs.readFileSync(new URL('../src/pages/_admin.js', import.meta.url), 'utf8');
+  assert.match(editor, /Top spacing<input[^>]+min="-160" max="160"/);
+  assert.match(editor, /Bottom spacing<input[^>]+min="-160" max="160"/);
 });
 
 test('page-specific commerce components cannot be deleted, duplicated, or moved across page kinds', () => {

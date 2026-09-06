@@ -106,7 +106,7 @@ function validateStyle(style, path, errors) {
     else if (key === 'textTransform') enumValue(value, new Set(['none', 'uppercase']), `${path}.${key}`, errors);
     else if (key === 'color' || key === 'backgroundColor') enumValue(value, PALETTE, `${path}.${key}`, errors);
     else if (key.startsWith('padding')) number(value, `${path}.${key}`, errors, 0, 160);
-    else if (key.startsWith('margin')) number(value, `${path}.${key}`, errors, -40, 160);
+    else if (key.startsWith('margin')) number(value, `${path}.${key}`, errors, -160, 160);
     else if (key === 'gap') number(value, `${path}.${key}`, errors, 0, 96);
     else if (key === 'radius') number(value, `${path}.${key}`, errors, 0, 32);
     else if (key === 'maxWidth') number(value, `${path}.${key}`, errors, 280, 1440);
