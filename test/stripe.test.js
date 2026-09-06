@@ -151,7 +151,10 @@ test('checkout preserves first-party attribution in session and payment metadata
   assert.equal(created.metadata.entitlement_key, 'guard-retention');
   assert.match(created.metadata.flow_hash, /^[a-f0-9]{64}$/);
   assert.equal(created.customer_creation, 'always');
-  assert.deepEqual(created.payment_intent_data.metadata, created.metadata);
+  assert.deepEqual(created.payment_intent_data, {
+    metadata: created.metadata,
+    setup_future_usage: 'off_session',
+  });
   assert.match(response.headers.get('set-cookie'), /^yfbjj_flow=/);
   const flowInsert = DB.calls.findIndex(({ sql }) => sql.includes('INSERT INTO checkout_flows'));
   const rootUpdate = DB.calls.findIndex(({ sql }) => sql.includes('UPDATE checkout_flows SET root_session_id'));
@@ -183,7 +186,10 @@ test('checkout adds the server-owned Head to Toes order bump to the same payment
   assert.equal(created.metadata.order_bump, 'head_to_toes');
   assert.equal(created.metadata.order_bump_price_id, 'price_head_bump');
   assert.equal(created.metadata.order_bump_entitlement_key, 'head-slug');
-  assert.deepEqual(created.payment_intent_data.metadata, created.metadata);
+  assert.deepEqual(created.payment_intent_data, {
+    metadata: created.metadata,
+    setup_future_usage: 'off_session',
+  });
 });
 
 test('checkout ignores unsupported browser-supplied order bumps', async () => {

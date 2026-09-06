@@ -282,7 +282,7 @@ export async function handleCheckout(request, env, deps = {}) {
     customer_creation: 'always',
     success_url: `${origin}/offer?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/?checkout=cancelled`,
-    payment_intent_data: { metadata },
+    payment_intent_data: { metadata, setup_future_usage: 'off_session' },
   };
   if (proof.authorized) {
     params.discounts = [{ coupon: proof.couponId }];
@@ -358,12 +358,29 @@ async function authenticatedFlow(request, env, deps = {}, sourceSessionId = null
   }
   try {
     const stripe = deps.stripe || stripeClient(env);
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-    if (session.status !== 'complete' || !['paid', 'no_payment_required'].includes(session.payment_status)
-      || session.customer !== flow.customer_id) {
+    let purchase;
+    if (sessionId.startsWith('cs_')) {
+      purchase = await stripe.checkout.sessions.retrieve(sessionId);
+      if (purchase.status !== 'complete' || !['paid', 'no_payment_required'].includes(purchase.payment_status)) {
+        return { ok: false, status: 403, error: 'stripe_session_not_verified' };
+      }
+    } else if (sessionId.startsWith('pi_')) {
+      purchase = await stripe.paymentIntents.retrieve(sessionId);
+      if (purchase.status !== 'succeeded') {
+        return { ok: false, status: 403, error: 'stripe_session_not_verified' };
+      }
+    } else if (sessionId.startsWith('sub_')) {
+      purchase = await stripe.subscriptions.retrieve(sessionId);
+      if (!['active', 'trialing'].includes(purchase.status)) {
+        return { ok: false, status: 403, error: 'stripe_session_not_verified' };
+      }
+    } else {
       return { ok: false, status: 403, error: 'stripe_session_not_verified' };
     }
-    return { ok: true, flow, flowHash, session, stripe, order };
+    if (purchase.customer !== flow.customer_id) {
+      return { ok: false, status: 403, error: 'stripe_session_not_verified' };
+    }
+    return { ok: true, flow, flowHash, purchase, stripe, order };
   } catch {
     return { ok: false, status: 503, error: 'stripe_verification_failed' };
   }
@@ -435,6 +452,187 @@ function childCheckoutParams(env, mapping, offerKey, auth, request, deps) {
   return { params, metadata, trialEnd };
 }
 
+function stripeId(value) {
+  return typeof value === 'string' ? value : value && value.id;
+}
+
+async function reusablePaymentMethod(stripe, flow) {
+  const root = await stripe.checkout.sessions.retrieve(flow.root_session_id);
+  const paymentIntentId = stripeId(root.payment_intent);
+  if (!paymentIntentId || root.customer !== flow.customer_id) throw new Error('saved_payment_method_unavailable');
+  const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+  const paymentMethodId = stripeId(paymentIntent.payment_method);
+  if (paymentIntent.status !== 'succeeded' || paymentIntent.customer !== flow.customer_id
+    || paymentIntent.setup_future_usage !== 'off_session' || !paymentMethodId) {
+    throw new Error('saved_payment_method_unavailable');
+  }
+  return paymentMethodId;
+}
+
+function oneClickMetadata(auth, offerKey, mapping) {
+  return {
+    ...cleanAttribution(JSON.parse(auth.flow.attribution || '{}')),
+    offer: offerKey,
+    price_id: mapping.priceId,
+    entitlement_key: mapping.entitlementKey,
+    flow_hash: auth.flowHash,
+    root_session_id: auth.flow.root_session_id,
+    parent_session_id: auth.flow.authorized_session_id,
+    step: offerKey,
+    purchase_path: 'one_click',
+  };
+}
+
+function purchaseRecord(id, auth, mapping, metadata, fields = {}) {
+  return {
+    id,
+    customer: auth.flow.customer_id,
+    payment_intent: fields.paymentIntent || null,
+    subscription: fields.subscription || null,
+    amount_total: fields.amount,
+    customer_details: { email: auth.flow.email },
+    metadata,
+  };
+}
+
+async function createOneClickPurchase(auth, env, mapping, offerKey) {
+  const paymentMethod = await reusablePaymentMethod(auth.stripe, auth.flow);
+  const metadata = oneClickMetadata(auth, offerKey, mapping);
+  const idempotencyKey = `offer:${auth.flowHash}:${offerKey}:v${auth.flow.version}`;
+  if (mapping.offer.mode === 'payment') {
+    const price = await auth.stripe.prices.retrieve(mapping.priceId);
+    if (!price || price.active === false || price.type !== 'one_time'
+      || !Number.isInteger(price.unit_amount) || price.unit_amount < 50 || price.currency !== 'usd') {
+      throw new Error('offer_price_invalid');
+    }
+    const intent = await auth.stripe.paymentIntents.create({
+      amount: price.unit_amount,
+      currency: price.currency,
+      customer: auth.flow.customer_id,
+      payment_method: paymentMethod,
+      payment_method_types: ['card'],
+      confirm: true,
+      off_session: true,
+      error_on_requires_action: true,
+      metadata,
+    }, { idempotencyKey });
+    if (intent.status !== 'succeeded') throw new Error('one_click_payment_incomplete');
+    return {
+      purchase: purchaseRecord(intent.id, auth, mapping, metadata, {
+        paymentIntent: intent.id,
+        amount: intent.amount_received || intent.amount,
+      }),
+      trialEnd: null,
+    };
+  }
+
+  const subscription = await auth.stripe.subscriptions.create({
+    customer: auth.flow.customer_id,
+    default_payment_method: paymentMethod,
+    items: [{ price: mapping.priceId }],
+    add_invoice_items: [{
+      price_data: { currency: 'usd', product: env.STRIPE_PRODUCT_TWO_MONTH, unit_amount: 800 },
+      quantity: 1,
+    }],
+    trial_period_days: 30,
+    payment_behavior: 'error_if_incomplete',
+    metadata,
+    expand: ['latest_invoice.payment_intent'],
+  }, { idempotencyKey });
+  const invoice = subscription.latest_invoice;
+  const paymentIntentId = stripeId(invoice && invoice.payment_intent);
+  if (!['active', 'trialing'].includes(subscription.status) || !invoice || invoice.status !== 'paid'
+    || invoice.amount_paid !== 800) {
+    throw new Error('one_click_subscription_incomplete');
+  }
+  return {
+    purchase: purchaseRecord(subscription.id, auth, mapping, metadata, {
+      paymentIntent: paymentIntentId,
+      subscription: subscription.id,
+      amount: invoice.amount_paid,
+    }),
+    trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
+  };
+}
+
+async function completeOneClickPurchase(env, auth, mapping, offerKey, purchase, sourceSessionId, deps) {
+  const now = clock(deps);
+  await env.DB.prepare(
+    `INSERT OR IGNORE INTO offer_transitions
+     (flow_hash, source_session_id, offer, action, checkout_session_id, attribution, created_at)
+     VALUES (?1, ?2, ?3, 'accept', ?4, ?5, ?6)`
+  ).bind(auth.flowHash, sourceSessionId, offerKey, purchase.id, auth.flow.attribution || '{}', now.toISOString()).run();
+  await orderStatement(env, purchase, mapping, 'paid', now).run();
+  await processEntitlementOperation(env, purchase, mapping, deps);
+  await advanceFlowAfterGrant(env, purchase, clock(deps));
+  return `/offer?session_id=${encodeURIComponent(purchase.id)}`;
+}
+
+async function finalizeOneClickPurchase(env, auth, mapping, offerKey, purchase, trialEnd, sourceSessionId, deps) {
+  const now = clock(deps);
+  const changed = await env.DB.prepare(
+    `UPDATE checkout_flows SET status = 'checkout_pending', pending_session_id = ?2,
+     pending_checkout_url = NULL, two_month_trial_end = ?3, version = version + 1,
+     updated_at = ?4 WHERE flow_hash = ?1 AND status = 'offer_ready' AND current_offer = ?5
+     RETURNING flow_hash`
+  ).bind(auth.flowHash, purchase.id, trialEnd, now.toISOString(), offerKey).first();
+  if (!changed) throw new Error('concurrent_transition');
+  return completeOneClickPurchase(env, auth, mapping, offerKey, purchase, sourceSessionId, deps);
+}
+
+async function resumeOneClickPurchase(env, auth, mapping, offerKey, sourceSessionId, deps) {
+  const pendingId = auth.flow.pending_session_id;
+  let purchase;
+  if (pendingId && pendingId.startsWith('pi_')) {
+    const intent = await auth.stripe.paymentIntents.retrieve(pendingId);
+    if (intent.status !== 'succeeded' || intent.customer !== auth.flow.customer_id
+      || !intent.metadata || intent.metadata.flow_hash !== auth.flowHash
+      || intent.metadata.offer !== offerKey) throw new Error('pending_purchase_not_verified');
+    purchase = purchaseRecord(intent.id, auth, mapping, intent.metadata, {
+      paymentIntent: intent.id,
+      amount: intent.amount_received || intent.amount,
+    });
+  } else if (pendingId && pendingId.startsWith('sub_')) {
+    const subscription = await auth.stripe.subscriptions.retrieve(pendingId, {
+      expand: ['latest_invoice.payment_intent'],
+    });
+    const invoice = subscription.latest_invoice;
+    if (!['active', 'trialing'].includes(subscription.status)
+      || subscription.customer !== auth.flow.customer_id || !subscription.metadata
+      || subscription.metadata.flow_hash !== auth.flowHash || subscription.metadata.offer !== offerKey
+      || !invoice || invoice.status !== 'paid' || invoice.amount_paid !== 800) {
+      throw new Error('pending_purchase_not_verified');
+    }
+    purchase = purchaseRecord(subscription.id, auth, mapping, subscription.metadata, {
+      paymentIntent: stripeId(invoice.payment_intent),
+      subscription: subscription.id,
+      amount: invoice.amount_paid,
+    });
+  } else {
+    throw new Error('pending_purchase_not_verified');
+  }
+  return completeOneClickPurchase(env, auth, mapping, offerKey, purchase, sourceSessionId, deps);
+}
+
+async function createChildCheckout(env, auth, mapping, offerKey, request, deps, proof) {
+  const { params, trialEnd } = childCheckoutParams(env, mapping, offerKey, auth, request, deps);
+  if (proof && proof.authorized) {
+    params.discounts = [{ coupon: proof.couponId }];
+    params.metadata.qa_proof = 'true';
+    if (params.payment_intent_data) params.payment_intent_data.metadata.qa_proof = 'true';
+    if (params.subscription_data) {
+      params.subscription_data.metadata.qa_proof = 'true';
+      params.payment_method_collection = 'if_required';
+    }
+  } else if (mapping.offer.mode === 'subscription') {
+    params.payment_method_collection = 'if_required';
+  }
+  const session = await auth.stripe.checkout.sessions.create(params, {
+    idempotencyKey: `offer-checkout:${auth.flowHash}:${offerKey}:v${auth.flow.version}`,
+  });
+  return { session, trialEnd };
+}
+
 export async function handleOfferCheckout(request, env, deps = {}) {
   if (isPreviewMode(env)) return response({ ok: false, error: 'preview_locked' }, 423);
   if (!sameOrigin(request)) return response({ ok: false, error: 'origin_rejected' }, 403);
@@ -448,27 +646,39 @@ export async function handleOfferCheckout(request, env, deps = {}) {
   if (auth.flow.status === 'checkout_pending' && auth.flow.pending_checkout_url) {
     return response({ ok: true, url: auth.flow.pending_checkout_url, replay: true });
   }
-  if (auth.flow.status !== 'offer_ready') return response({ ok: false, error: 'step_not_ready' }, 409);
   const mapping = resolveOffer(env, offerKey);
   if (!mapping.ok) return response({ ok: false, error: mapping.error, missing: mapping.missing }, 503);
   const readiness = await checkRuntimeReadiness(env, deps);
   if (!readiness.ok) return response({ ok: false, error: 'checkout_not_ready' }, 503);
-  const { params, trialEnd } = childCheckoutParams(env, mapping, offerKey, auth, request, deps);
-  const proof = await qaProofCoupon(request, env);
-  if (proof.active && !proof.authorized) return response({ ok: false, error: 'qa_proof_required' }, 403);
-  if (proof.authorized) {
-    params.discounts = [{ coupon: proof.couponId }];
-    params.metadata.qa_proof = 'true';
-    if (params.payment_intent_data) params.payment_intent_data.metadata.qa_proof = 'true';
-    if (params.subscription_data) {
-      params.subscription_data.metadata.qa_proof = 'true';
-      params.payment_method_collection = 'if_required';
+  if (auth.flow.status === 'checkout_pending') {
+    try {
+      const url = await resumeOneClickPurchase(env, auth, mapping, offerKey, sourceSessionId, deps);
+      return response({ ok: true, url, one_click: true, recovered: true });
+    } catch (error) {
+      console.error('pending one-click recovery failed', { code: error && (error.code || error.message) });
+      return response({ ok: false, error: 'checkout_recovery_failed' }, 502);
     }
   }
+  if (auth.flow.status !== 'offer_ready') return response({ ok: false, error: 'step_not_ready' }, 409);
+  const proof = await qaProofCoupon(request, env);
+  if (proof.active && !proof.authorized) return response({ ok: false, error: 'qa_proof_required' }, 403);
   try {
-    const session = await auth.stripe.checkout.sessions.create(params, {
-      idempotencyKey: `offer:${auth.flowHash}:${offerKey}:v${auth.flow.version}`,
-    });
+    if (!proof.authorized) {
+      try {
+        const oneClick = await createOneClickPurchase(auth, env, mapping, offerKey);
+        const url = await finalizeOneClickPurchase(
+          env, auth, mapping, offerKey, oneClick.purchase, oneClick.trialEnd, sourceSessionId, deps,
+        );
+        return response({ ok: true, url, one_click: true, trial_end: oneClick.trialEnd });
+      } catch (error) {
+        const fallback = ['saved_payment_method_unavailable', 'authentication_required', 'card_declined',
+          'payment_intent_authentication_failure', 'one_click_payment_incomplete'].includes(
+          String(error && (error.code || error.message) || ''),
+        );
+        if (!fallback) throw error;
+      }
+    }
+    const { session, trialEnd } = await createChildCheckout(env, auth, mapping, offerKey, request, deps, proof);
     const changed = await env.DB.prepare(
       `UPDATE checkout_flows SET status = 'checkout_pending', pending_session_id = ?2,
        pending_checkout_url = ?3, two_month_trial_end = ?4, version = version + 1,
@@ -481,7 +691,7 @@ export async function handleOfferCheckout(request, env, deps = {}) {
        (flow_hash, source_session_id, offer, action, checkout_session_id, attribution, created_at)
        VALUES (?1, ?2, ?3, 'accept', ?4, ?5, ?6)`
     ).bind(auth.flowHash, sourceSessionId, offerKey, session.id, auth.flow.attribution || '{}', clock(deps).toISOString()).run();
-    return response({ ok: true, url: session.url, trial_end: trialEnd && trialEnd.toISOString() });
+    return response({ ok: true, url: session.url, one_click: false, trial_end: trialEnd && trialEnd.toISOString() });
   } catch (error) {
     console.error('offer checkout creation failed', { type: error && error.type, code: error && error.code });
     return response({ ok: false, error: 'checkout_failed' }, 502);

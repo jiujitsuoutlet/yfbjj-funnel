@@ -272,6 +272,15 @@ if (!stripeSource.includes("entitlement_key: entitlementKey")) {
 if (!pageJs.includes("? 'head_to_toes' : null") || !stripeSource.includes('order_bump_price_id')) {
   fail('the Head to Toes order bump is not connected to server-owned Stripe and fulfillment mappings.');
 } else pass('Head to Toes order bump uses server-owned Stripe and fulfillment mappings');
+if (!stripeSource.includes("setup_future_usage: 'off_session'")
+  || !stripeSource.includes('paymentIntents.create')
+  || !stripeSource.includes('subscriptions.create')
+  || !stripeSource.includes('error_on_requires_action: true')) {
+  fail('the initial Checkout and post-purchase sequence do not enforce saved-card one-click billing.');
+} else pass('initial Checkout saves the card and post-purchase accepts use guarded one-click billing');
+if (!pageJs.includes('Adding this to your order...')) {
+  fail('the offer page does not tell the buyer when a one-click charge is processing.');
+} else pass('offer accept buttons report one-click charge progress');
 
 /* 5e. every image a page references actually exists */
 // A renamed original or a skipped `npm run build:img` would otherwise ship a
