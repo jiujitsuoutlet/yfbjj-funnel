@@ -21,3 +21,17 @@ test('offer branding preserves locked commerce and editable text', () => {
   assert.match(result.body, /data-offer-skip/);
   assert.match(result.body, /\$247 once/);
 });
+
+test('published landing hero grows with edited copy instead of clipping it', () => {
+  const css = readFileSync(new URL('../src/pages/_base.css', import.meta.url), 'utf8');
+  assert.match(css, /\.editor-page \.editor-preset-landing-hero\{height:auto;min-height:calc\(100dvh - 8\.5rem\)/);
+  assert.match(css, /\.editor-page \.editor-preset-landing-hero\{height:auto;min-height:max\(40rem,calc\(100dvh - 6rem\)\)\}/);
+  assert.doesNotMatch(css, /\.editor-page \.editor-preset-landing-hero\{height:calc\(100dvh/);
+  assert.doesNotMatch(css, /\.editor-page \.editor-preset-landing-hero \.editor-section-inner\{height:100%/);
+});
+
+test('membership mobile layout neutralizes saved negative spacing', () => {
+  const css = readFileSync(new URL('../src/pages/_brand.css', import.meta.url), 'utf8');
+  assert.match(css, /\[data-editor-id="offer-two-heading"\][\s\S]*?margin-top:0!important;margin-bottom:0!important/);
+  assert.match(css, /\[data-editor-id="offer-two-copy"\][\s\S]*?\[data-editor-id="offer-two-month-facts"\][\s\S]*?margin-top:0!important;margin-bottom:0!important/);
+});

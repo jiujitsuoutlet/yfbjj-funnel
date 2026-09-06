@@ -62,6 +62,16 @@
   .canvas .editor-page[data-page-key="offer-two-month"] [data-element="offer-two-membership-image"]{
     margin:.5rem 0 1rem;border-radius:.75rem;
   }
+  .editor-page[data-page-key="offer-two-month"] [data-editor-id="offer-two-heading"],
+  .canvas.mobile .editor-page[data-page-key="offer-two-month"] [data-element="offer-two-heading"]{
+    margin-top:0!important;margin-bottom:0!important;
+  }
+  .editor-page[data-page-key="offer-two-month"] [data-editor-id="offer-two-copy"],
+  .canvas.mobile .editor-page[data-page-key="offer-two-month"] [data-element="offer-two-copy"],
+  .editor-page[data-page-key="offer-two-month"] [data-editor-id="offer-two-month-facts"],
+  .canvas.mobile .editor-page[data-page-key="offer-two-month"] [data-element="offer-two-month-facts"]{
+    margin-top:0!important;margin-bottom:0!important;
+  }
 }
 
 /* Lifetime offer: repeat the same server-owned action immediately after the
