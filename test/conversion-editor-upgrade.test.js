@@ -35,6 +35,38 @@ test('landing upgrade uses verified proof in a separate responsive section', () 
   assert.equal(validateContentDocument(document, { pageKey: 'landing-a', imagePaths: EDITOR_IMAGE_PATHS }).ok, true);
 });
 
+test('membership offer upgrades with an editable Yoga for BJJ image', () => {
+  const source = defaultDocument('offer-two-month');
+  const membershipImages = elements(source).filter((element) => element.id === 'offer-two-membership-image');
+  assert.equal(membershipImages.length, 1);
+  assert.equal(membershipImages[0].src, '/img/membership-shoulders-1600-v1.webp');
+  assert.equal(validateContentDocument(source, { pageKey: 'offer-two-month', imagePaths: EDITOR_IMAGE_PATHS }).ok, true);
+  const rendered = renderContentDocument(source, { pageKey: 'offer-two-month' }).body;
+  assert.match(rendered, /membership-shoulders-1600-v1\.webp/);
+  assert.ok(rendered.indexOf('offer-two-heading') < rendered.indexOf('offer-two-membership-image'));
+  assert.ok(rendered.indexOf('offer-two-membership-image') < rendered.indexOf('offer-two-copy'));
+});
+
+test('lifetime offer reserves the coaching photo for certification', () => {
+  const source = defaultDocument('offer-lifetime');
+  source.sections[0].rows[0].columns[0].elements.splice(1, 0, {
+    id: 'image-6e4b5e79',
+    type: 'image',
+    src: '/media/60cdaeb9-fd0b-4427-bb8f-71c4da9f9cb5',
+    alt: 'Sebastian coaching grapplers.',
+  });
+  const upgraded = upgradeContentDocument('offer-lifetime', source);
+  const replacement = elements(upgraded).find((element) => element.id === 'image-6e4b5e79');
+  assert.equal(replacement.src, '/img/lifetime-twist-chair-cta-v1.webp');
+  assert.match(replacement.alt, /Get Lifetime Access Now/);
+  assert.equal(validateContentDocument(upgraded, { pageKey: 'offer-lifetime', imagePaths: EDITOR_IMAGE_PATHS }).ok, true);
+
+  const previouslyUpgraded = structuredClone(upgraded);
+  elements(previouslyUpgraded).find((element) => element.id === 'image-6e4b5e79').src = '/img/lifetime-twist-chair-1600-v1.webp';
+  const currentReplacement = elements(upgradeContentDocument('offer-lifetime', previouslyUpgraded)).find((element) => element.id === 'image-6e4b5e79');
+  assert.equal(currentReplacement.src, '/img/lifetime-twist-chair-cta-v1.webp');
+});
+
 test('renderer exposes a locked course access action and approved video', () => {
   const granted = renderContentDocument(defaultDocument('thanks-granted'), { pageKey: 'thanks-granted' });
   assert.match(granted.body, /href="https:\/\/yfbjj\.autocreator\.ai\/login"/);

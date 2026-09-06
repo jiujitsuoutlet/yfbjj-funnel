@@ -503,7 +503,7 @@ main h2{font-size:clamp(2rem,5vw,3.25rem)}
 .editor-page .editor-element img{display:block;max-width:100%;height:auto}
 .editor-page blockquote{margin:1rem 0;padding:1rem 1.2rem;border-left:.25rem solid var(--editor-accent-color);background:rgba(255,255,255,.06)}.editor-page blockquote p{margin:0 0 .45rem;font-size:1.1rem}.editor-page blockquote cite{color:var(--ink-2);font-style:normal}.editor-page .editor-video{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:1rem;background:#000}.editor-page .editor-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}.editor-page .editor-access-link{display:inline-flex;margin:1rem 0;text-decoration:none}
 .editor-page .editor-element button{border-radius:var(--editor-button-radius)}
-.editor-page .editor-preset-landing-hero{height:calc(100dvh - 8.5rem);min-height:0;display:grid;align-items:center}
+.editor-page .editor-preset-landing-hero{height:auto;min-height:calc(100dvh - 8.5rem);display:grid;align-items:center}
 .editor-page .editor-preset-landing-hero{position:relative;isolation:isolate;overflow:hidden}.editor-page .editor-preset-landing-hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(10,10,10,.97),rgba(10,10,10,.84) 55%,rgba(10,10,10,.35))}.editor-page .editor-background{position:absolute;inset:0;z-index:-2}.editor-page .editor-background img{width:100%;height:100%;object-fit:cover;object-position:58% 45%}.editor-page .editor-background.is-flipped img{transform:scaleX(-1)}.editor-page .editor-preset-landing-hero .editor-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(18rem,1fr);align-items:center}.editor-page .editor-preset-landing-hero .editor-column:nth-child(2){padding:clamp(.9rem,2.5vh,1.35rem);background:rgba(10,10,10,.9);border:1px solid var(--line);border-radius:1rem;backdrop-filter:blur(8px)}
 .editor-page .editor-preset-hero-copy{max-width:43rem}
 .editor-page .editor-preset-identity{font-size:.75rem;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
@@ -518,10 +518,10 @@ main h2{font-size:clamp(2rem,5vw,3.25rem)}
 @media(max-width:47.99rem){
  .editor-page>.announce{padding:.2rem .75rem;font-size:.62rem}.editor-page>.preview-banner{position:static;padding:.18rem .75rem;font-size:.62rem}
  .editor-page .editor-row{display:block}.editor-page .editor-column+.editor-column{margin-top:var(--s5)}
- .editor-page .editor-preset-landing-hero{height:calc(100dvh - 6rem);min-height:40rem}
- .editor-page .editor-preset-landing-hero .editor-row{height:100%;display:grid;grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto;gap:.2rem}
+ .editor-page .editor-preset-landing-hero{height:auto;min-height:max(40rem,calc(100dvh - 6rem))}
+ .editor-page .editor-preset-landing-hero .editor-row{display:grid;grid-template-columns:1fr;gap:.2rem}
  .editor-page .editor-preset-landing-hero::after{background:linear-gradient(180deg,rgba(10,10,10,.72),rgba(10,10,10,.96) 52%,#0a0a0a)}
- .editor-page .editor-preset-landing-hero .editor-section-inner{height:100%;padding:.18rem .7rem}
+ .editor-page .editor-preset-landing-hero .editor-section-inner{height:auto;padding:.75rem .7rem}
  .editor-page .editor-preset-landing-hero .editor-element{padding:0}.editor-page .editor-preset-landing-hero .editor-column:nth-child(2){padding:.35rem .55rem;margin-top:.1rem}
  .editor-page .editor-preset-identity p{margin:0 0 .1rem;font-size:.58rem}.editor-page .editor-preset-landing-hero h1{margin:0 0 .15rem;font-size:clamp(1.35rem,7vw,1.9rem);line-height:.88}
  .editor-page .editor-preset-landing-hero .lede{margin:0 0 .2rem;font-size:.68rem;line-height:1.15}

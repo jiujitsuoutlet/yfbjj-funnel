@@ -18,6 +18,7 @@ import publishedHtml from './pages/published.html';
 import adminLoginHtml from './pages/admin-login.html';
 import adminEditorHtml from './pages/admin-editor.html';
 import baseCss from './pages/_base.css';
+import brandCss from './pages/_brand.css';
 import pageJs from './pages/_page.js';
 import adminCss from './pages/_admin.css';
 import adminJs from './pages/_admin.js';
@@ -127,31 +128,29 @@ function readCookie(request, name) {
   return null;
 }
 
-/** Unbiased coin. Math.random is fine here too, but this is free and auditable. */
-function coinFlip() {
-  const byte = new Uint8Array(1);
-  crypto.getRandomValues(byte);
-  return byte[0] < 128 ? 'a' : 'b';
-}
-
 /**
  * Decides the variant BEFORE anything renders, so there is no client-side
  * redirect and no flash of the wrong page.
  *   1. ?v=a / ?v=b wins, and never sets a cookie or counts a visit
- *   2. an existing cookie wins next, so a returning visitor is stable
- *   3. bots get A, uncounted
- *   4. everyone else is flipped, cookied and counted once
+ *   2. bots get A, uncounted
+ *   3. the public entry point uses the founder-approved A page
+ *   4. a stale B cookie is replaced so returning reviewers see the live page
+ *
+ * Variant B remains available through ?v=b for deliberate QA only.
  */
 function assignVariant(request) {
   const override = (new URL(request.url).searchParams.get('v') || '').toLowerCase();
   if (VARIANTS.includes(override)) return { variant: override, assigned: false, forced: true };
 
   const cookie = readCookie(request, VARIANT_COOKIE);
-  if (VARIANTS.includes(cookie)) return { variant: cookie, assigned: false, forced: false };
-
   if (isBot(request)) return { variant: 'a', assigned: false, forced: false, bot: true };
 
-  return { variant: coinFlip(), assigned: true, forced: false };
+  return {
+    variant: 'a',
+    assigned: !VARIANTS.includes(cookie),
+    refreshCookie: cookie !== 'a',
+    forced: false,
+  };
 }
 
 function variantCookie(variant) {
@@ -198,7 +197,7 @@ function renderPage(template, env, variant, extra = {}) {
   // and $' as patterns, which silently mangles any injected JS or URL that
   // contains them (`return '$' + ...` became `return '` and broke the page).
   return template
-    .replace(/\{\{BASE_CSS\}\}/g, () => baseCss)
+    .replace(/\{\{BASE_CSS\}\}/g, () => baseCss + brandCss)
     .replace(/\{\{PAGE_JS\}\}/g, () => pageJs)
     .replace(/\{\{PAGE_CONFIG_JSON\}\}/g, () => payload);
 }
@@ -233,13 +232,13 @@ function renderThanksPage(env, state) {
     },
     granted: {
       title: 'Access granted', kicker: 'Order confirmed', headline: "You're in.",
-      message: 'Payment is complete and your access grant is durably recorded.',
-      support: 'Sign in to Yoga for BJJ to use your access. If anything looks wrong, write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your Stripe receipt.',
+      message: 'Payment is complete, your access is active, and your one-click sign-in email is on its way.',
+      support: 'Check the email address used at checkout. The secure link works for 24 hours. If anything looks wrong, write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your Stripe receipt.',
     },
     activation: {
       title: 'Activate your access', kicker: 'Order confirmed', headline: 'Your access is assigned.',
-      message: 'Payment is complete. Your Yoga for BJJ access is assigned, but this account has not signed in yet.',
-      support: 'Open Yoga for BJJ and use the email from checkout to sign in. If you need help, write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your Stripe receipt.',
+      message: 'Payment is complete, your Yoga for BJJ access is assigned, and your one-click sign-in email is on its way.',
+      support: 'Check the email address used at checkout. The secure link works for 24 hours. If you need help, write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your Stripe receipt.',
     },
   }[state];
   return renderPage(thanksHtml, env, null)
@@ -385,7 +384,7 @@ async function checkLeadRateLimit(request, env, ctx) {
 /* ------------------------------------------------------------------ routes */
 
 async function handleLanding(request, env, ctx) {
-  const { variant, assigned } = assignVariant(request);
+  const { variant, assigned, refreshCookie } = assignVariant(request);
   const doc = variant === 'b' ? landingBHtml : landingAHtml;
   const edited = await renderPublishedPage(env, `landing-${variant}`, variant);
 
@@ -393,7 +392,7 @@ async function handleLanding(request, env, ctx) {
   // shared cache. This costs the landing page its edge caching: a deliberate
   // trade, and the reason to end the test rather than leave it running.
   const headers = { 'Cache-Control': 'private, no-store', Vary: 'Cookie' };
-  if (assigned) headers['Set-Cookie'] = variantCookie(variant);
+  if (assigned || refreshCookie) headers['Set-Cookie'] = variantCookie(variant);
 
   const response = html(edited || renderPage(doc, env, variant), 200, headers);
   if (assigned && !isNoD1Preview(env) && ctx && ctx.waitUntil) ctx.waitUntil(countVisit(env, variant));
@@ -573,7 +572,7 @@ export default {
     if (path === '/admin') return new Response(null, { status: 302, headers: { ...SECURITY_HEADERS, 'Cache-Control': 'no-store', Location: '/admin/editor' } });
     if (path.startsWith('/admin/') || path.startsWith('/api/admin/')) {
       const editorResponse = await handleEditorRoute(request, env, {
-        loginHtml: adminLoginHtml, editorHtml: adminEditorHtml, css: adminCss, js: adminJs, loginJs: adminLoginJs,
+        loginHtml: adminLoginHtml, editorHtml: adminEditorHtml, css: adminCss + brandCss, js: adminJs, loginJs: adminLoginJs,
       });
       if (editorResponse) return editorResponse;
     }

@@ -20,7 +20,8 @@
     "db:migrate:staging": "wrangler d1 migrations apply yfbjj_funnel_staging --env staging --remote",
     "build:tc": "node scripts/build-thrivecart.mjs",
     "build:img": "node scripts/build-images.mjs",
-    "visual:audit": "node scripts/visual-audit.mjs"
+    "visual:audit": "node scripts/visual-audit.mjs",
+    "triple-check:live": "node scripts/triple-check-live.mjs"
   },
   "keywords": [],
   "author": "",

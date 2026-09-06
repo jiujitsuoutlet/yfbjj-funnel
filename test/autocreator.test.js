@@ -26,18 +26,20 @@ test('bundle grant uses the documented envelope and requires exact read-back', a
     ok('members.findByEmail', { member: { id: 'member_1', last_sign_in_at: null } }),
     ok('members.grantBundleEntitlement', { already_existed: true }),
     ok('members.listBundleEntitlements', { items: [{ bundle_slug: 'guard-retention', status: 'active' }] }),
+    ok('members.invite', { sent: true }),
   ]);
   const client = createAutoCreatorClient(env, transport);
   const result = await client.grant({
     offer: 'bundle', entitlementKey: 'guard-retention', sessionId: 'cs_1', email: 'buyer@example.com',
   });
-  assert.deepEqual(result, { verified: true, activationNeeded: true });
+  assert.deepEqual(result, { verified: true, activationNeeded: true, emailSent: true });
   assert.equal(transport.calls[1].url, 'https://yfbjj.autocreator.ai/api/v1/tools/members.grantBundleEntitlement');
   assert.equal(transport.calls[0].init.headers.Authorization, 'Bearer fixture_key');
   assert.deepEqual(transport.calls[1].body, { args: {
     email: 'buyer@example.com', bundle_slug: 'guard-retention', notes: 'Stripe Checkout cs_1',
   } });
-  assert.equal(transport.calls.length, 3);
+  assert.deepEqual(transport.calls[3].body, { args: { email: 'buyer@example.com', next: '/dashboard' } });
+  assert.equal(transport.calls.length, 4);
 });
 
 test('Certification grants all three level bundles and requires every exact read-back', async () => {
@@ -52,16 +54,18 @@ test('Certification grants all three level bundles and requires every exact read
     ok('members.grantBundleEntitlement', { already_existed: false }),
     ok('members.grantBundleEntitlement', { already_existed: true }),
     ok('members.listBundleEntitlements', { items: entitlementKeys.map((bundle_slug) => ({ bundle_slug, status: 'active' })) }),
+    ok('members.invite', { sent: true }),
   ]);
   const result = await createAutoCreatorClient(env, transport).grant({
     offer: 'certification', entitlementKeys, sessionId: 'cs_cert', email: 'coach@example.com',
   });
-  assert.deepEqual(result, { verified: true, activationNeeded: false });
+  assert.deepEqual(result, { verified: true, activationNeeded: false, emailSent: true });
   assert.deepEqual(transport.calls.slice(1, 4).map(({ body }) => body.args), entitlementKeys.map((bundle_slug) => ({
     email: 'coach@example.com', bundle_slug, notes: 'Stripe Checkout cs_cert',
   })));
   assert.deepEqual(transport.calls[4].body, { args: { email: 'coach@example.com' } });
-  assert.equal(transport.calls.length, 5);
+  assert.deepEqual(transport.calls[5].body, { args: { email: 'coach@example.com', next: '/dashboard' } });
+  assert.equal(transport.calls.length, 6);
 });
 
 test('Certification fails closed when any level is missing from bundle read-back', async () => {
@@ -99,11 +103,12 @@ test('bundle fulfillment creates a brand-new buyer before granting access', asyn
     ok('members.findByEmail', { member: { id: 'member_new', last_sign_in_at: null } }),
     ok('members.grantBundleEntitlement', { already_existed: false }),
     ok('members.listBundleEntitlements', { items: [{ bundle_slug: 'guard-retention', status: 'active' }] }),
+    ok('members.invite', { sent: true }),
   ]);
   const result = await createAutoCreatorClient(env, transport).grant({
     offer: 'bundle', entitlementKey: 'guard-retention', sessionId: 'cs_new', email: 'new@example.com',
   });
-  assert.deepEqual(result, { verified: true, activationNeeded: true });
+  assert.deepEqual(result, { verified: true, activationNeeded: true, emailSent: true });
   assert.equal(transport.calls[1].url, 'https://yfbjj.autocreator.ai/api/v1/tools/members.create');
   assert.deepEqual(transport.calls[1].body, { args: { email: 'new@example.com' } });
 });
@@ -115,17 +120,36 @@ test('plan grant attaches Stripe references and proves the exact active price', 
     ok('members.findByEmail', { id: 'member_2' }),
     ok('subscriptions.getActive', { subscription: { stripe_price_id: 'price_plan', status: 'active' } }),
     ok('members.checkAccess', { access: { granted: true, neverSignedIn: false } }),
+    ok('members.invite', { sent: true }),
   ], calls);
   const result = await createAutoCreatorClient(env, transport).grant({
     offer: 'two_month', entitlementKey: 'price_plan', sessionId: 'cs_2', email: 'buyer@example.com',
     customerId: 'cus_1', subscriptionId: 'sub_1',
   });
-  assert.deepEqual(result, { verified: true, activationNeeded: false });
+  assert.deepEqual(result, { verified: true, activationNeeded: false, emailSent: true });
   assert.deepEqual(calls[0].body.args, {
     email: 'buyer@example.com', price_id: 'price_plan', status: 'active', create_if_missing: true,
     stripe_customer_id: 'cus_1', stripe_subscription_id: 'sub_1',
   });
   assert.deepEqual(calls[3].body, { args: { memberId: 'member_2' } });
+  assert.deepEqual(calls[4].body, { args: { email: 'buyer@example.com', next: '/dashboard' } });
+});
+
+test('access is never marked verified when the login email cannot be sent', async () => {
+  const transport = queued([
+    ok('members.findByEmail', { member: { id: 'member_4', last_sign_in_at: null } }),
+    ok('members.grantBundleEntitlement', { already_existed: false }),
+    ok('members.listBundleEntitlements', { items: [{ bundle_slug: 'guard-retention', status: 'active' }] }),
+    new Response('{}', { status: 500 }),
+  ]);
+  await assert.rejects(createAutoCreatorClient(env, transport).grant({
+    offer: 'bundle', entitlementKey: 'guard-retention', sessionId: 'cs_4', email: 'buyer@example.com',
+  }), (error) => {
+    assert.ok(error instanceof AutoCreatorError);
+    assert.equal(error.code, 'upstream_failure');
+    assert.equal(error.retryable, true);
+    return true;
+  });
 });
 
 test('transport, auth, rate, envelope, and read-back failures never verify a grant', async () => {

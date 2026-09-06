@@ -45,12 +45,36 @@ export function upgradeContentDocument(pageKey, input) {
       });
     }
   }
+  if (pageKey === 'offer-lifetime') {
+    const coachingImage = allElements(document).find((element) =>
+      element.id === 'image-6e4b5e79'
+      && element.type === 'image'
+      && [
+        '/media/60cdaeb9-fd0b-4427-bb8f-71c4da9f9cb5',
+        '/img/lifetime-twist-chair-1600-v1.webp',
+      ].includes(element.src)
+    );
+    if (coachingImage) {
+      coachingImage.src = '/img/lifetime-twist-chair-cta-v1.webp';
+      coachingImage.alt = 'Sebastian Brosche practicing a standing twist beside the words Get Lifetime Access Now.';
+    }
+  }
   const offerFacts = {
     'offer-head-to-toes': ['3 guided videos', 'About 15 minutes per session', 'Gentle movements built for inflexible grapplers'],
     'offer-lifetime': ['The full Yoga for BJJ library', '90+ programs and 1,200+ videos', '7 coaches and new content added regularly'],
     'offer-two-month': ['The full Yoga for BJJ library', '$8 for the first month', '$19.99 per month after that unless canceled', 'Canceling stops future charges. Course access remains.'],
     'offer-certification': ['Levels 1, 2 and 3', 'Class planning and sequencing', 'Communication, demonstration and BJJ-relevant anatomy'],
   };
+  if (pageKey === 'offer-two-month' && !existing.has('offer-two-membership-image')) {
+    const elements = primary(document);
+    const headingIndex = elements.findIndex((element) => element.type === 'heading');
+    elements.splice(headingIndex < 0 ? 0 : headingIndex + 1, 0, {
+      id: 'offer-two-membership-image',
+      type: 'image',
+      src: '/img/membership-shoulders-1600-v1.webp',
+      alt: 'Sebastian Brosche practicing downward-facing dog in Yoga for BJJ training gear.',
+    });
+  }
   if (offerFacts[pageKey]) add(primary(document), { id: `${pageKey}-facts`, type: 'list', preset: 'valueList', items: offerFacts[pageKey] }, 'price');
   if (pageKey === 'thanks-granted' || pageKey === 'thanks-activation') {
     add(primary(document), { id: `${pageKey}-access`, type: 'accessLink', label: 'Access your courses' });

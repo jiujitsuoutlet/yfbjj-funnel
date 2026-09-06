@@ -150,10 +150,11 @@ export function createAutoCreatorClient(env, deps = {}) {
           retryable: true, code: 'readback_failed',
         });
       }
+      await tool('members.invite', { email, next: '/dashboard' });
       // Bundle access is owned by the exact active entitlement. AutoCreator's
       // members.checkAccess tool reports subscription access only and returns
       // no_subscription for valid bundle-only buyers.
-      return { verified: true, activationNeeded: needsActivation(member) };
+      return { verified: true, activationNeeded: needsActivation(member), emailSent: true };
     }
 
     if (offer === 'lifetime' || offer === 'two_month') {
@@ -183,7 +184,8 @@ export function createAutoCreatorClient(env, deps = {}) {
           retryable: true, code: 'readback_failed',
         });
       }
-      return { verified: true, activationNeeded: needsActivation(access) };
+      await tool('members.invite', { email, next: '/dashboard' });
+      return { verified: true, activationNeeded: needsActivation(access), emailSent: true };
     }
     throw new AutoCreatorError('Unsupported fulfillment offer', { code: 'unsupported_offer' });
   }
