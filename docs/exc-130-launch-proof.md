@@ -91,3 +91,33 @@ The isolated AutoCreator bundle entitlements created for staging proof were
 soft-revoked after the evidence was recorded. The proof Monthly subscription
 was canceled immediately and cannot renew. Stripe and D1 proof records remain
 as the durable audit trail.
+
+## Buyer email and login proof refresh — 2026-09-06
+
+The current post-fulfillment login-email revision was deployed to isolated
+functional staging as Worker version `d3455be1-89e5-44dd-91b9-a1d5acdfb2c6`.
+Before deployment, all 72 automated tests and the functional-staging preflight
+passed.
+
+A disposable inbox completed the full one-time journey through Guard
+Retention, Head to Toes, Lifetime, and Certification. A temporary protected
+100-percent coupon made every Checkout total exactly zero; no card was entered
+and no money was collected. Stripe reported all four Sessions complete and
+paid. D1 recorded all four orders paid and granted, all four outbox operations
+succeeded on their first attempt, and the flow reached `status=complete`.
+
+AutoCreator exact read-back found the Guard and Head to Toes bundles, all three
+Certification level bundles, and the exact Lifetime price. Its production
+access gate returned `allowed=true` through the Guard bundle entitlement. Four
+separate emails from `Yoga For BJJ <noreply@m1.yogaforbjj.net>` reached the
+disposable inbox. The first 24-hour one-click link was opened in a real browser,
+landed on the authenticated dashboard, and opened the purchased Inverted Guard
+program with its five lessons visible.
+
+Cleanup was verified after the evidence was captured: all five bundle
+entitlements were soft-revoked, the disposable member was soft-deleted, the
+cardless Stripe customer and temporary coupon were deleted, the staging webhook
+was disabled, and the staging QA secret was removed. An ordinary staging
+checkout now returns HTTP 403 `qa_proof_required`. Production remained healthy
+with D1 and schema connected, and its four-event Stripe webhook remained
+enabled. The unused real-price production Checkout was expired unpaid.
