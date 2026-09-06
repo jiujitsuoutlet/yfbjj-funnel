@@ -52,6 +52,15 @@ test('POST /api/checkout is locked in preview mode without D1', async () => {
   assert.equal(response.headers.get('cache-control'), 'no-store');
 });
 
+test('the main funnel URL always opens the approved landing A page', async () => {
+  const response = await fetch(origin, {
+    headers: { cookie: 'yfbjj_v=b', 'user-agent': 'Yoga for BJJ review browser' },
+  });
+  assert.equal(response.status, 200);
+  assert.match(await response.text(), /Keep your guard\. Get your hips back\./);
+  assert.match(response.headers.get('set-cookie') || '', /yfbjj_v=a/);
+});
+
 for (const variant of ['a', 'b']) {
   test(`variant ${variant} preserves preview attribution and has usable legal links`, async () => {
     const browser = await chromium.launch({ headless: true });

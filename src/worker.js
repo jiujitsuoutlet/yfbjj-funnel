@@ -128,31 +128,29 @@ function readCookie(request, name) {
   return null;
 }
 
-/** Unbiased coin. Math.random is fine here too, but this is free and auditable. */
-function coinFlip() {
-  const byte = new Uint8Array(1);
-  crypto.getRandomValues(byte);
-  return byte[0] < 128 ? 'a' : 'b';
-}
-
 /**
  * Decides the variant BEFORE anything renders, so there is no client-side
  * redirect and no flash of the wrong page.
  *   1. ?v=a / ?v=b wins, and never sets a cookie or counts a visit
- *   2. an existing cookie wins next, so a returning visitor is stable
- *   3. bots get A, uncounted
- *   4. everyone else is flipped, cookied and counted once
+ *   2. bots get A, uncounted
+ *   3. the public entry point uses the founder-approved A page
+ *   4. a stale B cookie is replaced so returning reviewers see the live page
+ *
+ * Variant B remains available through ?v=b for deliberate QA only.
  */
 function assignVariant(request) {
   const override = (new URL(request.url).searchParams.get('v') || '').toLowerCase();
   if (VARIANTS.includes(override)) return { variant: override, assigned: false, forced: true };
 
   const cookie = readCookie(request, VARIANT_COOKIE);
-  if (VARIANTS.includes(cookie)) return { variant: cookie, assigned: false, forced: false };
-
   if (isBot(request)) return { variant: 'a', assigned: false, forced: false, bot: true };
 
-  return { variant: coinFlip(), assigned: true, forced: false };
+  return {
+    variant: 'a',
+    assigned: !VARIANTS.includes(cookie),
+    refreshCookie: cookie !== 'a',
+    forced: false,
+  };
 }
 
 function variantCookie(variant) {
@@ -386,7 +384,7 @@ async function checkLeadRateLimit(request, env, ctx) {
 /* ------------------------------------------------------------------ routes */
 
 async function handleLanding(request, env, ctx) {
-  const { variant, assigned } = assignVariant(request);
+  const { variant, assigned, refreshCookie } = assignVariant(request);
   const doc = variant === 'b' ? landingBHtml : landingAHtml;
   const edited = await renderPublishedPage(env, `landing-${variant}`, variant);
 
@@ -394,7 +392,7 @@ async function handleLanding(request, env, ctx) {
   // shared cache. This costs the landing page its edge caching: a deliberate
   // trade, and the reason to end the test rather than leave it running.
   const headers = { 'Cache-Control': 'private, no-store', Vary: 'Cookie' };
-  if (assigned) headers['Set-Cookie'] = variantCookie(variant);
+  if (assigned || refreshCookie) headers['Set-Cookie'] = variantCookie(variant);
 
   const response = html(edited || renderPage(doc, env, variant), 200, headers);
   if (assigned && !isNoD1Preview(env) && ctx && ctx.waitUntil) ctx.waitUntil(countVisit(env, variant));
