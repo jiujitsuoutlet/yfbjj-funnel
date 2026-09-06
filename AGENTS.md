@@ -110,8 +110,13 @@ idempotent. Durable `granted` state must be written before `/thanks` claims acce
 **The post-purchase sequence is server-owned.** Initial Checkout accepts Guard
 only. Child offers come from D1, never from browser-supplied offer data. Every
 mutation requires the opaque HttpOnly flow cookie, same Origin, the matching
-paid Stripe Session, and durable AutoCreator read-back. Each accept opens a
-fresh Stripe-hosted Checkout. A Stripe cancel is not a decline.
+paid Stripe purchase, and durable AutoCreator read-back. Initial Checkout saves
+the card for off-session reuse with Stripe's required consent notice. Each
+accept clearly discloses its charge and uses that saved card once. Hosted Stripe
+confirmation is a fallback only when the bank requires authentication or the
+original purchase lacks reusable-card consent. A Stripe cancel is not a decline.
+A charged one-click offer must remain recoverable through the D1 outbox without
+charging twice.
 
 **AutoCreator success requires read-back.** HTTP 200 with `ok:false`, a wrong
 tool name, invalid JSON, or a write without exact bundle/plan read-back is

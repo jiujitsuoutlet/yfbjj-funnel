@@ -11,6 +11,10 @@
   var VARIANT = CFG.VARIANT || '';
   var ATTRIBUTION_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'gclid'];
 
+  if (CFG.PENDING_RETRY_URL) {
+    window.setTimeout(function () { location.replace(CFG.PENDING_RETRY_URL); }, 2000);
+  }
+
   function deviceClass() {
     return innerWidth < 600 ? 'mobile' : innerWidth < 1024 ? 'tablet' : 'desktop';
   }
@@ -219,10 +223,10 @@
     function setStatus(message) {
       statuses.forEach(function (status) { status.textContent = message; });
     }
-    function transition(path) {
+    function transition(path, message) {
       if (PREVIEW) return Promise.resolve(PREVIEW_PATH);
       setDisabled(true);
-      setStatus('Opening the next step...');
+      setStatus(message);
       return fetch(path, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -234,17 +238,17 @@
         });
       });
     }
-    function go(path) {
-      transition(path).then(function (url) { location.assign(url); }).catch(function () {
+    function go(path, message) {
+      transition(path, message).then(function (url) { location.assign(url); }).catch(function () {
         setDisabled(false);
         setStatus('That step is not ready yet. Please try again.');
       });
     }
     accepts.forEach(function (accept) {
-      accept.addEventListener('click', function () { event('offer_accept', offer, 'offer-page'); go('/api/offer-checkout'); });
+      accept.addEventListener('click', function () { event('offer_accept', offer, 'offer-page'); go('/api/offer-checkout', 'Adding this to your order...'); });
     });
     skips.forEach(function (skip) {
-      skip.addEventListener('click', function () { event('offer_decline', offer, 'offer-page'); go('/api/offer-skip'); });
+      skip.addEventListener('click', function () { event('offer_decline', offer, 'offer-page'); go('/api/offer-skip', 'Loading the next offer...'); });
     });
   })();
 

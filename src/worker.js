@@ -213,7 +213,7 @@ async function renderPublishedPage(env, pageKey, variant, extra = {}, context = 
   return renderPage(template, env, variant, { PAGE_KEY: pageKey, ...extra });
 }
 
-function renderThanksPage(env, state) {
+function renderThanksPage(env, state, extra = {}) {
   const copy = {
     preview: {
       title: 'Checkout preview', kicker: 'Preview', headline: 'Checkout is locked.',
@@ -241,7 +241,7 @@ function renderThanksPage(env, state) {
       support: 'Check the email address used at checkout. The secure link works for 24 hours. If you need help, write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your Stripe receipt.',
     },
   }[state];
-  return renderPage(thanksHtml, env, null)
+  return renderPage(thanksHtml, env, null, extra)
     .replace(/\{\{THANKS_TITLE\}\}/g, () => copy.title)
     .replace(/\{\{THANKS_KICKER\}\}/g, () => copy.kicker)
     .replace(/\{\{THANKS_HEADLINE\}\}/g, () => copy.headline)
@@ -253,19 +253,19 @@ function offerCopy(offer, trialEnd) {
   if (offer === 'head_to_toes') return {
     title: 'Head to Toes', kicker: 'Optional next step', headline: 'Add Head to Toes.',
     message: 'Keep this separate from your Guard Retention purchase. Choose it only if you want it.',
-    price: '$29', terms: 'A new Stripe Checkout opens. Nothing is charged unless you confirm there.',
+    price: '$29', terms: 'Clicking the red button charges $29 to the card you used for your original order. Your bank may occasionally ask you to confirm.',
     accept: 'Add Head to Toes for $29', skip: 'No thanks. Show me the next option.',
   };
   if (offer === 'lifetime') return {
     title: 'Lifetime access', kicker: 'Optional next step', headline: 'Choose lifetime access.',
     message: 'This is a separate one-time purchase.',
-    price: '$247 once', terms: 'A new Stripe Checkout opens. Nothing is charged unless you confirm there.',
+    price: '$247 once', terms: 'Clicking the red button charges $247 to the card you used for your original order. Your bank may occasionally ask you to confirm.',
     accept: 'Choose lifetime for $247', skip: 'No thanks. Show me the lower-cost option.',
   };
   if (offer === 'certification') return {
     title: 'Instructor certification', kicker: 'Final optional offer', headline: 'Teach Yoga for BJJ.',
     message: 'Levels 1, 2 and 3. This is for coaches and prospective coaches who intend to teach this material to grapplers.',
-    price: '$297 once', terms: 'One payment. A new Stripe Checkout opens. Nothing is charged unless you confirm there.',
+    price: '$297 once', terms: 'Clicking the red button charges one payment of $297 to the card you used for your original order. Your bank may occasionally ask you to confirm.',
     accept: 'Get all three levels for $297', skip: 'No thanks. Finish my order.',
   };
   const starts = trialEnd
@@ -274,7 +274,7 @@ function offerCopy(offer, trialEnd) {
   return {
     title: '$8 first month', kicker: 'Optional lower-cost option', headline: 'Start your first month for $8.',
     message: 'Then it continues at $19.99 per month unless you cancel. Canceling stops future charges. Your course access remains.',
-    price: '$8 first month', terms: `Then $19.99 per month starting ${starts}, until canceled. Stripe shows the same terms before you confirm.`,
+    price: '$8 first month', terms: `Clicking the red button charges $8 to the card used for your original order. Then $19.99 per month starting ${starts}, until canceled. Your bank may occasionally ask you to confirm.`,
     accept: 'Start for $8', skip: 'No thanks. Show me the final option.',
   };
 }
@@ -593,7 +593,16 @@ export default {
       if (path === '/offer') {
         const state = await getOfferJourneyState(request, env);
         if (!state.ok) return json({ ok: false, error: state.error }, state.status || 403);
-        if (state.pending) return html(await renderPublishedPage(env, 'thanks-pending', null) || renderThanksPage(env, 'pending'), 202, BUYER_STATE_HEADERS);
+        if (state.pending) {
+          const retryUrl = `${url.pathname}${url.search}`;
+          const pendingHeaders = { ...BUYER_STATE_HEADERS, Refresh: `2; url=${retryUrl}` };
+          return html(
+            await renderPublishedPage(env, 'thanks-pending', null, { PENDING_RETRY_URL: retryUrl })
+              || renderThanksPage(env, 'pending', { PENDING_RETRY_URL: retryUrl }),
+            202,
+            pendingHeaders,
+          );
+        }
         if (state.complete) {
           const completeState = state.access === 'activation_needed' ? 'activation' : 'granted';
           return html(await renderPublishedPage(env, `thanks-${completeState}`, null) || renderThanksPage(env, completeState), 200, BUYER_STATE_HEADERS);

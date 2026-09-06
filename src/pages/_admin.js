@@ -40,11 +40,11 @@
   }
   function lifetimeQuickOfferPreview(action) {
     if (!action || pageKey !== 'offer-lifetime') return '';
-    return `<div class="editor-element lifetime-quick-offer" data-commerce-repeat="lifetime-top"><div class="lifetime-quick-price"><p class="offer-price">$247 once</p><p class="dim">One-time purchase. Confirm in Stripe Checkout.</p></div><div class="form-actions"><button class="cta" disabled>${esc(action.acceptText)}</button> <button class="decline" disabled>${esc(action.skipText)}</button></div></div>`;
+    return `<div class="editor-element lifetime-quick-offer" data-commerce-repeat="lifetime-top"><div class="lifetime-quick-price"><p class="offer-price">$247 once</p><p class="dim">Click the red button to charge $247 to the card used for the original order.</p></div><div class="form-actions"><button class="cta" disabled>${esc(action.acceptText)}</button> <button class="decline" disabled>${esc(action.skipText)}</button></div></div>`;
   }
   function certificationQuickOfferPreview(action) {
     if (!action || pageKey !== 'offer-certification') return '';
-    return `<div class="editor-element certification-quick-offer" data-commerce-repeat="certification-mid"><div class="certification-quick-price"><p class="offer-price">$297 once</p><p class="dim">All three certification levels. One-time purchase. Confirm in Stripe Checkout.</p></div><div class="form-actions"><button class="cta" disabled>${esc(action.acceptText)}</button> <button class="decline" disabled>${esc(action.skipText)}</button></div></div>`;
+    return `<div class="editor-element certification-quick-offer" data-commerce-repeat="certification-mid"><div class="certification-quick-price"><p class="offer-price">$297 once</p><p class="dim">All three certification levels. Click the red button to charge $297 to the card used for the original order.</p></div><div class="form-actions"><button class="cta" disabled>${esc(action.acceptText)}</button> <button class="decline" disabled>${esc(action.skipText)}</button></div></div>`;
   }
   function elementMarkup(element, lifetime = {}, certification = {}) {
     let body = '';

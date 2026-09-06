@@ -25,6 +25,7 @@ function flowDatabase(overrides = {}) {
   const state = {
     status: 'offer_ready', current_offer: 'head_to_toes', pending_session_id: null,
     pending_checkout_url: null, authorized_session_id: 'cs_parent', two_month_trial_end: null,
+    outboxStatus: null,
     ...overrides,
   };
   return {
@@ -47,9 +48,25 @@ function flowDatabase(overrides = {}) {
             flow_hash: flowHash, customer_id: 'cus_1', email: 'buyer@example.com',
           };
           if (sql.includes('FROM fulfillment_readiness')) return { schema_version: 1 };
+          if (sql.includes("UPDATE entitlement_outbox SET status = 'processing'")) {
+            if (!state.outboxStatus || ['pending', 'failed'].includes(state.outboxStatus)) {
+              state.outboxStatus = 'processing';
+              return { status: 'processing' };
+            }
+            return null;
+          }
+          if (sql.includes('SELECT status FROM entitlement_outbox')) {
+            return state.outboxStatus ? { status: state.outboxStatus } : null;
+          }
           if (sql.includes("UPDATE checkout_flows SET status = 'checkout_pending'")) {
             if (state.status !== 'offer_ready') return null;
             state.status = 'checkout_pending'; state.pending_session_id = values[1]; state.pending_checkout_url = values[2];
+            return { flow_hash: flowHash };
+          }
+          if (sql.includes('UPDATE checkout_flows SET authorized_session_id')) {
+            if (!['offer_ready', 'checkout_pending'].includes(state.status)) return null;
+            state.authorized_session_id = values[1]; state.current_offer = values[2]; state.status = values[3];
+            state.pending_session_id = null; state.pending_checkout_url = null;
             return { flow_hash: flowHash };
           }
           if (sql.includes('UPDATE checkout_flows SET current_offer')) {
@@ -60,7 +77,12 @@ function flowDatabase(overrides = {}) {
           }
           return null;
         },
-        run: async () => ({ success: true }),
+        run: async () => {
+          if (sql.includes('INSERT INTO entitlement_outbox') && !state.outboxStatus) state.outboxStatus = 'pending';
+          if (sql.includes("entitlement_outbox SET status = 'succeeded'")) state.outboxStatus = 'succeeded';
+          if (sql.includes("entitlement_outbox SET status = 'failed'")) state.outboxStatus = 'failed';
+          return { success: true };
+        },
       }; } };
     },
   };
@@ -75,10 +97,45 @@ function request(path, body = {}) {
 }
 
 function stripe(created) {
-  return { checkout: { sessions: {
-    retrieve: async () => ({ id: 'cs_parent', status: 'complete', payment_status: 'paid', customer: 'cus_1' }),
-    create: async (params, options) => { created.push({ params, options }); return { id: 'cs_child', url: 'https://checkout.test/child' }; },
-  } } };
+  return {
+    checkout: { sessions: {
+      retrieve: async (id) => id === 'cs_root'
+        ? { id, status: 'complete', payment_status: 'paid', customer: 'cus_1', payment_intent: 'pi_root' }
+        : { id, status: 'complete', payment_status: 'paid', customer: 'cus_1' },
+      create: async (params, options) => {
+        created.push({ kind: 'checkout', params, options });
+        return { id: 'cs_child', url: 'https://checkout.test/child' };
+      },
+    } },
+    prices: { retrieve: async (id) => ({ id, active: true, type: 'one_time', unit_amount: id === 'price_certification' ? 29700 : 2900, currency: 'usd' }) },
+    paymentIntents: {
+      retrieve: async (id) => {
+        if (id === 'pi_root') return { id, status: 'succeeded', customer: 'cus_1', payment_method: 'pm_saved', setup_future_usage: 'off_session' };
+        const record = created.find((item) => item.kind === 'payment_intent');
+        return { id, status: 'succeeded', customer: 'cus_1', amount: record && record.params.amount,
+          amount_received: record && record.params.amount, metadata: record && record.params.metadata };
+      },
+      create: async (params, options) => {
+        created.push({ kind: 'payment_intent', params, options });
+        return { id: 'pi_child', status: 'succeeded', customer: 'cus_1', amount: params.amount, amount_received: params.amount };
+      },
+    },
+    subscriptions: {
+      retrieve: async (id) => {
+        const record = created.find((item) => item.kind === 'subscription');
+        return { id, status: 'trialing', customer: 'cus_1', trial_end: 1800000000,
+          metadata: record && record.params.metadata,
+          latest_invoice: { status: 'paid', amount_paid: 800, payment_intent: { id: 'pi_invoice' } } };
+      },
+      create: async (params, options) => {
+        created.push({ kind: 'subscription', params, options });
+        return {
+          id: 'sub_child', status: 'trialing', customer: 'cus_1', trial_end: 1800000000,
+          latest_invoice: { status: 'paid', amount_paid: 800, payment_intent: { id: 'pi_invoice' } },
+        };
+      },
+    },
+  };
 }
 
 test('offer mutations reject missing flow cookie and cross-origin requests', async () => {
@@ -93,24 +150,31 @@ test('offer mutations reject missing flow cookie and cross-origin requests', asy
   assert.equal((await handleOfferCheckout(badOrigin, { ...baseEnv, DB }, { stripe: stripe([]), fulfillmentImplemented: true })).status, 403);
 });
 
-test('server derives the sole allowed child offer and accept replay returns one Checkout', async () => {
+test('server derives the sole allowed child offer and charges the saved card once', async () => {
   const DB = flowDatabase();
   const created = [];
-  const deps = { stripe: stripe(created), fulfillmentImplemented: true };
+  const deps = {
+    stripe: stripe(created), fulfillmentImplemented: true,
+    autocreator: { grant: async () => ({}) },
+  };
   const first = await handleOfferCheckout(request('/api/offer-checkout', {
     offer: 'lifetime', price_id: 'price_attacker', entitlement_key: 'attacker',
   }), { ...baseEnv, DB }, deps);
   assert.equal(first.status, 200);
   assert.equal(created.length, 1);
-  assert.equal(created[0].params.line_items[0].price, 'price_head');
+  assert.equal(created[0].kind, 'payment_intent');
+  assert.equal(created[0].params.amount, 2900);
   assert.equal(created[0].params.customer, 'cus_1');
+  assert.equal(created[0].params.payment_method, 'pm_saved');
+  assert.equal(created[0].params.confirm, true);
+  assert.equal(created[0].params.off_session, true);
+  assert.equal(created[0].params.error_on_requires_action, true);
   assert.equal(created[0].params.metadata.root_session_id, 'cs_root');
   assert.equal(created[0].params.metadata.parent_session_id, 'cs_parent');
   assert.equal(created[0].params.metadata.variant, 'b');
   assert.equal(created[0].options.idempotencyKey, `offer:${flowHash}:head_to_toes:v1`);
-  const replay = await handleOfferCheckout(request('/api/offer-checkout'), { ...baseEnv, DB }, deps);
-  assert.equal(replay.status, 200);
-  assert.equal((await replay.json()).replay, true);
+  assert.equal((await first.json()).one_click, true);
+  assert.equal(DB.state.current_offer, 'lifetime');
   assert.equal(created.length, 1);
 });
 
@@ -145,24 +209,25 @@ test('a live pending Checkout cannot be declined and ready declines follow the a
   assert.equal((await finished.json()).url, '/thanks?session_id=cs_parent');
 });
 
-test('monthly downsell charges $8 now and starts $19.99 billing 30 days after completed Checkout', async () => {
+test('monthly downsell charges $8 now and starts $19.99 billing after a 30 day one-click trial', async () => {
   const DB = flowDatabase({ current_offer: 'two_month' });
   const created = [];
   const response = await handleOfferCheckout(request('/api/offer-checkout'), { ...baseEnv, DB }, {
     stripe: stripe(created), fulfillmentImplemented: true,
+    autocreator: { grant: async () => ({}) },
   });
   assert.equal(response.status, 200);
   assert.equal(created.length, 1);
-  assert.equal(created[0].params.mode, 'subscription');
-  assert.deepEqual(created[0].params.line_items, [
-    { price_data: { currency: 'usd', product: 'prod_trial', unit_amount: 800 }, quantity: 1 },
-    { price: 'price_monthly', quantity: 1 },
-  ]);
-  assert.deepEqual(created[0].params.subscription_data, {
-    metadata: created[0].params.metadata,
-    trial_period_days: 30,
-  });
-  assert.equal((await response.json()).trial_end, null);
+  assert.equal(created[0].kind, 'subscription');
+  assert.deepEqual(created[0].params.items, [{ price: 'price_monthly' }]);
+  assert.deepEqual(created[0].params.add_invoice_items, [{
+    price_data: { currency: 'usd', product: 'prod_trial', unit_amount: 800 }, quantity: 1,
+  }]);
+  assert.equal(created[0].params.default_payment_method, 'pm_saved');
+  assert.equal(created[0].params.trial_period_days, 30);
+  assert.equal(created[0].params.payment_behavior, 'error_if_incomplete');
+  assert.equal((await response.json()).one_click, true);
+  assert.equal(DB.state.current_offer, 'certification');
 });
 
 test('isolated monthly proof can start without a card while production terms stay unchanged', async () => {
@@ -178,6 +243,7 @@ test('isolated monthly proof can start without a card while production terms sta
     QA_STRIPE_COUPON_ID: 'coupon-proof',
   }, { stripe: stripe(created), fulfillmentImplemented: true });
   assert.equal(response.status, 200);
+  assert.equal(created[0].kind, 'checkout');
   assert.deepEqual(created[0].params.discounts, [{ coupon: 'coupon-proof' }]);
   assert.equal(created[0].params.payment_method_collection, 'if_required');
   assert.equal(created[0].params.metadata.qa_proof, 'true');
@@ -189,13 +255,63 @@ test('Certification checkout is server-derived, one-time, and fixed to the verif
   const created = [];
   const response = await handleOfferCheckout(request('/api/offer-checkout', {
     offer: 'two_month', price_id: 'price_attacker', entitlement_key: 'attacker',
-  }), { ...baseEnv, DB }, { stripe: stripe(created), fulfillmentImplemented: true });
+  }), { ...baseEnv, DB }, {
+    stripe: stripe(created), fulfillmentImplemented: true,
+    autocreator: { grant: async () => ({}) },
+  });
   assert.equal(response.status, 200);
   assert.equal(created.length, 1);
-  assert.equal(created[0].params.mode, 'payment');
-  assert.equal(created[0].params.line_items[0].price, 'price_certification');
+  assert.equal(created[0].kind, 'payment_intent');
+  assert.equal(created[0].params.amount, 29700);
   assert.equal(created[0].params.metadata.offer, 'certification');
   assert.equal(created[0].params.metadata.entitlement_key,
     'level-1-instructors-course,level-2-instructor-course,level-3-instructors-course');
   assert.equal(created[0].options.idempotencyKey, `offer:${flowHash}:certification:v1`);
+});
+
+test('an older purchase without a reusable card falls back to hosted Checkout', async () => {
+  const DB = flowDatabase();
+  const created = [];
+  const client = stripe(created);
+  client.paymentIntents.retrieve = async () => ({
+    id: 'pi_root', status: 'succeeded', customer: 'cus_1', payment_method: 'pm_old', setup_future_usage: null,
+  });
+  const response = await handleOfferCheckout(request('/api/offer-checkout'), { ...baseEnv, DB }, {
+    stripe: client, fulfillmentImplemented: true,
+  });
+  assert.equal(response.status, 200);
+  assert.equal(created[0].kind, 'checkout');
+  assert.equal(created[0].params.customer, 'cus_1');
+  assert.equal(created[0].params.payment_method_collection, undefined);
+  assert.equal((await response.json()).one_click, false);
+});
+
+test('a saved-card charge resumes fulfillment without charging twice after a delivery failure', async () => {
+  const DB = flowDatabase();
+  const created = [];
+  const client = stripe(created);
+  let attempts = 0;
+  const deps = {
+    stripe: client,
+    fulfillmentImplemented: true,
+    autocreator: { grant: async () => {
+      attempts += 1;
+      if (attempts === 1) throw new Error('temporary_delivery_failure');
+      return {};
+    } },
+  };
+  const first = await handleOfferCheckout(request('/api/offer-checkout'), { ...baseEnv, DB }, deps);
+  assert.equal(first.status, 502);
+  assert.equal(DB.state.status, 'checkout_pending');
+  assert.equal(DB.state.pending_session_id, 'pi_child');
+  assert.equal(created.length, 1);
+
+  const retried = await handleOfferCheckout(request('/api/offer-checkout'), { ...baseEnv, DB }, deps);
+  assert.equal(retried.status, 200);
+  assert.deepEqual(await retried.json(), {
+    ok: true, url: '/offer?session_id=pi_child', one_click: true, recovered: true,
+  });
+  assert.equal(created.length, 1);
+  assert.equal(attempts, 2);
+  assert.equal(DB.state.current_offer, 'lifetime');
 });

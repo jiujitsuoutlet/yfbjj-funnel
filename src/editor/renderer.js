@@ -52,14 +52,14 @@ function priceMarkup(pageKey, env, context) {
     const cents = Number(env.BUNDLE_PRICE_CENTS || 1400);
     return `<p class="offer-price" data-price="bundle">$${(cents / 100).toFixed(cents % 100 ? 2 : 0)}</p>`;
   }
-  if (pageKey === 'offer-head-to-toes') return '<p class="offer-price">$29</p><p class="dim">One-time purchase. Confirm in Stripe Checkout.</p>';
-  if (pageKey === 'offer-lifetime') return '<p class="offer-price">$247 once</p><p class="dim">One-time purchase. Confirm in Stripe Checkout.</p>';
-  if (pageKey === 'offer-certification') return '<p class="offer-price">$297 once</p><p class="dim">All three certification levels. One-time purchase. Confirm in Stripe Checkout.</p>';
+  if (pageKey === 'offer-head-to-toes') return '<p class="offer-price">$29</p><p class="dim">Click the red button to charge $29 to the card used for your original order. Your bank may occasionally ask you to confirm.</p>';
+  if (pageKey === 'offer-lifetime') return '<p class="offer-price">$247 once</p><p class="dim">Click the red button to charge $247 to the card used for your original order. Your bank may occasionally ask you to confirm.</p>';
+  if (pageKey === 'offer-certification') return '<p class="offer-price">$297 once</p><p class="dim">All three certification levels. Click the red button to charge $297 to the card used for your original order. Your bank may occasionally ask you to confirm.</p>';
   if (pageKey === 'offer-two-month') {
     const starts = context.trialEnd
       ? `${new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' }).format(new Date(context.trialEnd))} UTC`
       : '30 days after you complete checkout';
-    return `<p class="offer-price">$8 first month</p><p class="dim">Then $19.99 per month starting ${escapeHtml(starts)}, until canceled. Canceling stops future charges. Course access remains.</p>`;
+    return `<p class="offer-price">$8 first month</p><p class="dim">Click the red button to charge $8 to the card used for your original order. Then $19.99 per month starting ${escapeHtml(starts)}, until canceled. Canceling stops future charges. Course access remains. Your bank may occasionally ask you to confirm.</p>`;
   }
   return '';
 }

@@ -8,7 +8,9 @@ const routes = await readFile(new URL('../src/editor/routes.js', import.meta.url
 test('buyer-specific offer and thanks responses are private and never shared cached', () => {
   assert.match(worker, /BUYER_STATE_HEADERS = \{ 'Cache-Control': 'private, no-store', Vary: 'Cookie' \}/);
   const stateResponses = worker.match(/html\([^\n]+BUYER_STATE_HEADERS\)/g) || [];
-  assert.ok(stateResponses.length >= 5, `expected buyer-state cache headers on all branches, found ${stateResponses.length}`);
+  assert.ok(stateResponses.length >= 4, `expected buyer-state cache headers on resolved branches, found ${stateResponses.length}`);
+  assert.match(worker, /pendingHeaders = \{ \.\.\.BUYER_STATE_HEADERS, Refresh:/);
+  assert.match(worker, /202,\s*pendingHeaders/);
 });
 
 test('published routing uses fixed server-derived page keys and trusted trial end', () => {

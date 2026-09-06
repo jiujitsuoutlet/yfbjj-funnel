@@ -4,9 +4,12 @@ Cloudflare Worker behind `welcome.yogaforbjj.net`. The landing page for the $14
 Guard Retention Bundle, post-purchase offer path, fulfillment, conversion
 measurement, and visual content editor.
 
-Checkout uses five verified Stripe Prices. The Worker captures
-leads, creates guarded Stripe-hosted Checkout Sessions, verifies webhook
-signatures, records orders in D1, and reports health.
+Checkout uses five verified Stripe Prices. The Worker captures leads, creates
+the guarded Stripe-hosted initial Checkout, saves the buyer's payment method
+with consent for the offer sequence, verifies webhook signatures, records
+orders in D1, and reports health. Post-purchase accepts charge the saved card
+in place. Hosted Stripe confirmation remains available when a bank requires
+authentication or the original purchase predates reusable-card consent.
 
 Checkout fails closed. A Checkout Session cannot be created
 unless `PREVIEW_MODE` is the exact string `false`, the selected offer has its
@@ -30,7 +33,7 @@ revocation proof plus both readiness flags.
 | `/api/event`           | POST   | rate-limited directional funnel events; never treated as payment truth |
 | `/api/stats`           | GET    | conversion, source, device, offer, revenue and A/B gate data. `Authorization: Bearer $STATS_SECRET` |
 | `/api/checkout`        | POST   | creates Guard Checkout only; every other offer key is rejected |
-| `/api/offer-checkout`  | POST   | accepts the sole D1-authorized next offer in a fresh hosted Checkout |
+| `/api/offer-checkout`  | POST   | accepts the sole D1-authorized next offer with the saved card; safely resumes delivery or falls back to hosted authentication when required |
 | `/api/offer-skip`      | POST   | records an explicit decline and advances the D1 state machine |
 | `/api/customer-portal` | POST   | creates a portal only after retrieving and verifying a completed Checkout Session |
 | `/api/stripe-webhook`  | POST   | verifies the raw signed body, then processes it through the D1 retry ledger |
@@ -123,9 +126,13 @@ D1 granted only after exact bundle or active-plan read-back. The post-purchase
 sequence is server-owned: Guard, optional Head to Toes, optional Lifetime, then
 the $8 first-month offer after a Lifetime decline, followed by the final optional Certification
 offer. D1 derives each step from an opaque HttpOnly
-flow-cookie hash. Every accept opens a new Stripe-hosted Checkout. Two-Month
-uses Stripe's completion-anchored 30-day period for the `$8 first month, then
-$19.99/month` terms shown before Checkout and in Stripe.
+flow-cookie hash. The initial Checkout stores the card for off-session use with
+Stripe's required notice. Every accept clearly states the amount and charges
+that saved card once without asking the buyer to re-enter it. Stripe-hosted
+confirmation remains a fallback for bank authentication or an older purchase
+that lacks reusable-card consent. The monthly option charges $8 immediately,
+then starts the $19.99/month subscription after a 30-day trial. Its billing
+terms remain visible beside the accept button.
 
 Paid events write through `entitlement_outbox`. A stable operation key guards
 the documented idempotent AutoCreator grant tools; no undocumented HTTP
