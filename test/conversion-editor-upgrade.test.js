@@ -57,9 +57,14 @@ test('lifetime offer reserves the coaching photo for certification', () => {
   });
   const upgraded = upgradeContentDocument('offer-lifetime', source);
   const replacement = elements(upgraded).find((element) => element.id === 'image-6e4b5e79');
-  assert.equal(replacement.src, '/img/lifetime-twist-chair-1600-v1.webp');
-  assert.match(replacement.alt, /standing twist/);
+  assert.equal(replacement.src, '/img/lifetime-twist-chair-cta-v1.webp');
+  assert.match(replacement.alt, /Get Lifetime Access Now/);
   assert.equal(validateContentDocument(upgraded, { pageKey: 'offer-lifetime', imagePaths: EDITOR_IMAGE_PATHS }).ok, true);
+
+  const previouslyUpgraded = structuredClone(upgraded);
+  elements(previouslyUpgraded).find((element) => element.id === 'image-6e4b5e79').src = '/img/lifetime-twist-chair-1600-v1.webp';
+  const currentReplacement = elements(upgradeContentDocument('offer-lifetime', previouslyUpgraded)).find((element) => element.id === 'image-6e4b5e79');
+  assert.equal(currentReplacement.src, '/img/lifetime-twist-chair-cta-v1.webp');
 });
 
 test('renderer exposes a locked course access action and approved video', () => {

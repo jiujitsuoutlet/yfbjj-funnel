@@ -49,11 +49,14 @@ export function upgradeContentDocument(pageKey, input) {
     const coachingImage = allElements(document).find((element) =>
       element.id === 'image-6e4b5e79'
       && element.type === 'image'
-      && element.src === '/media/60cdaeb9-fd0b-4427-bb8f-71c4da9f9cb5'
+      && [
+        '/media/60cdaeb9-fd0b-4427-bb8f-71c4da9f9cb5',
+        '/img/lifetime-twist-chair-1600-v1.webp',
+      ].includes(element.src)
     );
     if (coachingImage) {
-      coachingImage.src = '/img/lifetime-twist-chair-1600-v1.webp';
-      coachingImage.alt = 'Sebastian Brosche practicing a standing twist in the Yoga for BJJ studio.';
+      coachingImage.src = '/img/lifetime-twist-chair-cta-v1.webp';
+      coachingImage.alt = 'Sebastian Brosche practicing a standing twist beside the words Get Lifetime Access Now.';
     }
   }
   const offerFacts = {

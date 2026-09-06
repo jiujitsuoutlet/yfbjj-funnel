@@ -7,5 +7,6 @@ export const EDITOR_IMAGE_PATHS = Object.freeze([
   '/img/guard-pass-1600.jpg',
   '/img/lunge-wide-keep-reading-v1.webp',
   '/img/lifetime-twist-chair-1600-v1.webp',
+  '/img/lifetime-twist-chair-cta-v1.webp',
   '/img/membership-shoulders-1600-v1.webp',
 ]);
