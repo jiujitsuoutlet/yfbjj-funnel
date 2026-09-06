@@ -232,13 +232,13 @@ function renderThanksPage(env, state) {
     },
     granted: {
       title: 'Access granted', kicker: 'Order confirmed', headline: "You're in.",
-      message: 'Payment is complete and your access grant is durably recorded.',
-      support: 'Sign in to Yoga for BJJ to use your access. If anything looks wrong, write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your Stripe receipt.',
+      message: 'Payment is complete, your access is active, and your one-click sign-in email is on its way.',
+      support: 'Check the email address used at checkout. The secure link works for 24 hours. If anything looks wrong, write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your Stripe receipt.',
     },
     activation: {
       title: 'Activate your access', kicker: 'Order confirmed', headline: 'Your access is assigned.',
-      message: 'Payment is complete. Your Yoga for BJJ access is assigned, but this account has not signed in yet.',
-      support: 'Open Yoga for BJJ and use the email from checkout to sign in. If you need help, write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your Stripe receipt.',
+      message: 'Payment is complete, your Yoga for BJJ access is assigned, and your one-click sign-in email is on its way.',
+      support: 'Check the email address used at checkout. The secure link works for 24 hours. If you need help, write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your Stripe receipt.',
     },
   }[state];
   return renderPage(thanksHtml, env, null)

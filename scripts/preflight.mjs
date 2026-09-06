@@ -151,9 +151,10 @@ if (!flowMigration.includes('checkout_flows') || !flowMigration.includes('offer_
 if (!autoCreatorSource.includes('members.grantBundleEntitlement')
   || !autoCreatorSource.includes('members.setMembership')
   || !autoCreatorSource.includes('members.listBundleEntitlements')
-  || !autoCreatorSource.includes('subscriptions.getActive')) {
-  fail('authenticated AutoCreator grant and read-back client paths are incomplete.');
-} else pass('AutoCreator bundle and plan grant/read-back client paths present');
+  || !autoCreatorSource.includes('subscriptions.getActive')
+  || !autoCreatorSource.includes('members.invite')) {
+  fail('authenticated AutoCreator grant, read-back, and buyer-email client paths are incomplete.');
+} else pass('AutoCreator grant, exact read-back, and buyer login-email paths present');
 if (!stripeSource.includes("offerKey !== 'bundle'") || !stripeSource.includes('FLOW_COOKIE')) {
   fail('initial Checkout is not locked to Guard or the child sequence is not cookie-bound.');
 } else pass('initial Checkout is Guard-only and child sequence is cookie-bound');

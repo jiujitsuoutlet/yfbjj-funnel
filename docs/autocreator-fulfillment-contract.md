@@ -44,6 +44,14 @@ Confirmed paid-plan tools:
 - `members.findByEmail`, `members.checkAccess`, `subscriptions.getActive`,
   `members.syncStatus`, and `content.accessCheck`: required read-back surfaces.
 
+Confirmed buyer delivery tool:
+
+- `members.invite`: sends the checkout email address a one-click sign-in link
+  that lands on `/dashboard` and remains valid for 24 hours. Fulfillment calls
+  it only after exact entitlement read-back succeeds. If AutoCreator does not
+  accept the email send, the D1 outbox operation fails and remains retryable;
+  the order is never presented as completely fulfilled.
+
 No symmetric local paid-plan revoke tool is documented. The approved funnel
 policy does not require one: Stripe cancellation stops future billing and the
 buyer keeps course access. The Worker must never delete the member or revoke
