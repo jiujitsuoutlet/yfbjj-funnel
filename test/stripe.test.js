@@ -5,6 +5,7 @@ import {
   addCalendarMonths,
   getOrderFulfillmentState,
   handleCheckout,
+  handleQaProofLogin,
   handlePortal,
   handleWebhook,
   processEntitlementOperation,
@@ -110,11 +111,12 @@ test('functional staging requires its proof secret and applies only the configur
     QA_PROOF_SECRET: 'proof-secret',
     QA_STRIPE_COUPON_ID: 'coupon-proof',
   };
-  const requestFor = (proof) => new Request('https://staging.test/api/checkout', {
+  const requestFor = (proof, cookie = '') => new Request('https://staging.test/api/checkout', {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
       ...(proof ? { 'x-yfbjj-qa-proof': proof } : {}),
+      ...(cookie ? { cookie } : {}),
     },
     body: JSON.stringify({ offer: 'bundle' }),
   });
@@ -129,6 +131,45 @@ test('functional staging requires its proof secret and applies only the configur
   assert.deepEqual(created.discounts, [{ coupon: 'coupon-proof' }]);
   assert.equal(created.metadata.qa_proof, 'true');
   assert.equal(created.payment_intent_data.metadata.qa_proof, 'true');
+
+  const login = await handleQaProofLogin(new Request('https://staging.test/qa', {
+    method: 'POST',
+    headers: { origin: 'https://staging.test', 'content-type': 'application/x-www-form-urlencoded' },
+    body: 'code=proof-secret',
+  }), proofEnv);
+  assert.equal(login.status, 303);
+  assert.equal(login.headers.get('location'), '/?qa=active');
+  const proofCookie = login.headers.get('set-cookie').split(';')[0];
+  assert.match(proofCookie, /^yfbjj_qa=[a-f0-9]{64}$/);
+  assert.equal(proofCookie.includes('proof-secret'), false);
+
+  created = undefined;
+  const cookieAllowed = await handleCheckout(requestFor(null, proofCookie), {
+    ...proofEnv,
+    DB: database(),
+  }, { stripe });
+  assert.equal(cookieAllowed.status, 200);
+  assert.deepEqual(created.discounts, [{ coupon: 'coupon-proof' }]);
+});
+
+test('QA proof login stays disabled outside functional staging and rejects bad codes', async () => {
+  const requestFor = (code) => new Request('https://staging.test/qa', {
+    method: 'POST',
+    headers: { origin: 'https://staging.test', 'content-type': 'application/x-www-form-urlencoded' },
+    body: `code=${encodeURIComponent(code)}`,
+  });
+  const disabled = await handleQaProofLogin(requestFor('proof-secret'), env);
+  assert.equal(disabled.status, 404);
+
+  const rejected = await handleQaProofLogin(requestFor('wrong-code'), {
+    ...env,
+    QA_PROOF_MODE: 'true',
+    QA_PROOF_SECRET: 'proof-secret',
+    QA_STRIPE_COUPON_ID: 'coupon-proof',
+  });
+  assert.equal(rejected.status, 303);
+  assert.equal(rejected.headers.get('location'), '/qa?error=invalid');
+  assert.equal(rejected.headers.get('set-cookie'), null);
 });
 
 test('checkout preserves first-party attribution in session and payment metadata', async () => {
@@ -391,6 +432,26 @@ test('authenticated unsupported events are acknowledged before readiness and D1'
   assert.equal(response.status, 200);
   assert.deepEqual(await body(response), { ok: true, ignored: true });
   assert.equal(DB.calls.length, 0);
+});
+
+test('functional staging acknowledges live production events without writing them to staging D1', async () => {
+  let prepared = false;
+  const response = await handleWebhook(new Request('https://staging.test/api/stripe-webhook', {
+    method: 'POST', headers: { 'stripe-signature': 'fixture' }, body: '{}',
+  }), {
+    ...env,
+    QA_PROOF_MODE: 'true',
+    DB: { prepare: () => { prepared = true; throw new Error('should not write'); } },
+  }, {
+    stripe: { webhooks: { constructEventAsync: async () => ({
+      id: 'evt_production',
+      type: 'checkout.session.completed',
+      data: { object: { metadata: { offer: 'bundle' } } },
+    }) } },
+  });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await body(response), { ok: true, ignored: true, reason: 'non_qa_event' });
+  assert.equal(prepared, false);
 });
 
 test('unpaid completion stays pending and async failure never grants access', async () => {
