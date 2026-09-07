@@ -41,6 +41,8 @@ const READINESS_SCHEMA_VERSION = 1;
 const PROCESSING_LEASE_MS = 5 * 60 * 1000;
 const FLOW_TTL_MS = 24 * 60 * 60 * 1000;
 const FLOW_COOKIE = 'yfbjj_flow';
+const QA_PROOF_COOKIE = 'yfbjj_qa';
+const QA_PROOF_TTL_SECONDS = 3 * 24 * 60 * 60;
 const HANDLED_STRIPE_EVENTS = new Set([
   'checkout.session.completed',
   'checkout.session.async_payment_succeeded',
@@ -143,6 +145,10 @@ function flowCookie(token) {
   return `${FLOW_COOKIE}=${token}; Path=/; Max-Age=${FLOW_TTL_MS / 1000}; HttpOnly; Secure; SameSite=Lax`;
 }
 
+function qaProofCookie(secretHash) {
+  return `${QA_PROOF_COOKIE}=${secretHash}; Path=/; Max-Age=${QA_PROOF_TTL_SECONDS}; HttpOnly; Secure; SameSite=Strict`;
+}
+
 function sameOrigin(request) {
   const origin = request.headers.get('origin');
   return origin === new URL(request.url).origin;
@@ -183,16 +189,51 @@ function clock(deps) {
   return deps.now ? new Date(deps.now()) : new Date();
 }
 
-async function qaProofCoupon(request, env) {
-  if (env.QA_PROOF_MODE !== 'true') return { active: false, authorized: false };
-  const supplied = request.headers.get('x-yfbjj-qa-proof') || '';
-  if (!supplied || !env.QA_PROOF_SECRET || !env.QA_STRIPE_COUPON_ID) {
-    return { active: true, authorized: false };
+export function qaProofEnabled(env) {
+  return env.QA_PROOF_MODE === 'true';
+}
+
+export async function handleQaProofLogin(request, env) {
+  if (!qaProofEnabled(env)) return response({ ok: false, error: 'not_found' }, 404);
+  if (!sameOrigin(request)) return response({ ok: false, error: 'origin_rejected' }, 403);
+  if (!env.QA_PROOF_SECRET || !env.QA_STRIPE_COUPON_ID) {
+    return response({ ok: false, error: 'qa_proof_not_configured' }, 503);
+  }
+  const length = Number(request.headers.get('content-length') || 0);
+  if (length > 2048) return response({ ok: false, error: 'invalid_body' }, 400);
+  let supplied = '';
+  try {
+    const form = await request.formData();
+    supplied = String(form.get('code') || '');
+  } catch {
+    return response({ ok: false, error: 'invalid_body' }, 400);
   }
   const [suppliedHash, expectedHash] = await Promise.all([
     sha256Hex(supplied),
     sha256Hex(env.QA_PROOF_SECRET),
   ]);
+  if (!supplied || suppliedHash !== expectedHash) {
+    return new Response(null, { status: 303, headers: { location: '/qa?error=invalid', 'cache-control': 'no-store' } });
+  }
+  return new Response(null, {
+    status: 303,
+    headers: {
+      location: '/?qa=active',
+      'cache-control': 'no-store',
+      'set-cookie': qaProofCookie(expectedHash),
+    },
+  });
+}
+
+async function qaProofCoupon(request, env) {
+  if (env.QA_PROOF_MODE !== 'true') return { active: false, authorized: false };
+  const suppliedHeader = request.headers.get('x-yfbjj-qa-proof') || '';
+  const suppliedCookieHash = readCookie(request, QA_PROOF_COOKIE) || '';
+  if ((!suppliedHeader && !suppliedCookieHash) || !env.QA_PROOF_SECRET || !env.QA_STRIPE_COUPON_ID) {
+    return { active: true, authorized: false };
+  }
+  const expectedHash = await sha256Hex(env.QA_PROOF_SECRET);
+  const suppliedHash = suppliedHeader ? await sha256Hex(suppliedHeader) : suppliedCookieHash;
   return {
     active: true,
     authorized: suppliedHash === expectedHash,
@@ -949,6 +990,13 @@ export async function handleWebhook(request, env, deps = {}) {
   // while keeping unsupported lifecycle events out of the local ledger.
   if (!HANDLED_STRIPE_EVENTS.has(event.type)) {
     return response({ ok: true, ignored: true });
+  }
+
+  // The staging endpoint receives the account's live events while it is
+  // enabled for a QA run. Only proof-tagged sessions belong in staging D1.
+  if (qaProofEnabled(env)
+    && (!event.data.object.metadata || event.data.object.metadata.qa_proof !== 'true')) {
+    return response({ ok: true, ignored: true, reason: 'non_qa_event' });
   }
 
   try {

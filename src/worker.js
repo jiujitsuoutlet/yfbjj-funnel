@@ -36,7 +36,9 @@ import {
   handleOfferCheckout,
   handleOfferSkip,
   handlePortal,
+  handleQaProofLogin,
   handleWebhook,
+  qaProofEnabled,
 } from './stripe.js';
 
 const SECURITY_HEADERS = {
@@ -85,6 +87,46 @@ function html(body, status = 200, extraHeaders = {}) {
       ...extraHeaders,
     },
   });
+}
+
+function renderQaProofPage(hasError = false) {
+  const error = hasError
+    ? '<p class="error" role="alert">That code did not match. Please try again.</p>'
+    : '';
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yoga for BJJ QA access</title>
+  <style>
+    :root { color-scheme: dark; font-family: Arial, sans-serif; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #090909; color: #fff; }
+    main { width: min(90vw, 440px); padding: 32px; border: 1px solid #333; border-top: 5px solid #ed1c24; border-radius: 16px; background: #151515; box-sizing: border-box; }
+    h1 { margin: 0 0 12px; font-size: 30px; }
+    p { color: #ccc; line-height: 1.5; }
+    label { display: block; margin: 24px 0 8px; font-weight: 700; }
+    input, button { width: 100%; box-sizing: border-box; border-radius: 10px; padding: 14px; font: inherit; }
+    input { border: 1px solid #555; background: #090909; color: #fff; }
+    button { margin-top: 12px; border: 0; background: #ed1c24; color: #fff; font-weight: 800; cursor: pointer; }
+    .error { padding: 10px 12px; border: 1px solid #ed1c24; border-radius: 8px; color: #fff; }
+    small { display: block; margin-top: 18px; color: #999; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Private funnel QA</h1>
+    <p>Enter the temporary QA code. Eligible Stripe checkout steps will be reduced to $0 automatically.</p>
+    ${error}
+    <form method="post" action="/qa">
+      <label for="code">QA code</label>
+      <input id="code" name="code" type="password" autocomplete="off" required autofocus>
+      <button type="submit">Start QA</button>
+    </form>
+    <small>This access is limited to the staging funnel and expires automatically.</small>
+  </main>
+</body>
+</html>`;
 }
 
 /**
@@ -581,6 +623,9 @@ export default {
       const mediaMatch = path.match(/^\/media\/([0-9a-f-]{36})$/);
       if (mediaMatch) return await serveMedia(env, mediaMatch[1]) || json({ ok: false, error: 'not_found' }, 404);
       if (path === '/') return handleLanding(request, env, ctx);
+      if (path === '/qa' && qaProofEnabled(env)) {
+        return html(renderQaProofPage(url.searchParams.get('error') === 'invalid'), 200, { 'Cache-Control': 'no-store' });
+      }
       if (path === '/thanks') {
         if (isPreviewMode(env)) return html(await renderPublishedPage(env, 'thanks-preview', null) || renderThanksPage(env, 'preview'), 200, BUYER_STATE_HEADERS);
         const order = await getOrderFulfillmentState(request, env);
@@ -616,6 +661,7 @@ export default {
     }
 
     if (method === 'POST') {
+      if (path === '/qa' && qaProofEnabled(env)) return handleQaProofLogin(request, env);
       if (path === '/api/checkout' && isPreviewMode(env)) {
         return json({ ok: false, error: 'preview_locked' }, 423);
       }
