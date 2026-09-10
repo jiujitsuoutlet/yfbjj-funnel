@@ -150,7 +150,7 @@ export function createAutoCreatorClient(env, deps = {}) {
           retryable: true, code: 'readback_failed',
         });
       }
-      await tool('members.invite', { email, next: '/dashboard' });
+      await tool('members.invite', { email, next: '/dashboard', invite_type: 'set_password' });
       // Bundle access is owned by the exact active entitlement. AutoCreator's
       // members.checkAccess tool reports subscription access only and returns
       // no_subscription for valid bundle-only buyers.
@@ -184,7 +184,7 @@ export function createAutoCreatorClient(env, deps = {}) {
           retryable: true, code: 'readback_failed',
         });
       }
-      await tool('members.invite', { email, next: '/dashboard' });
+      await tool('members.invite', { email, next: '/dashboard', invite_type: 'set_password' });
       return { verified: true, activationNeeded: needsActivation(access), emailSent: true };
     }
     throw new AutoCreatorError('Unsupported fulfillment offer', { code: 'unsupported_offer' });
