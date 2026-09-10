@@ -25,7 +25,7 @@ function flowDatabase(overrides = {}) {
   const state = {
     status: 'offer_ready', current_offer: 'head_to_toes', pending_session_id: null,
     pending_checkout_url: null, authorized_session_id: 'cs_parent', two_month_trial_end: null,
-    outboxStatus: null,
+    outboxStatuses: new Map(), orders: new Map(),
     ...overrides,
   };
   return {
@@ -43,24 +43,33 @@ function flowDatabase(overrides = {}) {
               expires_at: '2099-01-01T00:00:00.000Z', two_month_trial_end: state.two_month_trial_end, version: 1,
             };
           }
-          if (sql.includes('FROM stripe_orders WHERE session_id')) return {
-            status: 'paid', fulfillment_status: state.fulfillment || 'granted', access_state: 'active',
-            flow_hash: flowHash, customer_id: 'cus_1', email: 'buyer@example.com',
-          };
+          if (sql.includes('FROM stripe_orders WHERE session_id')) {
+            const stored = state.orders.get(values[0]);
+            if (stored) return stored;
+            if (values[0] !== 'cs_parent') return null;
+            return {
+              status: 'paid', fulfillment_status: state.fulfillment || 'granted', access_state: 'active',
+              flow_hash: flowHash, customer_id: 'cus_1', email: 'buyer@example.com',
+            };
+          }
           if (sql.includes('FROM fulfillment_readiness')) return { schema_version: 1 };
           if (sql.includes("UPDATE entitlement_outbox SET status = 'processing'")) {
-            if (!state.outboxStatus || ['pending', 'failed'].includes(state.outboxStatus)) {
-              state.outboxStatus = 'processing';
+            const status = state.outboxStatuses.get(values[0]);
+            if (!status || ['pending', 'failed'].includes(status)) {
+              state.outboxStatuses.set(values[0], 'processing');
               return { status: 'processing' };
             }
             return null;
           }
           if (sql.includes('SELECT status FROM entitlement_outbox')) {
-            return state.outboxStatus ? { status: state.outboxStatus } : null;
+            const status = state.outboxStatuses.get(values[0]);
+            return status ? { status } : null;
           }
           if (sql.includes("UPDATE checkout_flows SET status = 'checkout_pending'")) {
             if (state.status !== 'offer_ready') return null;
-            state.status = 'checkout_pending'; state.pending_session_id = values[1]; state.pending_checkout_url = values[2];
+            state.status = 'checkout_pending'; state.pending_session_id = values[1];
+            if (sql.includes('pending_checkout_url = ?3')) state.pending_checkout_url = values[2];
+            if (sql.includes('two_month_trial_end = ?3')) state.two_month_trial_end = values[2];
             return { flow_hash: flowHash };
           }
           if (sql.includes('UPDATE checkout_flows SET authorized_session_id')) {
@@ -78,9 +87,30 @@ function flowDatabase(overrides = {}) {
           return null;
         },
         run: async () => {
-          if (sql.includes('INSERT INTO entitlement_outbox') && !state.outboxStatus) state.outboxStatus = 'pending';
-          if (sql.includes("entitlement_outbox SET status = 'succeeded'")) state.outboxStatus = 'succeeded';
-          if (sql.includes("entitlement_outbox SET status = 'failed'")) state.outboxStatus = 'failed';
+          if (sql.includes('INSERT INTO stripe_orders')) {
+            state.orders.set(values[0], {
+              session_id: values[0], customer_id: values[1], payment_intent_id: values[2],
+              subscription_id: values[3], offer: values[4], amount_cents: values[7], email: values[8],
+              status: values[9], fulfillment_status: 'pending', access_state: 'pending',
+              metadata: values[10], flow_hash: values[13],
+            });
+          }
+          if (sql.includes('INSERT INTO entitlement_outbox') && !state.outboxStatuses.has(values[0])) {
+            state.outboxStatuses.set(values[0], 'pending');
+          }
+          if (sql.includes("entitlement_outbox SET status = 'succeeded'")) {
+            state.outboxStatuses.set(values[0], 'succeeded');
+          }
+          if (sql.includes("entitlement_outbox SET status = 'failed'")) {
+            state.outboxStatuses.set(values[0], 'failed');
+          }
+          if (sql.includes("stripe_orders SET fulfillment_status = 'granted'")) {
+            const order = state.orders.get(values[0]);
+            if (order) {
+              order.fulfillment_status = 'granted';
+              order.access_state = values[2];
+            }
+          }
           return { success: true };
         },
       }; } };
@@ -88,11 +118,11 @@ function flowDatabase(overrides = {}) {
   };
 }
 
-function request(path, body = {}) {
+function request(path, body = {}, sourceSessionId = 'cs_parent') {
   return new Request(`https://funnel.test${path}`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', origin: 'https://funnel.test', cookie: `yfbjj_flow=${token}` },
-    body: JSON.stringify({ source_session_id: 'cs_parent', ...body }),
+    body: JSON.stringify({ source_session_id: sourceSessionId, ...body }),
   });
 }
 
@@ -230,7 +260,7 @@ test('monthly downsell charges $8 now and starts $19.99 billing after a 30 day o
   assert.equal(DB.state.current_offer, 'certification');
 });
 
-test('isolated monthly proof can start without a card while production terms stay unchanged', async () => {
+test('isolated QA accepts advance without Stripe redirects or charges', async () => {
   const DB = flowDatabase({ current_offer: 'two_month' });
   const created = [];
   const proofRequest = request('/api/offer-checkout');
@@ -241,13 +271,94 @@ test('isolated monthly proof can start without a card while production terms sta
     QA_PROOF_MODE: 'true',
     QA_PROOF_SECRET: 'proof-secret',
     QA_STRIPE_COUPON_ID: 'coupon-proof',
-  }, { stripe: stripe(created), fulfillmentImplemented: true });
+  }, {
+    stripe: stripe(created),
+    fulfillmentImplemented: true,
+    autocreator: { grant: async () => ({}) },
+  });
   assert.equal(response.status, 200);
-  assert.equal(created[0].kind, 'checkout');
-  assert.deepEqual(created[0].params.discounts, [{ coupon: 'coupon-proof' }]);
-  assert.equal(created[0].params.payment_method_collection, 'if_required');
-  assert.equal(created[0].params.metadata.qa_proof, 'true');
-  assert.equal(created[0].params.subscription_data.metadata.qa_proof, 'true');
+  assert.equal(created.length, 0);
+  const payload = await response.json();
+  assert.equal(payload.one_click, true);
+  assert.equal(payload.no_charge, true);
+  assert.match(payload.url, /^\/offer\?session_id=qa_two_month_/);
+  assert.equal(DB.state.current_offer, 'certification');
+  assert.equal(DB.state.status, 'offer_ready');
+  assert.match(DB.state.two_month_trial_end, /^\d{4}-\d{2}-\d{2}T/);
+});
+
+test('isolated QA preserves the server-owned offer order across consecutive no-charge accepts', async () => {
+  const DB = flowDatabase();
+  const created = [];
+  const grants = [];
+  const proofEnv = {
+    ...baseEnv,
+    DB,
+    QA_PROOF_MODE: 'true',
+    QA_PROOF_SECRET: 'proof-secret',
+    QA_STRIPE_COUPON_ID: 'coupon-proof',
+  };
+  const deps = {
+    stripe: stripe(created),
+    fulfillmentImplemented: true,
+    autocreator: { grant: async ({ offer }) => { grants.push(offer); return {}; } },
+  };
+  let source = 'cs_parent';
+  for (const expectedNext of ['lifetime', 'certification', null]) {
+    const proofRequest = request('/api/offer-checkout', {}, source);
+    proofRequest.headers.set('x-yfbjj-qa-proof', 'proof-secret');
+    const response = await handleOfferCheckout(proofRequest, proofEnv, deps);
+    assert.equal(response.status, 200);
+    const payload = await response.json();
+    assert.equal(payload.one_click, true);
+    assert.equal(payload.no_charge, true);
+    source = new URL(payload.url, 'https://funnel.test').searchParams.get('session_id');
+    assert.match(source, /^qa_/);
+    assert.equal(DB.state.current_offer, expectedNext);
+  }
+  assert.equal(created.length, 0);
+  assert.deepEqual(grants, ['head_to_toes', 'lifetime', 'certification']);
+  assert.equal(DB.state.status, 'complete');
+});
+
+test('isolated QA preserves the lifetime decline and monthly downsell branch without Checkout redirects', async () => {
+  const DB = flowDatabase();
+  const created = [];
+  const env = {
+    ...baseEnv, DB, QA_PROOF_MODE: 'true', QA_PROOF_SECRET: 'proof-secret',
+    QA_STRIPE_COUPON_ID: 'coupon-proof',
+  };
+  const deps = {
+    stripe: stripe(created), fulfillmentImplemented: true,
+    autocreator: { grant: async () => ({}) },
+  };
+  const proofRequest = (path, source) => {
+    const result = request(path, {}, source);
+    result.headers.set('x-yfbjj-qa-proof', 'proof-secret');
+    return result;
+  };
+
+  const head = await handleOfferCheckout(proofRequest('/api/offer-checkout', 'cs_parent'), env, deps);
+  const headSource = new URL((await head.json()).url, 'https://funnel.test').searchParams.get('session_id');
+  assert.equal(DB.state.current_offer, 'lifetime');
+
+  const lifetimeSkip = await handleOfferSkip(proofRequest('/api/offer-skip', headSource), env, deps);
+  assert.equal(lifetimeSkip.status, 200);
+  assert.equal(DB.state.current_offer, 'two_month');
+
+  const monthly = await handleOfferCheckout(proofRequest('/api/offer-checkout', headSource), env, deps);
+  const monthlyPayload = await monthly.json();
+  assert.equal(monthlyPayload.one_click, true);
+  assert.equal(monthlyPayload.no_charge, true);
+  const monthlySource = new URL(monthlyPayload.url, 'https://funnel.test').searchParams.get('session_id');
+  assert.equal(DB.state.current_offer, 'certification');
+
+  const certificationSkip = await handleOfferSkip(proofRequest('/api/offer-skip', monthlySource), env, deps);
+  assert.equal(certificationSkip.status, 200);
+  assert.match((await certificationSkip.json()).url, /^\/thanks\?session_id=qa_two_month_/);
+  assert.equal(DB.state.current_offer, null);
+  assert.equal(DB.state.status, 'complete');
+  assert.equal(created.length, 0);
 });
 
 test('Certification checkout is server-derived, one-time, and fixed to the verified $297 Price', async () => {
