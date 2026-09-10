@@ -275,12 +275,12 @@ function renderThanksPage(env, state, extra = {}) {
     granted: {
       title: 'Access granted', kicker: 'Order confirmed', headline: "You're in.",
       message: 'Payment is complete, your access is active, and your one-click sign-in email is on its way.',
-      support: 'Check the email address used at checkout. The secure link works for 24 hours. If anything looks wrong, write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your Stripe receipt.',
+      support: 'Use the email to set your password. After that, you can always sign in at <a href="https://yogaforbjj.net/login">yogaforbjj.net/login</a>. If the setup email expires before you use it, that permanent login page can send you a fresh link. If anything looks wrong, write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your Stripe receipt.',
     },
     activation: {
       title: 'Activate your access', kicker: 'Order confirmed', headline: 'Your access is assigned.',
       message: 'Payment is complete, your Yoga for BJJ access is assigned, and your one-click sign-in email is on its way.',
-      support: 'Check the email address used at checkout. The secure link works for 24 hours. If you need help, write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your Stripe receipt.',
+      support: 'Use the email to set your password. After that, you can always sign in at <a href="https://yogaforbjj.net/login">yogaforbjj.net/login</a>. If the setup email expires before you use it, that permanent login page can send you a fresh link. If you need help, write to <a href="mailto:Sebastian@yogaforbjj.net">Sebastian@yogaforbjj.net</a> with your Stripe receipt.',
     },
   }[state];
   return renderPage(thanksHtml, env, null, extra)

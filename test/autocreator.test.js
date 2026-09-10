@@ -38,7 +38,9 @@ test('bundle grant uses the documented envelope and requires exact read-back', a
   assert.deepEqual(transport.calls[1].body, { args: {
     email: 'buyer@example.com', bundle_slug: 'guard-retention', notes: 'Stripe Checkout cs_1',
   } });
-  assert.deepEqual(transport.calls[3].body, { args: { email: 'buyer@example.com', next: '/dashboard' } });
+  assert.deepEqual(transport.calls[3].body, { args: {
+    email: 'buyer@example.com', next: '/dashboard', invite_type: 'set_password',
+  } });
   assert.equal(transport.calls.length, 4);
 });
 
@@ -64,7 +66,9 @@ test('Certification grants all three level bundles and requires every exact read
     email: 'coach@example.com', bundle_slug, notes: 'Stripe Checkout cs_cert',
   })));
   assert.deepEqual(transport.calls[4].body, { args: { email: 'coach@example.com' } });
-  assert.deepEqual(transport.calls[5].body, { args: { email: 'coach@example.com', next: '/dashboard' } });
+  assert.deepEqual(transport.calls[5].body, { args: {
+    email: 'coach@example.com', next: '/dashboard', invite_type: 'set_password',
+  } });
   assert.equal(transport.calls.length, 6);
 });
 
@@ -132,7 +136,9 @@ test('plan grant attaches Stripe references and proves the exact active price', 
     stripe_customer_id: 'cus_1', stripe_subscription_id: 'sub_1',
   });
   assert.deepEqual(calls[3].body, { args: { memberId: 'member_2' } });
-  assert.deepEqual(calls[4].body, { args: { email: 'buyer@example.com', next: '/dashboard' } });
+  assert.deepEqual(calls[4].body, { args: {
+    email: 'buyer@example.com', next: '/dashboard', invite_type: 'set_password',
+  } });
 });
 
 test('access is never marked verified when the login email cannot be sent', async () => {

@@ -46,8 +46,12 @@ Confirmed paid-plan tools:
 
 Confirmed buyer delivery tool:
 
-- `members.invite`: sends the checkout email address a one-click sign-in link
-  that lands on `/dashboard` and remains valid for 24 hours. Fulfillment calls
+- `members.invite`: sends the checkout email address a set-password link that
+  establishes reusable credentials and then lands on `/dashboard`. The initial
+  setup token remains valid for 24 hours because AutoCreator does not expose a
+  configurable or non-expiring authentication token. Buyers can always visit
+  `https://yogaforbjj.net/login` to sign in with their password or request a
+  fresh one-time link. Fulfillment calls
   it only after exact entitlement read-back succeeds. If AutoCreator does not
   accept the email send, the D1 outbox operation fails and remains retryable;
   the order is never presented as completely fulfilled.
