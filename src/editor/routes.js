@@ -9,7 +9,7 @@ import { AB_DECISION_RULE, conversionSnapshot } from '../analytics.js';
 const HEADERS = {
   'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY',
   'Referrer-Policy': 'no-referrer',
-  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self'; frame-src https://iframe.mediadelivery.net; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; media-src 'self'; connect-src 'self'; frame-src https://iframe.mediadelivery.net; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
 };
 function json(body, status = 200, extra = {}) { return new Response(JSON.stringify(body), { status, headers: { ...HEADERS, 'Content-Type': 'application/json; charset=utf-8', ...extra } }); }
 function html(body, status = 200) { return new Response(body, { status, headers: { ...HEADERS, 'Content-Type': 'text/html; charset=utf-8' } }); }

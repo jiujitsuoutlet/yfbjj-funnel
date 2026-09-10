@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 import { execFileSync } from 'node:child_process';
 import { createServer } from 'node:http';
+import { request as httpsRequest } from 'node:https';
 import { mkdir, readFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import { renderContentDocument } from '../src/editor/renderer.js';
+import { upgradeContentDocument } from '../src/editor/upgrade.js';
 
 const baseCss = await readFile(new URL('../src/pages/_base.css', import.meta.url), 'utf8');
 const brandCss = await readFile(new URL('../src/pages/_brand.css', import.meta.url), 'utf8');
@@ -14,7 +16,9 @@ const raw = execFileSync('npx', ['wrangler', 'd1', 'execute', 'yfbjj_funnel', '-
   encoding: 'utf8', env: process.env, stdio: ['ignore', 'pipe', 'inherit'],
 });
 const pages = JSON.parse(raw)[0].results.map((row) => ({
-  key: row.page_key, revision: row.published_revision, document: JSON.parse(row.published_json),
+  key: row.page_key,
+  revision: row.published_revision,
+  document: upgradeContentDocument(row.page_key, JSON.parse(row.published_json)),
 }));
 
 const rendered = new Map(pages.map(({ key, revision, document }) => {
@@ -24,14 +28,30 @@ const rendered = new Map(pages.map(({ key, revision, document }) => {
   return [key, `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="https://welcome.yogaforbjj.net/"><style>${baseCss}\n${brandCss}</style></head><body>${page.body}<script>document.documentElement.dataset.revision=${JSON.stringify(String(revision))}</script></body></html>`];
 }));
 
+const auditMedia = {
+  '/video/yoga-for-bjj-intro.mp4': 'https://vz-5ecbf445-fd1.b-cdn.net/ad1f2932-955f-4abf-85d0-01c6a065a289/play_720p.mp4',
+  '/video/yoga-for-bjj-intro.jpg': 'https://vz-5ecbf445-fd1.b-cdn.net/ad1f2932-955f-4abf-85d0-01c6a065a289/thumbnail.jpg',
+};
+let port = 0;
 const server = createServer((request, response) => {
-  const key = new URL(request.url, 'http://127.0.0.1').pathname.slice(1);
+  const pathname = new URL(request.url, 'http://127.0.0.1').pathname;
+  if (auditMedia[pathname]) {
+    const headers = request.headers.range ? { Range: request.headers.range } : {};
+    const upstream = httpsRequest(auditMedia[pathname], { method: request.method, headers }, (mediaResponse) => {
+      response.writeHead(mediaResponse.statusCode || 502, mediaResponse.headers);
+      mediaResponse.pipe(response);
+    });
+    upstream.on('error', () => { response.writeHead(502); response.end('media unavailable'); });
+    upstream.end();
+    return;
+  }
+  const key = pathname.slice(1);
   const html = rendered.get(key);
   response.writeHead(html ? 200 : 404, { 'content-type': 'text/html; charset=utf-8' });
-  response.end(html || 'not found');
+  response.end(html ? html.replaceAll('="/video/', `="http://127.0.0.1:${port}/video/`) : 'not found');
 });
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
-const port = server.address().port;
+port = server.address().port;
 await mkdir(outputDir, { recursive: true });
 
 const requirements = {
@@ -88,6 +108,9 @@ for (const { key, revision } of pages) {
         text: document.body.innerText,
         overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
         brokenImages: [...document.images].filter((image) => image.complete && image.naturalWidth === 0).map((image) => image.src),
+        brokenVideos: [...document.querySelectorAll('video')].filter((video) => video.error || !video.currentSrc).map((video) => ({
+          src: video.currentSrc || video.getAttribute('src') || '', error: video.error?.code || 0,
+        })),
         clipped: [...new Set(clipped)],
         blankButtons: [...document.querySelectorAll('button,a.cta')].filter((button) => !button.textContent.trim()).length,
         sideBySideOfferRows,
@@ -102,6 +125,7 @@ for (const { key, revision } of pages) {
     if (copyIssues.get(key).length) errors.push(`copy: ${copyIssues.get(key).join(', ')}`);
     if (result.overflowX > 1) errors.push(`horizontal overflow ${result.overflowX}px`);
     if (result.brokenImages.length) errors.push(`${result.brokenImages.length} broken image(s)`);
+    if (result.brokenVideos.length) errors.push(`broken video: ${JSON.stringify(result.brokenVideos)}`);
     if (result.clipped.length) errors.push(`clipped: ${result.clipped.join(', ')}`);
     if (result.blankButtons) errors.push(`${result.blankButtons} blank action(s)`);
     if (result.sideBySideOfferRows) errors.push(`${result.sideBySideOfferRows} two-column offer row(s)`);

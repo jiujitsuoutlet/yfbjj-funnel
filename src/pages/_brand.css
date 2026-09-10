@@ -41,6 +41,9 @@
 .editor-page[data-page-key^="offer-"] .editor-element li{line-height:1.6}
 .editor-page[data-page-key^="offer-"] .editor-element img{width:100%;height:auto;border-radius:.75rem}
 .editor-page[data-page-key^="offer-"] .editor-element p{line-height:1.6}
+.editor-page[data-page-key^="offer-"] .editor-column{
+  display:flex;flex-direction:column;gap:clamp(.75rem,1.5vw,1.25rem);
+}
 .editor-page[data-page-key^="offer-"]>footer{background:var(--brand-black);color:#fff;padding:1.5rem}
 .editor-page[data-page-key^="offer-"] .decline{color:inherit}
 .editor-page[data-page-key^="offer-"] .offer-price{font-weight:900}

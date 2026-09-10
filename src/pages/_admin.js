@@ -27,7 +27,7 @@
   function id(prefix) { return `${prefix}-${crypto.randomUUID().slice(0, 8)}`; }
   function style(node = {}) {
     const source = node.style || {}, css = [];
-    const px = (name, value) => { if (value !== undefined) css.push(`${name}:${Number(value)}px`); };
+    const px = (name, value) => { if (value === undefined) return;const number=Number(value),safe=pageKey.startsWith('offer-')&&['margin-top','margin-bottom'].includes(name)?Math.max(0,number):number;css.push(`${name}:${safe}px`); };
     if (source.fontFamily) css.push(`font-family:${fonts[source.fontFamily]}`); px('font-size',source.fontSize);
     if (source.fontWeight) css.push(`font-weight:${source.fontWeight}`); if (source.lineHeight) css.push(`line-height:${source.lineHeight}`); px('letter-spacing',source.letterSpacing);
     if (source.textAlign) css.push(`text-align:${source.textAlign}`); if (source.textTransform) css.push(`text-transform:${source.textTransform}`);
@@ -53,7 +53,7 @@
     else if (element.type === 'list') body = `<ul>${element.items.map((item) => `<li>${esc(item)}</li>`).join('')}</ul>`;
     else if (element.type === 'image') body = `<img src="${esc(element.src)}" alt="${esc(element.alt)}">`;
     else if (element.type === 'quote') body = `<blockquote><p>${esc(element.content)}</p><cite>${esc(element.attribution)}</cite></blockquote>`;
-    else if (element.type === 'video') body = `<div class="editor-video"><iframe src="${esc(element.src)}" title="${esc(element.title)}"></iframe></div>`;
+    else if (element.type === 'video') body = `<div class="editor-video"><video src="/video/yoga-for-bjj-intro.mp4" poster="/video/yoga-for-bjj-intro.jpg" title="${esc(element.title)}" controls playsinline preload="metadata"></video></div>`;
     else if (element.type === 'divider') body = '<hr>'; else if (element.type === 'spacer') body = `<div style="height:${Number(element.size)}px"></div>`;
     else if (element.type === 'price') body = '<p class="offer-price">Price from server configuration</p>';
     else if (element.type === 'accessLink') body = `<a class="cta">${esc(element.label)}</a>`;
@@ -107,7 +107,8 @@
     if (element.type === 'backgroundImage') output += `<label class="field check-field"><input data-boolean="flipHorizontal" type="checkbox" ${element.flipHorizontal ? 'checked' : ''}> Flip image horizontally</label>`;
     if (element.type === 'video') output += `<label class="field">Approved video URL<input data-field="src" value="${esc(element.src)}"></label>`;
     output += field('Font','fontFamily',element.style?.fontFamily,Object.keys(fonts)) + field('Weight','fontWeight',element.style?.fontWeight,[400,500,700,900]) + field('Alignment','textAlign',element.style?.textAlign,['left','center','right']) + field('Color','color',element.style?.color,Object.keys(colors));
-    output += `<label class="field">Font size<input data-style="fontSize" type="number" min="10" max="96" value="${element.style?.fontSize || ''}"></label><label class="field">Line height<input data-style="lineHeight" type="number" min="0.8" max="2" step="0.1" value="${element.style?.lineHeight || ''}"></label><label class="field">Top spacing<input data-style="marginTop" type="number" min="-160" max="160" value="${element.style?.marginTop || ''}"></label><label class="field">Bottom spacing<input data-style="marginBottom" type="number" min="-160" max="160" value="${element.style?.marginBottom || ''}"></label>`;
+    const spacingMin=pageKey.startsWith('offer-')?0:-160;
+    output += `<label class="field">Font size<input data-style="fontSize" type="number" min="10" max="96" value="${element.style?.fontSize || ''}"></label><label class="field">Line height<input data-style="lineHeight" type="number" min="0.8" max="2" step="0.1" value="${element.style?.lineHeight || ''}"></label><label class="field">Top spacing<input data-style="marginTop" type="number" min="${spacingMin}" max="160" value="${element.style?.marginTop || ''}"></label><label class="field">Bottom spacing<input data-style="marginBottom" type="number" min="${spacingMin}" max="160" value="${element.style?.marginBottom || ''}"></label>`;
     const columnOptions = doc.sections.flatMap((section) => section.rows.flatMap((row) => row.columns.map((column) => `<option value="${column.id}" ${column.id === selectedColumn ? 'selected' : ''}>${esc(column.name || column.id)}</option>`))).join('');
     output += `<label class="field">Move to column<select id="move-column">${columnOptions}</select></label><div class="row-actions"><button id="move-up">Move up</button><button id="move-down">Move down</button><button id="duplicate" ${functional.has(element.type) ? 'disabled' : ''}>Duplicate</button><button id="delete" ${functional.has(element.type) ? 'disabled' : ''}>Delete</button></div>`;
     $('inspector').innerHTML = output; bindInspector();
@@ -115,7 +116,7 @@
   function bindInspector() {
     const element = findElement(selected); let editing = false;
     document.querySelectorAll('[data-field]').forEach((input) => { input.onfocus = () => { if (!editing) { remember(); editing = true; } }; input.onblur = () => { editing = false; render(); }; input.oninput = () => { element[input.dataset.field] = input.dataset.field === 'items' ? input.value.split('\n').filter(Boolean) : input.value; markChanged(false); }; });
-    document.querySelectorAll('[data-style]').forEach((input) => input.onchange = () => { remember(); if (input.dataset.style === 'globalFont') doc.globalStyles.fontFamily = input.value; else { element.style = element.style || {}; if (!input.value) delete element.style[input.dataset.style]; else element.style[input.dataset.style] = input.type === 'number' ? Number(input.value) : /^\d+$/.test(input.value) ? Number(input.value) : input.value; } markChanged(); });
+    document.querySelectorAll('[data-style]').forEach((input) => input.onchange = () => { remember(); if (input.dataset.style === 'globalFont') doc.globalStyles.fontFamily = input.value; else { element.style = element.style || {}; if (!input.value) delete element.style[input.dataset.style]; else { let value=input.type === 'number' ? Number(input.value) : /^\d+$/.test(input.value) ? Number(input.value) : input.value;if(pageKey.startsWith('offer-')&&['marginTop','marginBottom'].includes(input.dataset.style))value=Math.max(0,value);element.style[input.dataset.style]=value; } } markChanged(); });
     document.querySelectorAll('[data-boolean]').forEach((input) => input.onchange = () => { remember(); element[input.dataset.boolean] = input.checked; markChanged(); });
     if (!element) return;
     $('move-column').onchange = (event) => moveElement(element.id,event.target.value,findColumn(event.target.value).elements.length);

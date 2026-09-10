@@ -33,7 +33,7 @@ test('schema rejects unsafe fields, blank layouts, bad columns, and duplicate ID
   assert.match(validateContentDocument(duplicate, { pageKey: 'thanks-pending' }).errors.join(' '), /duplicate ID/);
 });
 
-test('editor and server both allow intentional negative spacing through -160px', () => {
+test('schema preserves legacy spacing while the offer editor prevents new negative spacing', () => {
   const document = defaultDocument('offer-two-month');
   const heading = document.sections[0].rows[0].columns[0].elements.find((element) => element.type === 'heading');
   heading.style = { marginTop: -70, marginBottom: -10 };
@@ -41,8 +41,10 @@ test('editor and server both allow intentional negative spacing through -160px',
   heading.style.marginTop = -161;
   assert.match(validateContentDocument(document, { pageKey: 'offer-two-month', imagePaths: images }).errors.join(' '), /from -160 to 160/);
   const editor = fs.readFileSync(new URL('../src/pages/_admin.js', import.meta.url), 'utf8');
-  assert.match(editor, /Top spacing<input[^>]+min="-160" max="160"/);
-  assert.match(editor, /Bottom spacing<input[^>]+min="-160" max="160"/);
+  assert.match(editor, /const spacingMin=pageKey\.startsWith\('offer-'\)\?0:-160/);
+  assert.match(editor, /Top spacing<input[^>]+min="\$\{spacingMin\}" max="160"/);
+  assert.match(editor, /Bottom spacing<input[^>]+min="\$\{spacingMin\}" max="160"/);
+  assert.match(editor, /Math\.max\(0,value\)/);
 });
 
 test('page-specific commerce components cannot be deleted, duplicated, or moved across page kinds', () => {

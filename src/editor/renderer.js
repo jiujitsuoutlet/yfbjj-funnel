@@ -11,14 +11,24 @@ const COLOR = Object.freeze({
 const FONT = Object.freeze({ brandSans: 'var(--stack)', systemSans: 'Arial,Helvetica,sans-serif', serif: 'Georgia,serif' });
 const JUSTIFY = Object.freeze({ start: 'flex-start', center: 'center', end: 'flex-end', between: 'space-between' });
 const ALIGN = Object.freeze({ start: 'flex-start', center: 'center', end: 'flex-end', stretch: 'stretch' });
+const INTRO_VIDEO_PATH = '/embed/215008/ad1f2932-955f-4abf-85d0-01c6a065a289';
+const INTRO_VIDEO_MP4 = '/video/yoga-for-bjj-intro.mp4';
+const INTRO_VIDEO_POSTER = '/video/yoga-for-bjj-intro.jpg';
 
 export function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 }
 
-function styleAttribute(style = {}, global = {}) {
+function styleAttribute(style = {}, global = {}, pageKey = '') {
   const css = [];
-  const px = (property, value) => { if (value !== undefined) css.push(`${property}:${Number(value)}px`); };
+  const px = (property, value) => {
+    if (value === undefined) return;
+    const number = Number(value);
+    const safe = pageKey.startsWith('offer-') && ['margin-top', 'margin-bottom'].includes(property)
+      ? Math.max(0, number)
+      : number;
+    css.push(`${property}:${safe}px`);
+  };
   if (style.fontFamily) css.push(`font-family:${FONT[style.fontFamily]}`);
   px('font-size', style.fontSize);
   if (style.fontWeight) css.push(`font-weight:${style.fontWeight}`);
@@ -113,7 +123,7 @@ function certificationQuickOfferMarkup(action, pageKey, env, context) {
 }
 
 function renderElement(element, pageKey, env, context, global, lifetime = {}, certification = {}) {
-  const attr = styleAttribute(element.style, global);
+  const attr = styleAttribute(element.style, global, pageKey);
   const cls = `${classes(element, 'editor-element')}${element.id === lifetime.heroImageId ? ' lifetime-hero-image' : ''}`;
   let body = '';
   if (['checkoutForm', 'offerActions', 'price', 'accessLink', 'legalFooter', 'previewBanner'].includes(element.type)) {
@@ -125,7 +135,13 @@ function renderElement(element, pageKey, env, context, global, lifetime = {}, ce
   else if (element.type === 'list') body = `<ul>${element.items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
   else if (element.type === 'image') body = `<img src="${escapeHtml(element.src)}" alt="${escapeHtml(element.alt)}" loading="${element.id === lifetime.heroImageId ? 'eager' : 'lazy'}"${element.id === lifetime.heroImageId ? ' fetchpriority="high"' : ''}>`;
   else if (element.type === 'quote') body = `<blockquote><p>${escapeHtml(element.content)}</p><cite>${escapeHtml(element.attribution)}</cite></blockquote>`;
-  else if (element.type === 'video') body = `<div class="editor-video"><iframe src="${escapeHtml(element.src)}" title="${escapeHtml(element.title)}" loading="lazy" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
+  else if (element.type === 'video') {
+    let approvedIntro = false;
+    try { approvedIntro = new URL(element.src).pathname === INTRO_VIDEO_PATH; } catch { /* schema reports invalid URLs */ }
+    body = approvedIntro
+      ? `<div class="editor-video"><video src="${INTRO_VIDEO_MP4}" poster="${INTRO_VIDEO_POSTER}" title="${escapeHtml(element.title)}" controls playsinline preload="metadata"></video></div>`
+      : `<div class="editor-video"><iframe src="${escapeHtml(element.src)}" title="${escapeHtml(element.title)}" loading="lazy" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
+  }
   else if (element.type === 'divider') body = '<hr>';
   else if (element.type === 'spacer') body = `<div aria-hidden="true" style="height:${Number(element.size)}px"></div>`;
   const quickOffer = element.id === lifetime.afterId
@@ -163,11 +179,11 @@ export function renderContentDocument(document, { pageKey, env = {}, context = {
   } : {};
   const announcement = allElements.find((element) => element.type === 'announcement');
   const background = (section) => section.rows.flatMap((row) => row.columns.flatMap((column) => column.elements)).find((element) => element.type === 'backgroundImage');
-  const sections = document.sections.map((section) => `<section class="${classes(section, 'editor-section')}" data-editor-id="${escapeHtml(section.id)}"${styleAttribute(section.style, global)}>
+  const sections = document.sections.map((section) => `<section class="${classes(section, 'editor-section')}" data-editor-id="${escapeHtml(section.id)}"${styleAttribute(section.style, global, pageKey)}>
     ${background(section) ? `<picture class="editor-background${background(section).flipHorizontal ? ' is-flipped' : ''}"><img src="${escapeHtml(background(section).src)}" alt="${escapeHtml(background(section).alt)}" loading="eager" fetchpriority="high"></picture>` : ''}
     <div class="editor-section-inner">
-      ${section.rows.map((row) => `<div class="${classes(row, 'editor-row')}" data-editor-id="${escapeHtml(row.id)}"${styleAttribute(row.style, global)}>
-        ${row.columns.map((column) => `<div class="${classes(column, 'editor-column')}" data-editor-id="${escapeHtml(column.id)}" style="--editor-column:${Number(column.width)};${styleAttribute(column.style, global).replace(/^ style="|"$/g, '')}">
+      ${section.rows.map((row) => `<div class="${classes(row, 'editor-row')}" data-editor-id="${escapeHtml(row.id)}"${styleAttribute(row.style, global, pageKey)}>
+        ${row.columns.map((column) => `<div class="${classes(column, 'editor-column')}" data-editor-id="${escapeHtml(column.id)}" style="--editor-column:${Number(column.width)};${styleAttribute(column.style, global, pageKey).replace(/^ style="|"$/g, '')}">
           ${column.elements.filter((element) => !['announcement', 'backgroundImage', 'previewBanner', 'legalFooter'].includes(element.type)).map((element) => renderElement(element, pageKey, env, context, global, lifetime, certification)).join('')}
         </div>`).join('')}
       </div>`).join('')}

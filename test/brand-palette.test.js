@@ -30,8 +30,9 @@ test('published landing hero grows with edited copy instead of clipping it', () 
   assert.doesNotMatch(css, /\.editor-page \.editor-preset-landing-hero \.editor-section-inner\{height:100%/);
 });
 
-test('membership mobile layout neutralizes saved negative spacing', () => {
+test('offer layouts establish readable rhythm and neutralize legacy negative spacing', () => {
   const css = readFileSync(new URL('../src/pages/_brand.css', import.meta.url), 'utf8');
+  assert.match(css, /data-page-key\^="offer-"\] \.editor-column[\s\S]*?display:flex;flex-direction:column;gap:/);
   assert.match(css, /\[data-editor-id="offer-two-heading"\][\s\S]*?margin-top:0!important;margin-bottom:0!important/);
   assert.match(css, /\[data-editor-id="offer-two-copy"\][\s\S]*?\[data-editor-id="offer-two-month-facts"\][\s\S]*?margin-top:0!important;margin-bottom:0!important/);
 });

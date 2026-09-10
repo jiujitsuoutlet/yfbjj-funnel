@@ -15,6 +15,21 @@ export function upgradeContentDocument(pageKey, input) {
   const document = structuredClone(input);
   if (!document || ![1, 2].includes(document.version)) return document;
   document.version = 2;
+  if (pageKey.startsWith('offer-')) {
+    const layoutNodes = document.sections.flatMap((section) => [
+      section,
+      ...section.rows.flatMap((row) => [
+        row,
+        ...row.columns.flatMap((column) => [column, ...column.elements]),
+      ]),
+    ]);
+    for (const node of layoutNodes) {
+      if (!node.style) continue;
+      for (const key of ['marginTop', 'marginBottom']) {
+        if (Number(node.style[key]) < 0) node.style[key] = 0;
+      }
+    }
+  }
   const existing = new Set(allElements(document).map((element) => element.id));
   const add = (target, element, before = 'legalFooter') => {
     if (!existing.has(element.id)) insertBefore(target, before, [element]);

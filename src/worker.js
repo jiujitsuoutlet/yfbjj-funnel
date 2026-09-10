@@ -52,6 +52,7 @@ const SECURITY_HEADERS = {
     "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data:",
+    "media-src 'self'",
     "connect-src 'self'",
     "frame-src https://iframe.mediadelivery.net",
     "form-action 'self'",
@@ -62,6 +63,38 @@ const SECURITY_HEADERS = {
 
 const nowIso = () => new Date().toISOString();
 const BUYER_STATE_HEADERS = { 'Cache-Control': 'private, no-store', Vary: 'Cookie' };
+const INTRO_MEDIA = Object.freeze({
+  '/video/yoga-for-bjj-intro.mp4': {
+    url: 'https://vz-5ecbf445-fd1.b-cdn.net/ad1f2932-955f-4abf-85d0-01c6a065a289/play_720p.mp4',
+    type: 'video/mp4',
+  },
+  '/video/yoga-for-bjj-intro.jpg': {
+    url: 'https://vz-5ecbf445-fd1.b-cdn.net/ad1f2932-955f-4abf-85d0-01c6a065a289/thumbnail.jpg',
+    type: 'image/jpeg',
+  },
+});
+
+async function serveIntroMedia(request, media) {
+  const headers = new Headers();
+  const range = request.headers.get('Range');
+  if (range) headers.set('Range', range);
+  const upstream = await fetch(media.url, { method: request.method, headers });
+  if (!upstream.ok && upstream.status !== 206) return json({ ok: false, error: 'media_unavailable' }, 502);
+  const responseHeaders = new Headers({
+    'Content-Type': upstream.headers.get('Content-Type') || media.type,
+    'Cache-Control': 'public, max-age=2592000, immutable',
+    'Accept-Ranges': upstream.headers.get('Accept-Ranges') || 'bytes',
+    'X-Content-Type-Options': 'nosniff',
+  });
+  for (const name of ['Content-Length', 'Content-Range', 'ETag', 'Last-Modified']) {
+    const value = upstream.headers.get(name);
+    if (value) responseHeaders.set(name, value);
+  }
+  return new Response(request.method === 'HEAD' ? null : upstream.body, {
+    status: upstream.status,
+    headers: responseHeaders,
+  });
+}
 
 function json(body, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(body), {
@@ -620,6 +653,7 @@ export default {
     }
 
     if (method === 'HEAD' || method === 'GET') {
+      if (INTRO_MEDIA[path]) return serveIntroMedia(request, INTRO_MEDIA[path]);
       const mediaMatch = path.match(/^\/media\/([0-9a-f-]{36})$/);
       if (mediaMatch) return await serveMedia(env, mediaMatch[1]) || json({ ok: false, error: 'not_found' }, 404);
       if (path === '/') return handleLanding(request, env, ctx);
@@ -678,7 +712,7 @@ export default {
       if (path === '/api/stripe-webhook') return handleWebhook(request, env);
     }
 
-    const known = ['/', '/offer', '/thanks', '/preview-checkout', '/health', '/api/lead', '/api/event', '/api/stats', '/api/checkout', '/api/offer-checkout', '/api/offer-skip', '/api/customer-portal', '/api/stripe-webhook', '/admin/login', '/admin/editor'];
+    const known = ['/', '/offer', '/thanks', '/preview-checkout', '/health', '/api/lead', '/api/event', '/api/stats', '/api/checkout', '/api/offer-checkout', '/api/offer-skip', '/api/customer-portal', '/api/stripe-webhook', '/admin/login', '/admin/editor', ...Object.keys(INTRO_MEDIA)];
     if (known.includes(path)) return json({ ok: false, error: 'method_not_allowed' }, 405);
 
     return json({ ok: false, error: 'not_found' }, 404);

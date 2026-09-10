@@ -72,8 +72,21 @@ test('renderer exposes a locked course access action and approved video', () => 
   assert.match(granted.body, /href="https:\/\/yfbjj\.autocreator\.ai\/login"/);
   assert.match(granted.body, /data-access-link/);
   const landing = renderContentDocument(defaultDocument('landing-a'), { pageKey: 'landing-a' });
-  assert.match(landing.body, /iframe\.mediadelivery\.net/);
+  assert.match(landing.body, /\/video\/yoga-for-bjj-intro\.mp4/);
+  assert.match(landing.body, /\/video\/yoga-for-bjj-intro\.jpg/);
+  assert.doesNotMatch(landing.body, />403</);
   assert.match(landing.body, /editor-background is-flipped/);
+});
+
+test('offer upgrades and rendering neutralize unsafe negative vertical spacing', () => {
+  const source = defaultDocument('offer-certification');
+  const target = elements(source).find((element) => element.type === 'heading');
+  target.style = { marginTop: -70, marginBottom: -30 };
+  const upgraded = upgradeContentDocument('offer-certification', source);
+  assert.deepEqual(elements(upgraded).find((element) => element.id === target.id).style, {
+    marginTop: 0, marginBottom: 0,
+  });
+  assert.doesNotMatch(renderContentDocument(source, { pageKey: 'offer-certification' }).body, /margin-(?:top|bottom):-\d/);
 });
 
 test('conversion and managed media migration is complete and constrained', () => {
