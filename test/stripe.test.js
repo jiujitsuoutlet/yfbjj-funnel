@@ -514,7 +514,10 @@ test('paid order bump grants both products and skips the duplicate Head to Toes 
   assert.equal(grant.operationKey, 'grant:cs_fixture:guard-retention,head-slug');
   const order = DB.calls.find(({ sql }) => sql.includes('INSERT INTO stripe_orders'));
   assert.equal(order.values[6], 'guard-retention,head-slug');
-  assert.deepEqual(JSON.parse(order.values[10]), { variant: 'a', order_bump: 'head_to_toes' });
+  assert.deepEqual(JSON.parse(order.values[10]), {
+    variant: 'a', order_bump: 'head_to_toes', offer: 'bundle', price_id: 'price_bundle',
+    entitlement_key: 'guard-retention', flow_hash: 'flow_fixture',
+  });
   const transition = DB.calls.find(({ sql }) => sql.includes('UPDATE checkout_flows SET customer_id'));
   assert.equal(transition.values[4], 'lifetime');
 });

@@ -21,7 +21,8 @@
     "build:tc": "node scripts/build-thrivecart.mjs",
     "build:img": "node scripts/build-images.mjs",
     "visual:audit": "node scripts/visual-audit.mjs",
-    "triple-check:live": "node scripts/triple-check-live.mjs"
+    "triple-check:live": "node scripts/triple-check-live.mjs",
+    "sync:editor:staging": "node scripts/sync-editor-to-staging.mjs"
   },
   "keywords": [],
   "author": "",

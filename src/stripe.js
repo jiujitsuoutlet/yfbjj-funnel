@@ -93,6 +93,12 @@ export function cleanAttribution(input = {}) {
 function cleanOrderMetadata(input = {}) {
   const metadata = cleanAttribution(input);
   if (input.order_bump === HEAD_TO_TOES_BUMP) metadata.order_bump = HEAD_TO_TOES_BUMP;
+  for (const key of ['offer', 'price_id', 'entitlement_key', 'flow_hash', 'root_session_id',
+    'parent_session_id', 'step', 'purchase_path', 'qa_proof']) {
+    if (typeof input[key] === 'string' && input[key].trim()) {
+      metadata[key] = input[key].trim().slice(0, 500);
+    }
+  }
   return metadata;
 }
 
@@ -389,7 +395,8 @@ async function authenticatedFlow(request, env, deps = {}, sourceSessionId = null
     return { ok: false, status: 403, error: 'session_not_authorized' };
   }
   const order = await env.DB.prepare(
-    `SELECT status, fulfillment_status, access_state, flow_hash, customer_id, email
+    `SELECT status, fulfillment_status, access_state, flow_hash, customer_id, email,
+      offer, payment_intent_id, subscription_id, amount_cents, metadata
      FROM stripe_orders WHERE session_id = ?1`
   ).bind(sessionId).first();
   if (!order || order.status !== 'paid' || order.fulfillment_status !== 'granted'
@@ -400,7 +407,24 @@ async function authenticatedFlow(request, env, deps = {}, sourceSessionId = null
   try {
     const stripe = deps.stripe || stripeClient(env);
     let purchase;
-    if (sessionId.startsWith('cs_')) {
+    if (sessionId.startsWith('qa_')) {
+      const proof = await qaProofCoupon(request, env);
+      let metadata;
+      try { metadata = JSON.parse(order.metadata || '{}'); } catch { metadata = null; }
+      if (!proof.authorized || !metadata || metadata.qa_proof !== 'true'
+        || metadata.flow_hash !== flowHash || metadata.offer !== order.offer) {
+        return { ok: false, status: 403, error: 'stripe_session_not_verified' };
+      }
+      purchase = {
+        id: sessionId,
+        customer: order.customer_id,
+        payment_intent: order.payment_intent_id,
+        subscription: order.subscription_id,
+        amount_total: order.amount_cents,
+        customer_details: { email: order.email },
+        metadata,
+      };
+    } else if (sessionId.startsWith('cs_')) {
       purchase = await stripe.checkout.sessions.retrieve(sessionId);
       if (purchase.status !== 'complete' || !['paid', 'no_payment_required'].includes(purchase.payment_status)) {
         return { ok: false, status: 403, error: 'stripe_session_not_verified' };
@@ -596,6 +620,25 @@ async function createOneClickPurchase(auth, env, mapping, offerKey) {
   };
 }
 
+function createQaProofPurchase(auth, mapping, offerKey, deps) {
+  const metadata = {
+    ...oneClickMetadata(auth, offerKey, mapping),
+    purchase_path: 'qa_no_charge_one_click',
+    qa_proof: 'true',
+  };
+  const id = `qa_${offerKey}_${auth.flowHash.slice(0, 16)}_${auth.flow.version}`;
+  const subscription = offerKey === 'two_month' ? id : null;
+  return {
+    purchase: purchaseRecord(id, auth, mapping, metadata, {
+      subscription,
+      amount: 0,
+    }),
+    trialEnd: offerKey === 'two_month'
+      ? new Date(clock(deps).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      : null,
+  };
+}
+
 async function completeOneClickPurchase(env, auth, mapping, offerKey, purchase, sourceSessionId, deps) {
   const now = clock(deps);
   await env.DB.prepare(
@@ -621,10 +664,27 @@ async function finalizeOneClickPurchase(env, auth, mapping, offerKey, purchase, 
   return completeOneClickPurchase(env, auth, mapping, offerKey, purchase, sourceSessionId, deps);
 }
 
-async function resumeOneClickPurchase(env, auth, mapping, offerKey, sourceSessionId, deps) {
+async function resumeOneClickPurchase(env, auth, mapping, offerKey, sourceSessionId, deps, proof) {
   const pendingId = auth.flow.pending_session_id;
   let purchase;
-  if (pendingId && pendingId.startsWith('pi_')) {
+  if (pendingId && pendingId.startsWith('qa_') && proof && proof.authorized) {
+    const order = await env.DB.prepare(
+      `SELECT customer_id, payment_intent_id, subscription_id, amount_cents, email, metadata
+       FROM stripe_orders WHERE session_id = ?1 AND flow_hash = ?2 AND offer = ?3`
+    ).bind(pendingId, auth.flowHash, offerKey).first();
+    let metadata;
+    try { metadata = JSON.parse(order && order.metadata || '{}'); } catch { metadata = null; }
+    if (!order || !metadata || metadata.qa_proof !== 'true') throw new Error('pending_purchase_not_verified');
+    purchase = {
+      id: pendingId,
+      customer: order.customer_id,
+      payment_intent: order.payment_intent_id,
+      subscription: order.subscription_id,
+      amount_total: order.amount_cents,
+      customer_details: { email: order.email },
+      metadata,
+    };
+  } else if (pendingId && pendingId.startsWith('pi_')) {
     const intent = await auth.stripe.paymentIntents.retrieve(pendingId);
     if (intent.status !== 'succeeded' || intent.customer !== auth.flow.customer_id
       || !intent.metadata || intent.metadata.flow_hash !== auth.flowHash
@@ -691,9 +751,11 @@ export async function handleOfferCheckout(request, env, deps = {}) {
   if (!mapping.ok) return response({ ok: false, error: mapping.error, missing: mapping.missing }, 503);
   const readiness = await checkRuntimeReadiness(env, deps);
   if (!readiness.ok) return response({ ok: false, error: 'checkout_not_ready' }, 503);
+  const proof = await qaProofCoupon(request, env);
+  if (proof.active && !proof.authorized) return response({ ok: false, error: 'qa_proof_required' }, 403);
   if (auth.flow.status === 'checkout_pending') {
     try {
-      const url = await resumeOneClickPurchase(env, auth, mapping, offerKey, sourceSessionId, deps);
+      const url = await resumeOneClickPurchase(env, auth, mapping, offerKey, sourceSessionId, deps, proof);
       return response({ ok: true, url, one_click: true, recovered: true });
     } catch (error) {
       console.error('pending one-click recovery failed', { code: error && (error.code || error.message) });
@@ -701,9 +763,14 @@ export async function handleOfferCheckout(request, env, deps = {}) {
     }
   }
   if (auth.flow.status !== 'offer_ready') return response({ ok: false, error: 'step_not_ready' }, 409);
-  const proof = await qaProofCoupon(request, env);
-  if (proof.active && !proof.authorized) return response({ ok: false, error: 'qa_proof_required' }, 403);
   try {
+    if (proof.authorized) {
+      const qaPurchase = createQaProofPurchase(auth, mapping, offerKey, deps);
+      const url = await finalizeOneClickPurchase(
+        env, auth, mapping, offerKey, qaPurchase.purchase, qaPurchase.trialEnd, sourceSessionId, deps,
+      );
+      return response({ ok: true, url, one_click: true, no_charge: true, trial_end: qaPurchase.trialEnd });
+    }
     if (!proof.authorized) {
       try {
         const oneClick = await createOneClickPurchase(auth, env, mapping, offerKey);

@@ -259,8 +259,22 @@ Functional staging proof is a separate gate:
     npm run deploy:staging:functional
 
 It requires `QA_PROOF_MODE="true"`, a staging-only coupon ID, and the
-`QA_PROOF_SECRET` Cloudflare Secret. Requests without the matching proof header
-fail closed. Production preflight rejects QA proof mode.
+`QA_PROOF_SECRET` Cloudflare Secret. The private `/qa` page exchanges that code
+for a short-lived, host-only proof cookie; automation may supply the matching
+proof header instead. Requests without either proof fail closed. After the
+coupon-backed $0 front order, staging simulates each authorized one-click accept
+without creating a charge or reopening Stripe Checkout. It still exercises the
+server-owned offer order and AutoCreator grant path. Production preflight rejects
+QA proof mode, and production always uses the real saved-card charge path.
+
+To copy only published editor content and its referenced editor-managed images
+from production into the isolated staging database, first review the dry run and
+then apply it:
+
+    CLOUDFLARE_API_TOKEN=... npm run sync:editor:staging
+    CLOUDFLARE_API_TOKEN=... npm run sync:editor:staging -- --apply
+
+The sync does not copy buyers, orders, checkout flows, events, or analytics.
 
 ## Setup
 
