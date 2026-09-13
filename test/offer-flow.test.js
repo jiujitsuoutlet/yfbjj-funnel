@@ -269,6 +269,41 @@ test('monthly downsell charges $8 now and starts $19.99 billing after a 30 day o
   assert.equal(DB.state.current_offer, 'certification');
 });
 
+test('monthly creation accepts the Basil invoice shape without expanding the removed payment_intent field', async () => {
+  const DB = flowDatabase({ current_offer: 'two_month' });
+  const client = stripe([]);
+  client.subscriptions.create = async (params) => {
+    assert.deepEqual(params.expand, ['latest_invoice']);
+    return { id: 'sub_basil', status: 'trialing', trial_end: 1800000000,
+      latest_invoice: { status: 'paid', amount_paid: 800, payments: { data: [
+        { payment: { type: 'payment_intent', payment_intent: 'pi_basil' } },
+      ] } } };
+  };
+  const result = await handleOfferCheckout(request('/api/offer-checkout'), { ...baseEnv, DB }, {
+    stripe: client, autocreator: { grant: async () => ({}) },
+  });
+  assert.equal(result.status, 200);
+  assert.equal(DB.state.orders.get('sub_basil').payment_intent_id, 'pi_basil');
+});
+
+for (const code of ['payment_intent_action_required', 'invoice_payment_intent_requires_action']) {
+  test(`bank-required authentication falls back once for ${code}`, async () => {
+    const monthly = code.startsWith('invoice_');
+    const DB = flowDatabase({ current_offer: monthly ? 'two_month' : 'lifetime' });
+    const created = [];
+    const client = stripe(created);
+    const requireAction = async () => { throw Object.assign(new Error('Bank confirmation required'), { code }); };
+    if (monthly) client.subscriptions.create = requireAction;
+    else client.paymentIntents.create = requireAction;
+    const result = await handleOfferCheckout(request('/api/offer-checkout'), { ...baseEnv, DB }, { stripe: client });
+    assert.equal(result.status, 200);
+    assert.equal((await result.json()).one_click, false);
+    assert.equal(created.length, 1);
+    assert.equal(created[0].kind, 'checkout');
+    assert.equal(DB.state.pending_session_id, 'cs_child');
+  });
+}
+
 test('isolated QA accepts advance without Stripe redirects or charges', async () => {
   const DB = flowDatabase({ current_offer: 'two_month' });
   const created = [];

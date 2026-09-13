@@ -331,6 +331,10 @@ export async function handleCheckout(request, env, deps = {}) {
     cancel_url: `${origin}/?checkout=cancelled`,
     payment_intent_data: { metadata, setup_future_usage: 'off_session' },
   };
+  const checkoutEmail = typeof body.email === 'string' ? body.email.trim() : '';
+  if (checkoutEmail.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(checkoutEmail)) {
+    params.customer_email = checkoutEmail;
+  }
   if (proof.authorized) {
     params.discounts = [{ coupon: proof.couponId }];
     params.metadata.qa_proof = 'true';
@@ -521,6 +525,13 @@ function stripeId(value) {
   return typeof value === 'string' ? value : value && value.id;
 }
 
+function invoicePaymentIntentId(invoice) {
+  // Acacia placed this on Invoice; Basil exposes the invoice's payments list.
+  return stripeId(invoice && invoice.payment_intent)
+    || stripeId(invoice?.payments?.data?.find((entry) => entry.payment?.type === 'payment_intent')?.payment?.payment_intent)
+    || null;
+}
+
 async function reusablePaymentMethod(stripe, flow) {
   const root = await stripe.checkout.sessions.retrieve(flow.root_session_id);
   const paymentIntentId = stripeId(root.payment_intent);
@@ -603,10 +614,10 @@ async function createOneClickPurchase(auth, env, mapping, offerKey) {
     trial_period_days: 30,
     payment_behavior: 'error_if_incomplete',
     metadata,
-    expand: ['latest_invoice.payment_intent'],
+    expand: ['latest_invoice'],
   }, { idempotencyKey });
   const invoice = subscription.latest_invoice;
-  const paymentIntentId = stripeId(invoice && invoice.payment_intent);
+  const paymentIntentId = invoicePaymentIntentId(invoice);
   if (!['active', 'trialing'].includes(subscription.status) || !invoice || invoice.status !== 'paid'
     || invoice.amount_paid !== 800) {
     throw new Error('one_click_subscription_incomplete');
@@ -710,7 +721,7 @@ async function resumeOneClickPurchase(env, auth, mapping, offerKey, sourceSessio
     });
   } else if (pendingId && pendingId.startsWith('sub_')) {
     const subscription = await auth.stripe.subscriptions.retrieve(pendingId, {
-      expand: ['latest_invoice.payment_intent'],
+      expand: ['latest_invoice'],
     });
     const invoice = subscription.latest_invoice;
     if (!['active', 'trialing'].includes(subscription.status)
@@ -720,7 +731,7 @@ async function resumeOneClickPurchase(env, auth, mapping, offerKey, sourceSessio
       throw new Error('pending_purchase_not_verified');
     }
     purchase = purchaseRecord(subscription.id, auth, mapping, subscription.metadata, {
-      paymentIntent: stripeId(invoice.payment_intent),
+      paymentIntent: invoicePaymentIntentId(invoice),
       subscription: subscription.id,
       amount: invoice.amount_paid,
     });
@@ -809,6 +820,7 @@ export async function handleOfferCheckout(request, env, deps = {}) {
         return response({ ok: true, url, one_click: true, trial_end: oneClick.trialEnd });
       } catch (error) {
         const fallback = ['saved_payment_method_unavailable', 'authentication_required', 'card_declined',
+          'payment_intent_action_required', 'invoice_payment_intent_requires_action',
           'payment_intent_authentication_failure', 'one_click_payment_incomplete'].includes(
           String(error && (error.code || error.message) || ''),
         );
@@ -1085,7 +1097,7 @@ async function recoverOneClickWebhook(event, env, deps) {
     amount = provider.amount_received;
   }
   const purchase = purchaseRecord(provider.id, { flow }, mapping, metadata, {
-    paymentIntent: invoice ? stripeId(invoice.payment_intent) : provider.id,
+    paymentIntent: invoice ? invoicePaymentIntentId(invoice) : provider.id,
     subscription: invoice ? provider.id : null,
     amount,
   });

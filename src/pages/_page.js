@@ -71,7 +71,7 @@
 
   if (String(CFG.PAGE_KEY || '').indexOf('landing-') === 0) event('landing_view', 'bundle', 'landing');
 
-  function checkout(kind) {
+  function checkout(kind, email) {
     event('checkout_start', kind, 'checkout');
     var key = 'yfbjj_checkout_' + kind;
     var idempotencyKey = '';
@@ -86,6 +86,7 @@
       headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
       body: JSON.stringify({
         offer: kind,
+        email: email || '',
         order_bump: kind === 'bundle' && document.getElementById('head-to-toes-bump') && document.getElementById('head-to-toes-bump').checked
           ? 'head_to_toes' : null,
         attribution: attribution()
@@ -182,7 +183,7 @@
       var wait = new Promise(function (r) { setTimeout(r, 1500); });
       Promise.race([capture(email, 'landing-hero'), wait]).then(function () {
         if (PREVIEW) return previewTarget();
-        return checkout('bundle');
+        return checkout('bundle', email);
       }).then(function (url) {
         location.assign(url);
       }).catch(function () {
@@ -203,7 +204,7 @@
       var lead = stored && !captured
         ? Promise.race([capture(stored, el.getAttribute('data-source') || 'secondary-cta'), wait])
         : Promise.resolve();
-      lead.then(function () { return checkout(el.getAttribute('data-cart')); })
+      lead.then(function () { return checkout(el.getAttribute('data-cart'), stored); })
         .then(function (url) { location.assign(url); })
         .catch(function () { location.assign(previewTarget()); });
     });

@@ -203,6 +203,25 @@ test('checkout preserves first-party attribution in session and payment metadata
   assert.equal(DB.calls.some(({ sql }) => sql.includes('INSERT INTO stripe_orders')), false);
 });
 
+test('Checkout prefills a valid landing email but never adds it to metadata', async () => {
+  for (const [email, expected] of [
+    ['  buyer+funnel@example.com  ', 'buyer+funnel@example.com'],
+    ['not-an-email', undefined], [null, undefined], ['bad\naddress@example.com', undefined],
+  ]) {
+    let params;
+    const stripe = { checkout: { sessions: { create: async (value) => {
+      params = value; return { id: 'cs_email', url: 'https://checkout.test/email' };
+    } } } };
+    const result = await handleCheckout(new Request('https://funnel.test/api/checkout', {
+      method: 'POST', body: JSON.stringify({ offer: 'bundle', email }),
+    }), { ...env, DB: database() }, { stripe });
+    assert.equal(result.status, 200);
+    assert.equal(params.customer_email, expected);
+    assert.equal(params.metadata.email, undefined);
+    assert.equal(params.payment_intent_data.metadata.email, undefined);
+  }
+});
+
 test('checkout adds the server-owned Head to Toes order bump to the same payment', async () => {
   let created;
   const stripe = { checkout: { sessions: { create: async (params) => {
