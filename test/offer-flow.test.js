@@ -368,13 +368,19 @@ test('isolated QA preserves the server-owned offer order across consecutive no-c
 test('isolated QA preserves the lifetime decline and monthly downsell branch without Checkout redirects', async () => {
   const DB = flowDatabase();
   const created = [];
+  const grants = [];
   const env = {
     ...baseEnv, DB, QA_PROOF_MODE: 'true', QA_PROOF_SECRET: 'proof-secret',
     QA_STRIPE_COUPON_ID: 'coupon-proof',
   };
   const deps = {
     stripe: stripe(created), fulfillmentImplemented: true,
-    autocreator: { grant: async () => ({}) },
+    autocreator: { grant: async (args) => {
+      // Mirror AutoCreator's documented Stripe reference validation.
+      assert.ok(!args.subscriptionId || args.subscriptionId.startsWith('sub_'));
+      grants.push(args);
+      return {};
+    } },
   };
   const proofRequest = (path, source) => {
     const result = request(path, {}, source);
@@ -394,6 +400,7 @@ test('isolated QA preserves the lifetime decline and monthly downsell branch wit
   const monthlyPayload = await monthly.json();
   assert.equal(monthlyPayload.one_click, true);
   assert.equal(monthlyPayload.no_charge, true);
+  assert.equal(grants.find((args) => args.offer === 'two_month').subscriptionId, null);
   const monthlySource = new URL(monthlyPayload.url, 'https://funnel.test').searchParams.get('session_id');
   assert.equal(DB.state.current_offer, 'certification');
 

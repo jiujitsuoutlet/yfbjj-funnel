@@ -984,7 +984,11 @@ export async function processEntitlementOperation(env, session, mapping, deps = 
       sessionId: session.id,
       email: session.customer_details && session.customer_details.email || null,
       customerId: session.customer || null,
-      subscriptionId: session.subscription || null,
+      // QA purchase IDs belong to our ledger, not Stripe. AutoCreator rejects
+      // them as subscription references; a no-charge proof grants access only.
+      subscriptionId: session.metadata.qa_proof === 'true'
+        && session.metadata.purchase_path === 'qa_no_charge_one_click'
+        ? null : session.subscription || null,
     });
     await runBatch(env, [
       env.DB.prepare(
