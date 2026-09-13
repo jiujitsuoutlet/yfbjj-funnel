@@ -94,7 +94,7 @@ function cleanOrderMetadata(input = {}) {
   const metadata = cleanAttribution(input);
   if (input.order_bump === HEAD_TO_TOES_BUMP) metadata.order_bump = HEAD_TO_TOES_BUMP;
   for (const key of ['offer', 'price_id', 'entitlement_key', 'flow_hash', 'root_session_id',
-    'parent_session_id', 'step', 'purchase_path', 'qa_proof']) {
+    'parent_session_id', 'step', 'purchase_path', 'qa_proof', 'attempt_version']) {
     if (typeof input[key] === 'string' && input[key].trim()) {
       metadata[key] = input[key].trim().slice(0, 500);
     }
@@ -545,6 +545,7 @@ function oneClickMetadata(auth, offerKey, mapping) {
     parent_session_id: auth.flow.authorized_session_id,
     step: offerKey,
     purchase_path: 'one_click',
+    attempt_version: String(auth.flow.version),
   };
 }
 
@@ -657,10 +658,16 @@ async function finalizeOneClickPurchase(env, auth, mapping, offerKey, purchase, 
   const changed = await env.DB.prepare(
     `UPDATE checkout_flows SET status = 'checkout_pending', pending_session_id = ?2,
      pending_checkout_url = NULL, two_month_trial_end = ?3, version = version + 1,
-     updated_at = ?4 WHERE flow_hash = ?1 AND status = 'offer_ready' AND current_offer = ?5
+     updated_at = ?4 WHERE flow_hash = ?1 AND status = 'checkout_pending' AND current_offer = ?5
+       AND pending_session_id = ?6
      RETURNING flow_hash`
-  ).bind(auth.flowHash, purchase.id, trialEnd, now.toISOString(), offerKey).first();
-  if (!changed) throw new Error('concurrent_transition');
+  ).bind(auth.flowHash, purchase.id, trialEnd, now.toISOString(), offerKey, `attempt_${auth.flow.version}`).first();
+  if (!changed) {
+    const completed = await env.DB.prepare('SELECT authorized_session_id FROM checkout_flows WHERE flow_hash = ?1')
+      .bind(auth.flowHash).first();
+    if (completed && completed.authorized_session_id === purchase.id) return `/offer?session_id=${encodeURIComponent(purchase.id)}`;
+    throw new Error('concurrent_transition');
+  }
   return completeOneClickPurchase(env, auth, mapping, offerKey, purchase, sourceSessionId, deps);
 }
 
@@ -674,16 +681,24 @@ async function resumeOneClickPurchase(env, auth, mapping, offerKey, sourceSessio
     ).bind(pendingId, auth.flowHash, offerKey).first();
     let metadata;
     try { metadata = JSON.parse(order && order.metadata || '{}'); } catch { metadata = null; }
-    if (!order || !metadata || metadata.qa_proof !== 'true') throw new Error('pending_purchase_not_verified');
-    purchase = {
-      id: pendingId,
-      customer: order.customer_id,
-      payment_intent: order.payment_intent_id,
-      subscription: order.subscription_id,
-      amount_total: order.amount_cents,
-      customer_details: { email: order.email },
-      metadata,
-    };
+    if (!order) {
+      // A QA purchase has no provider record. Its persisted flow marker plus
+      // the still-valid QA credential can recover a crash before order insert.
+      purchase = createQaProofPurchase(auth, mapping, offerKey, deps).purchase;
+      purchase.id = pendingId;
+      if (purchase.subscription) purchase.subscription = pendingId;
+    } else {
+      if (!metadata || metadata.qa_proof !== 'true') throw new Error('pending_purchase_not_verified');
+      purchase = {
+        id: pendingId,
+        customer: order.customer_id,
+        payment_intent: order.payment_intent_id,
+        subscription: order.subscription_id,
+        amount_total: order.amount_cents,
+        customer_details: { email: order.email },
+        metadata,
+      };
+    }
   } else if (pendingId && pendingId.startsWith('pi_')) {
     const intent = await auth.stripe.paymentIntents.retrieve(pendingId);
     if (intent.status !== 'succeeded' || intent.customer !== auth.flow.customer_id
@@ -753,7 +768,9 @@ export async function handleOfferCheckout(request, env, deps = {}) {
   if (!readiness.ok) return response({ ok: false, error: 'checkout_not_ready' }, 503);
   const proof = await qaProofCoupon(request, env);
   if (proof.active && !proof.authorized) return response({ ok: false, error: 'qa_proof_required' }, 403);
-  if (auth.flow.status === 'checkout_pending') {
+  const pendingAttempt = auth.flow.status === 'checkout_pending'
+    && auth.flow.pending_session_id === `attempt_${auth.flow.version}`;
+  if (auth.flow.status === 'checkout_pending' && !pendingAttempt) {
     try {
       const url = await resumeOneClickPurchase(env, auth, mapping, offerKey, sourceSessionId, deps, proof);
       return response({ ok: true, url, one_click: true, recovered: true });
@@ -762,7 +779,19 @@ export async function handleOfferCheckout(request, env, deps = {}) {
       return response({ ok: false, error: 'checkout_recovery_failed' }, 502);
     }
   }
-  if (auth.flow.status !== 'offer_ready') return response({ ok: false, error: 'step_not_ready' }, 409);
+  if (!pendingAttempt) {
+    if (auth.flow.status !== 'offer_ready') return response({ ok: false, error: 'step_not_ready' }, 409);
+    // Persist the attempt before contacting Stripe. A retry uses this same
+    // version/idempotency key even if the Worker stopped after Stripe charged.
+    // Skip cannot advance the offer while this durable attempt is pending.
+    const claimed = await env.DB.prepare(
+      `UPDATE checkout_flows SET status = 'checkout_pending', pending_session_id = ?2,
+       pending_checkout_url = NULL, updated_at = ?3
+       WHERE flow_hash = ?1 AND status = 'offer_ready' AND current_offer = ?4 AND version = ?5
+       RETURNING flow_hash`
+    ).bind(auth.flowHash, `attempt_${auth.flow.version}`, clock(deps).toISOString(), offerKey, auth.flow.version).first();
+    if (!claimed) return response({ ok: false, error: 'concurrent_transition' }, 409);
+  }
   try {
     if (proof.authorized) {
       const qaPurchase = createQaProofPurchase(auth, mapping, offerKey, deps);
@@ -790,9 +819,10 @@ export async function handleOfferCheckout(request, env, deps = {}) {
     const changed = await env.DB.prepare(
       `UPDATE checkout_flows SET status = 'checkout_pending', pending_session_id = ?2,
        pending_checkout_url = ?3, two_month_trial_end = ?4, version = version + 1,
-       updated_at = ?5 WHERE flow_hash = ?1 AND status = 'offer_ready' AND current_offer = ?6
+       updated_at = ?5 WHERE flow_hash = ?1 AND status = 'checkout_pending' AND current_offer = ?6
+         AND pending_session_id = ?7
        RETURNING flow_hash`
-    ).bind(auth.flowHash, session.id, session.url, trialEnd && trialEnd.toISOString(), clock(deps).toISOString(), offerKey).first();
+    ).bind(auth.flowHash, session.id, session.url, trialEnd && trialEnd.toISOString(), clock(deps).toISOString(), offerKey, `attempt_${auth.flow.version}`).first();
     if (!changed) return response({ ok: false, error: 'concurrent_transition' }, 409);
     await env.DB.prepare(
       `INSERT OR IGNORE INTO offer_transitions
@@ -841,7 +871,11 @@ export async function handleOfferSkip(request, env, deps = {}) {
 
 export async function getOrderFulfillmentState(request, env) {
   const sessionId = new URL(request.url).searchParams.get('session_id');
-  if (!sessionId || !sessionId.startsWith('cs_')) return { valid: false };
+  if (!sessionId || !/^(cs_|pi_|sub_|qa_)[A-Za-z0-9_]+$/.test(sessionId)) return { valid: false };
+  if (sessionId.startsWith('qa_')) {
+    const proof = await qaProofCoupon(request, env);
+    if (!proof.authorized) return { valid: false };
+  }
   try {
     const row = await env.DB.prepare(
       'SELECT status, fulfillment_status, access_state FROM stripe_orders WHERE session_id = ?1'
@@ -993,7 +1027,91 @@ async function advanceFlowAfterGrant(env, session, now) {
        RETURNING flow_hash`
     ).bind(flowHash, session.id, next, next ? 'offer_ready' : 'complete', now.toISOString(), metadata.offer, session.customer || null).first();
   }
-  if (!changed) throw new Error('checkout flow transition was stale or out of order');
+  if (!changed) {
+    const completed = await env.DB.prepare('SELECT authorized_session_id FROM checkout_flows WHERE flow_hash = ?1')
+      .bind(flowHash).first();
+    if (completed && completed.authorized_session_id === session.id) return;
+    throw new Error('checkout flow transition was stale or out of order');
+  }
+}
+
+async function recoverOneClickWebhook(event, env, deps) {
+  const stripe = deps.stripe || stripeClient(env);
+  let provider = event.data.object;
+  let invoice = null;
+  if (event.type === 'invoice.paid') {
+    invoice = provider;
+    // Only the $8 initial membership invoice belongs to this funnel step.
+    // Recurring renewal invoices must never re-grant or advance an offer.
+    if (invoice.billing_reason !== 'subscription_create') return response({ ok: true, ignored: true });
+    const subscriptionId = stripeId(invoice.subscription || invoice.parent?.subscription_details?.subscription);
+    if (!subscriptionId) return response({ ok: true, ignored: true });
+    provider = await stripe.subscriptions.retrieve(subscriptionId);
+  }
+  const metadata = provider.metadata || {};
+  if (metadata.purchase_path !== 'one_click' || !metadata.flow_hash || qaProofEnabled(env)) {
+    return response({ ok: true, ignored: true });
+  }
+  const flow = await env.DB.prepare(
+    `SELECT flow_hash, root_session_id, customer_id, email, current_offer, status,
+      authorized_session_id, pending_session_id, pending_checkout_url, attribution,
+      expires_at, two_month_trial_end, version FROM checkout_flows WHERE flow_hash = ?1`
+  ).bind(metadata.flow_hash).first();
+  if (!flow) return response({ ok: true, ignored: true, reason: 'unowned_flow' });
+  const readiness = await checkRuntimeReadiness(env, deps);
+  if (!readiness.ok) throw new Error('one_click_recovery_not_ready');
+  const mapping = resolveOffer(env, metadata.offer);
+  if (!mapping.ok || metadata.price_id !== mapping.priceId || metadata.entitlement_key !== mapping.entitlementKey
+    || metadata.root_session_id !== flow.root_session_id || provider.customer !== flow.customer_id) {
+    throw new Error('one_click_webhook_mapping_mismatch');
+  }
+  let amount;
+  let trialEnd = null;
+  if (invoice) {
+    if (metadata.offer !== 'two_month' || invoice.customer !== flow.customer_id || invoice.status !== 'paid'
+      || invoice.amount_paid !== 800 || invoice.currency !== 'usd' || !['active', 'trialing'].includes(provider.status)) {
+      throw new Error('one_click_invoice_invalid');
+    }
+    amount = invoice.amount_paid;
+    trialEnd = provider.trial_end ? new Date(provider.trial_end * 1000).toISOString() : null;
+  } else {
+    if (mapping.offer.mode !== 'payment' || provider.status !== 'succeeded' || provider.currency !== 'usd') {
+      throw new Error('one_click_payment_invalid');
+    }
+    const price = await stripe.prices.retrieve(mapping.priceId);
+    if (!price || price.currency !== 'usd' || provider.amount_received !== price.unit_amount) {
+      throw new Error('one_click_payment_amount_mismatch');
+    }
+    amount = provider.amount_received;
+  }
+  const purchase = purchaseRecord(provider.id, { flow }, mapping, metadata, {
+    paymentIntent: invoice ? stripeId(invoice.payment_intent) : provider.id,
+    subscription: invoice ? provider.id : null,
+    amount,
+  });
+  const order = await env.DB.prepare('SELECT status, fulfillment_status, access_state FROM stripe_orders WHERE session_id = ?1')
+    .bind(purchase.id).first();
+  if (order && order.fulfillment_status === 'granted' && flow.authorized_session_id !== metadata.parent_session_id) {
+    return response({ ok: true, duplicate: true });
+  }
+  const marker = `attempt_${metadata.attempt_version}`;
+  if (flow.status !== 'checkout_pending' || flow.current_offer !== metadata.offer
+    || flow.authorized_session_id !== metadata.parent_session_id
+    || ![purchase.id, marker].includes(flow.pending_session_id)) {
+    throw new Error('one_click_webhook_attempt_mismatch');
+  }
+  const claim = await claimStripeEvent(env, event, clock(deps));
+  if (claim.duplicate) return response({ ok: true, duplicate: true });
+  if (!claim.claimed) return response({ ok: false, error: 'event_in_progress' }, 503);
+  const auth = { flow, flowHash: flow.flow_hash, stripe };
+  if (flow.pending_session_id === marker) {
+    await finalizeOneClickPurchase(env, auth, mapping, metadata.offer, purchase, trialEnd, metadata.parent_session_id, deps);
+  } else {
+    await completeOneClickPurchase(env, auth, mapping, metadata.offer, purchase, metadata.parent_session_id, deps);
+  }
+  await env.DB.prepare("UPDATE stripe_events SET status = 'processed', updated_at = ?2 WHERE id = ?1")
+    .bind(event.id, clock(deps).toISOString()).run();
+  return response({ ok: true, recovered: true });
 }
 
 async function flowCanFulfill(env, session) {
@@ -1052,6 +1170,18 @@ export async function handleWebhook(request, env, deps = {}) {
     return response({ ok: false, error: 'invalid_signature' }, 400);
   }
 
+  if (['payment_intent.succeeded', 'invoice.paid'].includes(event.type)) {
+    try {
+      return await recoverOneClickWebhook(event, env, deps);
+    } catch {
+      try {
+        await env.DB.prepare("UPDATE stripe_events SET status = 'failed', last_error = 'processing_failed', updated_at = ?2 WHERE id = ?1")
+          .bind(event.id, clock(deps).toISOString()).run();
+      } catch { /* Stripe retains and retries the signed event. */ }
+      return response({ ok: false, error: 'one_click_recovery_failed' }, 503);
+    }
+  }
+
   // Authenticate but safely acknowledge events outside this Worker's contract.
   // This prevents an accidental broad Stripe subscription from creating retries
   // while keeping unsupported lifecycle events out of the local ledger.
@@ -1064,6 +1194,18 @@ export async function handleWebhook(request, env, deps = {}) {
   if (qaProofEnabled(env)
     && (!event.data.object.metadata || event.data.object.metadata.qa_proof !== 'true')) {
     return response({ ok: true, ignored: true, reason: 'non_qa_event' });
+  }
+
+  // Stripe sends the account's events to both endpoints. Only the database
+  // that owns the opaque flow may record or fulfill its purchases.
+  const eventFlowHash = event.data.object.metadata && event.data.object.metadata.flow_hash;
+  if (!eventFlowHash) return response({ ok: true, ignored: true, reason: 'unowned_flow' });
+  try {
+    const owner = await env.DB.prepare('SELECT flow_hash FROM checkout_flows WHERE flow_hash = ?1')
+      .bind(eventFlowHash).first();
+    if (!owner) return response({ ok: true, ignored: true, reason: 'unowned_flow' });
+  } catch {
+    return response({ ok: false, error: 'flow_ownership_unavailable' }, 503);
   }
 
   try {

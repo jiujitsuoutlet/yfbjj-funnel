@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { handleOfferCheckout, handleOfferSkip } from '../src/stripe.js';
+import { DatabaseSync } from 'node:sqlite';
+import { readdirSync, readFileSync } from 'node:fs';
+import { handleOfferCheckout, handleOfferSkip, getOrderFulfillmentState, handleWebhook } from '../src/stripe.js';
 
 const token = 'opaque-fixture-token';
 const flowHash = await (async () => {
@@ -66,7 +68,13 @@ function flowDatabase(overrides = {}) {
             return status ? { status } : null;
           }
           if (sql.includes("UPDATE checkout_flows SET status = 'checkout_pending'")) {
-            if (state.status !== 'offer_ready') return null;
+            if (sql.includes("AND status = 'offer_ready'")) {
+              if (state.status !== 'offer_ready') return null;
+            } else {
+              const marker = sql.includes('pending_session_id = ?7') ? values[6] : values[5];
+              if (state.status !== 'checkout_pending' || state.pending_session_id !== marker) return null;
+              if (state.failRecordOnce) { state.failRecordOnce = false; throw new Error('database_unavailable_after_charge'); }
+            }
             state.status = 'checkout_pending'; state.pending_session_id = values[1];
             if (sql.includes('pending_checkout_url = ?3')) state.pending_checkout_url = values[2];
             if (sql.includes('two_month_trial_end = ?3')) state.two_month_trial_end = values[2];
@@ -88,6 +96,7 @@ function flowDatabase(overrides = {}) {
         },
         run: async () => {
           if (sql.includes('INSERT INTO stripe_orders')) {
+            if (state.failOrderOnce) { state.failOrderOnce = false; throw new Error('interrupted_before_order_insert'); }
             state.orders.set(values[0], {
               session_id: values[0], customer_id: values[1], payment_intent_id: values[2],
               subscription_id: values[3], offer: values[4], amount_cents: values[7], email: values[8],
@@ -425,4 +434,172 @@ test('a saved-card charge resumes fulfillment without charging twice after a del
   assert.equal(created.length, 1);
   assert.equal(attempts, 2);
   assert.equal(DB.state.current_offer, 'lifetime');
+});
+
+test('an accept claims the offer before charging so a concurrent decline cannot orphan the purchase', async () => {
+  const DB = flowDatabase();
+  const created = [];
+  const client = stripe(created);
+  const charge = client.paymentIntents.create;
+  client.paymentIntents.create = async (...args) => {
+    assert.equal(DB.state.status, 'checkout_pending');
+    assert.equal(DB.state.pending_session_id, 'attempt_1');
+    const skip = await handleOfferSkip(request('/api/offer-skip'), { ...baseEnv, DB }, { stripe: client });
+    assert.equal(skip.status, 409);
+    assert.equal((await skip.json()).error, 'checkout_still_open');
+    return charge(...args);
+  };
+  const result = await handleOfferCheckout(request('/api/offer-checkout'), { ...baseEnv, DB }, {
+    stripe: client, autocreator: { grant: async () => ({}) },
+  });
+  assert.equal(result.status, 200);
+  assert.equal(created.length, 1);
+  assert.equal(DB.state.orders.get('pi_child').fulfillment_status, 'granted');
+});
+
+test('a crash after Stripe succeeds retains the original attempt and retries the same provider charge', async () => {
+  const DB = flowDatabase({ failRecordOnce: true });
+  const created = [];
+  const client = stripe(created);
+  const charge = client.paymentIntents.create;
+  const providerRecords = new Map();
+  const keys = [];
+  client.paymentIntents.create = async (params, options) => {
+    keys.push(options.idempotencyKey);
+    if (!providerRecords.has(options.idempotencyKey)) {
+      providerRecords.set(options.idempotencyKey, await charge(params, options));
+    }
+    return providerRecords.get(options.idempotencyKey);
+  };
+  const deps = { stripe: client, autocreator: { grant: async () => ({}) } };
+  const failed = await handleOfferCheckout(request('/api/offer-checkout'), { ...baseEnv, DB }, deps);
+  assert.equal(failed.status, 502);
+  assert.equal(DB.state.pending_session_id, 'attempt_1');
+  assert.equal(DB.state.orders.size, 0);
+  const resumed = await handleOfferCheckout(request('/api/offer-checkout'), { ...baseEnv, DB }, deps);
+  assert.equal(resumed.status, 200);
+  assert.equal(keys.length, 2);
+  assert.equal(keys[0], keys[1]);
+  assert.equal(created.length, 1);
+  assert.equal(DB.state.orders.get('pi_child').fulfillment_status, 'granted');
+  assert.equal(DB.state.current_offer, 'lifetime');
+});
+
+test('the final decline after a saved-card purchase opens its fulfilled thank-you page', async () => {
+  for (const session of ['pi_lifetime', 'sub_monthly']) {
+    const DB = flowDatabase({ current_offer: 'certification', authorized_session_id: session });
+    DB.state.orders.set(session, { status: 'paid', fulfillment_status: 'granted', access_state: 'active',
+      flow_hash: flowHash, customer_id: 'cus_1', email: 'buyer@example.com' });
+    const client = stripe([]);
+    client.subscriptions.retrieve = async () => ({ status: 'active', customer: 'cus_1' });
+    const skipped = await handleOfferSkip(request('/api/offer-skip', {}, session), { ...baseEnv, DB }, { stripe: client });
+    assert.equal(skipped.status, 200);
+    const result = await skipped.json();
+    const thanks = await getOrderFulfillmentState(new Request(`https://funnel.test${result.url}`), { ...baseEnv, DB });
+    assert.equal(thanks.valid, true);
+    assert.equal(thanks.fulfillment, 'granted');
+  }
+});
+
+test('a QA purchase resumes if the Worker stopped between storing its ID and inserting its order', async () => {
+  const DB = flowDatabase({ failOrderOnce: true });
+  const created = [];
+  const proofEnv = { ...baseEnv, DB, QA_PROOF_MODE: 'true', QA_PROOF_SECRET: 'proof', QA_STRIPE_COUPON_ID: 'coupon_fixture' };
+  const deps = { stripe: stripe(created), autocreator: { grant: async () => ({}) } };
+  const proofRequest = () => {
+    const req = request('/api/offer-checkout');
+    req.headers.set('x-yfbjj-qa-proof', 'proof');
+    return req;
+  };
+  assert.equal((await handleOfferCheckout(proofRequest(), proofEnv, deps)).status, 502);
+  assert.ok(DB.state.pending_session_id.startsWith('qa_'));
+  assert.equal(DB.state.orders.size, 0);
+  assert.equal((await handleOfferCheckout(proofRequest(), proofEnv, deps)).status, 200);
+  assert.equal(DB.state.current_offer, 'lifetime');
+  assert.equal(created.length, 0);
+});
+
+for (const recovery of ['buyer', 'webhook', 'monthly-webhook']) test(`real SQLite recovers a provider-response crash through ${recovery} without a second charge`, async () => {
+  const sqlite = new DatabaseSync(':memory:');
+  for (const name of readdirSync(new URL('../migrations/', import.meta.url)).filter((name) => name.endsWith('.sql')).sort()) {
+    sqlite.exec(readFileSync(new URL(`../migrations/${name}`, import.meta.url), 'utf8'));
+  }
+  sqlite.prepare(`INSERT INTO checkout_flows (flow_hash, root_session_id, customer_id, email, current_offer,
+    status, authorized_session_id, attribution, expires_at, version, updated_at)
+    VALUES (?, 'cs_root', 'cus_1', 'buyer@example.com', 'head_to_toes', 'offer_ready', 'cs_parent', '{}',
+    '2099-01-01', 7, '2026-01-01')`).run(flowHash);
+  sqlite.prepare(`INSERT INTO stripe_orders (session_id, customer_id, email, offer, status, fulfillment_status,
+    access_state, flow_hash, updated_at) VALUES ('cs_parent', 'cus_1', 'buyer@example.com', 'bundle', 'paid',
+    'granted', 'active', ?, '2026-01-01')`).run(flowHash);
+  if (recovery === 'monthly-webhook') sqlite.exec("UPDATE checkout_flows SET current_offer = 'two_month'");
+  let failRecord = true;
+  const DB = { prepare(sql) { return { bind(...values) {
+    const params = Object.fromEntries(values.map((value, index) => [String(index + 1), value]));
+    return {
+      first: async () => {
+        if (failRecord && sql.includes('AND pending_session_id = ?6')) {
+          failRecord = false;
+          throw new Error('worker_interrupted_after_charge');
+        }
+        return sqlite.prepare(sql).get(params) || null;
+      },
+      run: async () => sqlite.prepare(sql).run(params),
+    };
+  } }; } };
+  const created = [];
+  const client = stripe(created);
+  const providerCharge = client.paymentIntents.create;
+  let providerResult;
+  let providerKey;
+  client.paymentIntents.create = async (params, options) => {
+    if (providerResult) { assert.equal(options.idempotencyKey, providerKey); return providerResult; }
+    providerKey = options.idempotencyKey;
+    const skip = await handleOfferSkip(request('/api/offer-skip'), { ...baseEnv, DB }, { stripe: client });
+    assert.equal(skip.status, 409);
+    providerResult = await providerCharge(params, options);
+    return providerResult;
+  };
+  const deps = { stripe: client, autocreator: { grant: async () => ({ accessState: 'active' }) } };
+  assert.equal((await handleOfferCheckout(request('/api/offer-checkout'), { ...baseEnv, DB }, deps)).status, 502);
+  assert.equal(sqlite.prepare('SELECT pending_session_id FROM checkout_flows').get().pending_session_id, 'attempt_7');
+  if (recovery === 'buyer') {
+    assert.equal((await handleOfferCheckout(request('/api/offer-checkout'), { ...baseEnv, DB }, deps)).status, 200);
+  } else {
+    const monthly = recovery === 'monthly-webhook';
+    const record = created[0];
+    const event = monthly ? {
+      id: 'evt_monthly_recovery', type: 'invoice.paid', data: { object: {
+        id: 'in_initial', customer: 'cus_1', billing_reason: 'subscription_create', subscription: 'sub_child',
+        status: 'paid', amount_paid: 800, currency: 'usd', payment_intent: 'pi_invoice',
+      } },
+    } : {
+      id: 'evt_payment_recovery', type: 'payment_intent.succeeded', data: { object: {
+        id: 'pi_child', status: 'succeeded', customer: 'cus_1', currency: 'usd',
+        amount_received: record.params.amount, metadata: record.params.metadata,
+      } },
+    };
+    client.webhooks = { constructEventAsync: async () => event };
+    const hookRequest = () => new Request('https://funnel.test/api/stripe-webhook', { method: 'POST', body: '{}' });
+    let deliveries = 0;
+    deps.autocreator.grant = async () => {
+      deliveries++;
+      if (deliveries === 1) throw new Error('temporary_grant_failure');
+      return { accessState: 'active' };
+    };
+    assert.equal((await handleWebhook(hookRequest(), { ...baseEnv, DB }, deps)).status, 503);
+    assert.equal((await handleWebhook(hookRequest(), { ...baseEnv, DB }, deps)).status, 200);
+    const duplicate = await handleWebhook(hookRequest(), { ...baseEnv, DB }, deps);
+    assert.equal((await duplicate.json()).duplicate, true);
+    assert.equal(deliveries, 2);
+    if (monthly) {
+      event.data.object.billing_reason = 'subscription_cycle';
+      assert.equal((await (await handleWebhook(hookRequest(), { ...baseEnv, DB }, deps)).json()).ignored, true);
+      assert.equal(deliveries, 2);
+    }
+  }
+  assert.equal(created.length, 1);
+  const purchaseId = recovery === 'monthly-webhook' ? 'sub_child' : 'pi_child';
+  assert.equal(sqlite.prepare('SELECT fulfillment_status FROM stripe_orders WHERE session_id = ?').get(purchaseId).fulfillment_status, 'granted');
+  assert.equal(sqlite.prepare('SELECT current_offer FROM checkout_flows').get().current_offer, recovery === 'monthly-webhook' ? 'certification' : 'lifetime');
+  sqlite.close();
 });

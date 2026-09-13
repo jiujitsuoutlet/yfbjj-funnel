@@ -325,6 +325,9 @@ function database({ eventStatus, eventUpdatedAt, outboxStatus, outboxLeaseExpire
         calls.push({ sql, values });
         return {
           first: async () => {
+            if (sql === 'SELECT flow_hash FROM checkout_flows WHERE flow_hash = ?1') {
+              return state.flowRow ? { flow_hash: values[0] } : null;
+            }
             if (sql.includes('FROM fulfillment_readiness')) return { schema_version: 1 };
             if (sql.includes('INSERT INTO stripe_events')) {
               const stale = state.eventStatus === 'processing' && state.eventUpdatedAt <= values[3];
@@ -452,6 +455,45 @@ test('functional staging acknowledges live production events without writing the
   assert.equal(response.status, 200);
   assert.deepEqual(await body(response), { ok: true, ignored: true, reason: 'non_qa_event' });
   assert.equal(prepared, false);
+});
+
+test('production ignores a signed staging purchase whose flow belongs to another database', async () => {
+  const timestamp = 2_000_000_000;
+  const DB = database();
+  DB.state.flowRow = null;
+  const event = checkoutEvent('checkout.session.completed', 'paid');
+  event.data.object.metadata.qa_proof = 'true';
+  const result = await handleWebhook(await webhookRequest(event, timestamp), { ...env, DB }, { timestamp: timestamp * 1000 });
+  assert.equal(result.status, 200);
+  assert.deepEqual(await body(result), { ok: true, ignored: true, reason: 'unowned_flow' });
+  assert.equal(DB.calls.length, 1);
+  assert.equal(DB.state.orderStatus, undefined);
+});
+
+test('database failure while identifying a webhook owner remains retryable without writing orders', async () => {
+  const timestamp = 2_000_000_000;
+  const event = checkoutEvent('checkout.session.completed', 'paid');
+  const DB = { prepare() { throw new Error('database_temporarily_offline'); } };
+  const result = await handleWebhook(await webhookRequest(event, timestamp), { ...env, DB }, { timestamp: timestamp * 1000 });
+  assert.equal(result.status, 503);
+  assert.equal((await body(result)).error, 'flow_ownership_unavailable');
+});
+
+test('direct-payment recovery ignores another environment flow before any order or grant write', async () => {
+  const queries = [];
+  const DB = { prepare(sql) {
+    queries.push(sql);
+    return { bind() { return { first: async () => null, run: async () => { throw new Error('must not write'); } }; } };
+  } };
+  const event = { id: 'evt_other_direct_payment', type: 'payment_intent.succeeded', data: { object: {
+    id: 'pi_other', metadata: { purchase_path: 'one_click', flow_hash: 'other_environment' },
+  } } };
+  const result = await handleWebhook(new Request('https://funnel.test/api/stripe-webhook', { method: 'POST', body: '{}' }),
+    { ...env, DB }, { stripe: { webhooks: { constructEventAsync: async () => event } } });
+  assert.equal(result.status, 200);
+  assert.equal((await body(result)).reason, 'unowned_flow');
+  assert.equal(queries.length, 1);
+  assert.match(queries[0], /SELECT.*flow_hash/s);
 });
 
 test('unpaid completion stays pending and async failure never grants access', async () => {
