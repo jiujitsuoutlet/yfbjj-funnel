@@ -266,6 +266,11 @@ coupon-backed $0 front order, staging simulates each authorized one-click accept
 without creating a charge or reopening Stripe Checkout. It still exercises the
 server-owned offer order and AutoCreator grant path. Production preflight rejects
 QA proof mode, and production always uses the real saved-card charge path.
+The shared staging review code is stored only as a Cloudflare Secret and has no
+expiration; the browser proof cookie lasts three days, after which reviewers
+can re-enter the same code. The 100%-off Stripe coupon has no redemption deadline
+or usage cap. A $0 Checkout does not collect a payment method, so this lane
+cannot prove a real saved-card charge; it proves the no-charge journey only.
 
 To copy only published editor content and its referenced editor-managed images
 from production into the isolated staging database, first review the dry run and
