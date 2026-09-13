@@ -96,7 +96,7 @@ function functionalMarkup(element, pageKey, env, context) {
     <p class="faint" data-offer-status aria-live="polite"></p>
   </div>`;
   if (element.type === 'price') return priceMarkup(pageKey, env, context);
-  if (element.type === 'accessLink') return `<a class="cta editor-access-link" href="https://yfbjj.autocreator.ai/login" data-access-link>${escapeHtml(element.label || 'Access your courses')}</a>`;
+  if (element.type === 'accessLink') return `<a class="cta editor-access-link" href="https://yogaforbjj.net/login" data-access-link>${escapeHtml(element.label || 'Access your courses')}</a><p>This login page is always available. If your setup email expires, request a fresh link there. Already signed in? <a href="https://yogaforbjj.net/programs">Open your programs</a>, including any instructor courses you purchased.</p>`;
   if (element.type === 'legalFooter') return `<footer><p>Yoga for BJJ</p><nav aria-label="Legal and support">
     <a href="https://yfbjj.autocreator.ai/legal/terms">Terms</a> &middot;
     <a href="https://yfbjj.autocreator.ai/legal/privacy">Privacy</a> &middot;

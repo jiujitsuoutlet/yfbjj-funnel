@@ -2,7 +2,7 @@
 import { execFileSync } from 'node:child_process';
 import { createServer } from 'node:http';
 import { request as httpsRequest } from 'node:https';
-import { mkdir, readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import { renderContentDocument } from '../src/editor/renderer.js';
 import { upgradeContentDocument } from '../src/editor/upgrade.js';
@@ -79,7 +79,11 @@ for (const { key, revision } of pages) {
     const page = await browser.newPage({ viewport });
     const runtimeErrors = [];
     page.on('pageerror', (error) => runtimeErrors.push(error.message));
-    await page.goto(`http://127.0.0.1:${port}/${key}`, { waitUntil: 'networkidle' });
+    await page.goto(`http://127.0.0.1:${port}/${key}`, { waitUntil: 'domcontentloaded' });
+    // Video range streaming can keep networkidle open despite a healthy page.
+    // Wait on actual image and media readiness instead of network silence.
+    await page.waitForFunction(() => [...document.images].every(i => i.complete)
+      && [...document.querySelectorAll('video')].every(v => v.readyState >= 2 || v.error), undefined, { timeout: 30000 });
     await page.evaluate(async () => {
       for (let y = 0; y < document.documentElement.scrollHeight; y += 600) {
         window.scrollTo(0, y); await new Promise((resolve) => setTimeout(resolve, 20));
@@ -88,6 +92,18 @@ for (const { key, revision } of pages) {
     });
     const result = await page.evaluate(() => {
       const clipped = [];
+      const overlaps = [];
+      for (const column of document.querySelectorAll('.editor-column')) {
+        const children = [...column.children].filter((el) => el.matches('.editor-element') && el.getBoundingClientRect().height > 0);
+        for (let i = 1; i < children.length; i++) {
+          const previous = children[i - 1].getBoundingClientRect();
+          const current = children[i].getBoundingClientRect();
+          if (current.top < previous.bottom - 2) overlaps.push(children[i].dataset.editorId || children[i].className);
+        }
+      }
+      const unreadable = [...document.querySelectorAll('.editor-preset-landing-hero p,.editor-preset-landing-hero li,.editor-preset-landing-hero label')]
+        .filter((el) => el.getBoundingClientRect().height > 0 && parseFloat(getComputedStyle(el).fontSize) < 14)
+        .map((el) => el.textContent.slice(0, 60));
       for (const element of document.querySelectorAll('.editor-element')) {
         const rect = element.getBoundingClientRect();
         for (let parent = element.parentElement; parent; parent = parent.parentElement) {
@@ -112,6 +128,7 @@ for (const { key, revision } of pages) {
           src: video.currentSrc || video.getAttribute('src') || '', error: video.error?.code || 0,
         })),
         clipped: [...new Set(clipped)],
+        overlaps, unreadable,
         blankButtons: [...document.querySelectorAll('button,a.cta')].filter((button) => !button.textContent.trim()).length,
         sideBySideOfferRows,
         lifetimeAccepts: document.querySelectorAll('[data-page-key="offer-lifetime"] [data-offer-accept]').length,
@@ -127,6 +144,8 @@ for (const { key, revision } of pages) {
     if (result.brokenImages.length) errors.push(`${result.brokenImages.length} broken image(s)`);
     if (result.brokenVideos.length) errors.push(`broken video: ${JSON.stringify(result.brokenVideos)}`);
     if (result.clipped.length) errors.push(`clipped: ${result.clipped.join(', ')}`);
+    if (result.overlaps.length) errors.push(`overlapping blocks: ${result.overlaps.join(', ')}`);
+    if (result.unreadable.length) errors.push(`body text below 14px: ${result.unreadable.join(', ')}`);
     if (result.blankButtons) errors.push(`${result.blankButtons} blank action(s)`);
     if (result.sideBySideOfferRows) errors.push(`${result.sideBySideOfferRows} two-column offer row(s)`);
     if (/Price from server configuration|Legal and support links from server|Preview Status from server/.test(result.text)) errors.push('server placeholder visible');
@@ -143,4 +162,8 @@ for (const { key, revision } of pages) {
 await browser.close();
 await new Promise((resolve) => server.close(resolve));
 console.log(`SUMMARY pages=${pages.length} checks=${pages.length * viewports.length} failures=${failures.length}`);
+await writeFile(`${outputDir}/report.json`, JSON.stringify({
+  checkedAt: new Date().toISOString(), scope: 'Production published JSON rendered with release CSS; not a payment journey',
+  pages: pages.map(({key, revision}) => ({key, revision})), viewports, checks: pages.length * viewports.length, failures,
+}, null, 2));
 if (failures.length) process.exitCode = 1;

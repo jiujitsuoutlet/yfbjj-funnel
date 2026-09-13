@@ -69,7 +69,9 @@ test('lifetime offer reserves the coaching photo for certification', () => {
 
 test('renderer exposes a locked course access action and approved video', () => {
   const granted = renderContentDocument(defaultDocument('thanks-granted'), { pageKey: 'thanks-granted' });
-  assert.match(granted.body, /href="https:\/\/yfbjj\.autocreator\.ai\/login"/);
+  assert.match(granted.body, /href="https:\/\/yogaforbjj\.net\/login"/);
+  assert.match(granted.body, /href="https:\/\/yogaforbjj\.net\/programs"/);
+  assert.match(granted.body, /If your setup email expires, request a fresh link there/);
   assert.match(granted.body, /data-access-link/);
   const landing = renderContentDocument(defaultDocument('landing-a'), { pageKey: 'landing-a' });
   assert.match(landing.body, /\/video\/yoga-for-bjj-intro\.mp4/);
