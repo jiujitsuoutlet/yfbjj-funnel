@@ -9,6 +9,15 @@ import { upgradeContentDocument } from '../src/editor/upgrade.js';
 
 const baseCss = await readFile(new URL('../src/pages/_base.css', import.meta.url), 'utf8');
 const brandCss = await readFile(new URL('../src/pages/_brand.css', import.meta.url), 'utf8');
+const auditOrigin = process.env.AUDIT_ORIGIN;
+let auditCss = `${baseCss}\n${brandCss}`;
+if (auditOrigin) {
+  const deployed = await fetch(`${auditOrigin}/?v=a`, { headers: { 'cache-control': 'no-cache' } });
+  if (!deployed.ok) throw new Error(`Deployed CSS source returned ${deployed.status}`);
+  const markup = await deployed.text();
+  auditCss = [...markup.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((match) => match[1]).join('\n');
+  if (!auditCss.includes(brandCss)) throw new Error('Deployed brand stylesheet differs from this release');
+}
 
 const outputDir = process.argv[2] || '/private/tmp/yfbjj-triple-check';
 const query = 'SELECT page_key, published_revision, published_json FROM editor_pages WHERE published_json IS NOT NULL ORDER BY page_key';
@@ -25,7 +34,7 @@ const rendered = new Map(pages.map(({ key, revision, document }) => {
   const page = renderContentDocument(document, { pageKey: key, env: {
     BUNDLE_PRICE_CENTS: '1400', HEAD_TO_TOES_BUMP_PRICE_CENTS: '900',
   }, context: { trialEndsAt: '2026-10-06T00:00:00.000Z' } });
-  return [key, `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="https://welcome.yogaforbjj.net/"><style>${baseCss}\n${brandCss}</style></head><body>${page.body}<script>document.documentElement.dataset.revision=${JSON.stringify(String(revision))}</script></body></html>`];
+  return [key, `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="https://welcome.yogaforbjj.net/"><style>${auditCss}</style></head><body>${page.body}<script>document.documentElement.dataset.revision=${JSON.stringify(String(revision))}</script></body></html>`];
 }));
 
 const auditMedia = {
@@ -70,7 +79,7 @@ const copyIssues = new Map(pages.map(({ key, document }) => {
   const content = JSON.stringify(document);
   return [key, copyMistakes.filter((pattern) => pattern.test(content)).map(String)];
 }));
-const viewports = [{ width: 375, height: 812 }, { width: 768, height: 900 }, { width: 1440, height: 900 }];
+const viewports = [{ width: 375, height: 812 }, { width: 768, height: 900 }, { width: 1024, height: 900 }, { width: 1440, height: 900 }];
 const browser = await chromium.launch({ args: ['--disable-features=OverlayScrollbar'] });
 const failures = [];
 
@@ -93,12 +102,19 @@ for (const { key, revision } of pages) {
     const result = await page.evaluate(() => {
       const clipped = [];
       const overlaps = [];
+      const crowdedSections = [];
+      const crowdedParagraphs = [];
       for (const column of document.querySelectorAll('.editor-column')) {
         const children = [...column.children].filter((el) => el.matches('.editor-element') && el.getBoundingClientRect().height > 0);
         for (let i = 1; i < children.length; i++) {
           const previous = children[i - 1].getBoundingClientRect();
           const current = children[i].getBoundingClientRect();
           if (current.top < previous.bottom - 2) overlaps.push(children[i].dataset.editorId || children[i].className);
+          if (column.closest('[data-page-key="offer-lifetime"],[data-page-key="offer-certification"]')) {
+            const heading = children[i].querySelector(':scope > h2');
+            if (heading && heading.getBoundingClientRect().top - previous.bottom < 31) crowdedSections.push(children[i].dataset.editorId);
+            if (children[i].querySelector(':scope > p') && children[i - 1].querySelector(':scope > p') && current.top - previous.bottom < 19) crowdedParagraphs.push(children[i].dataset.editorId);
+          }
         }
       }
       const unreadable = [...document.querySelectorAll('.editor-preset-landing-hero p,.editor-preset-landing-hero li,.editor-preset-landing-hero label')]
@@ -129,6 +145,11 @@ for (const { key, revision } of pages) {
         })),
         clipped: [...new Set(clipped)],
         overlaps, unreadable,
+        crowdedSections, crowdedParagraphs,
+        certificationHeadlineLines: (() => {
+          const headline = document.querySelector('[data-page-key="offer-certification"] h1');
+          return headline ? Math.round(headline.getBoundingClientRect().height / parseFloat(getComputedStyle(headline).lineHeight)) : 0;
+        })(),
         blankButtons: [...document.querySelectorAll('button,a.cta')].filter((button) => !button.textContent.trim()).length,
         sideBySideOfferRows,
         lifetimeAccepts: document.querySelectorAll('[data-page-key="offer-lifetime"] [data-offer-accept]').length,
@@ -145,6 +166,9 @@ for (const { key, revision } of pages) {
     if (result.brokenVideos.length) errors.push(`broken video: ${JSON.stringify(result.brokenVideos)}`);
     if (result.clipped.length) errors.push(`clipped: ${result.clipped.join(', ')}`);
     if (result.overlaps.length) errors.push(`overlapping blocks: ${result.overlaps.join(', ')}`);
+    if (result.crowdedSections.length) errors.push(`crowded section headings: ${result.crowdedSections.join(', ')}`);
+    if (result.crowdedParagraphs.length) errors.push(`crowded paragraphs: ${result.crowdedParagraphs.join(', ')}`);
+    if (key === 'offer-certification' && viewport.width >= 768 && result.certificationHeadlineLines !== 1) errors.push('certification headline must fit on one desktop/tablet line');
     if (result.unreadable.length) errors.push(`body text below 14px: ${result.unreadable.join(', ')}`);
     if (result.blankButtons) errors.push(`${result.blankButtons} blank action(s)`);
     if (result.sideBySideOfferRows) errors.push(`${result.sideBySideOfferRows} two-column offer row(s)`);
@@ -163,7 +187,7 @@ await browser.close();
 await new Promise((resolve) => server.close(resolve));
 console.log(`SUMMARY pages=${pages.length} checks=${pages.length * viewports.length} failures=${failures.length}`);
 await writeFile(`${outputDir}/report.json`, JSON.stringify({
-  checkedAt: new Date().toISOString(), scope: 'Production published JSON rendered with release CSS; not a payment journey',
+  checkedAt: new Date().toISOString(), scope: `Production published JSON rendered with ${auditOrigin || 'local release'} CSS; not a payment journey`,
   pages: pages.map(({key, revision}) => ({key, revision})), viewports, checks: pages.length * viewports.length, failures,
 }, null, 2));
 if (failures.length) process.exitCode = 1;

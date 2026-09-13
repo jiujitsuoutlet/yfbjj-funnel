@@ -44,6 +44,22 @@
 .editor-page[data-page-key^="offer-"] .editor-column{
   display:flex;flex-direction:column;gap:clamp(.75rem,1.5vw,1.25rem);
 }
+/* Long sales pages need visible paragraph breaks and extra space before a new
+   section. Keep this rhythm shared by the published page and editor canvas. */
+.editor-page:is([data-page-key="offer-lifetime"],[data-page-key="offer-certification"]) .editor-column{
+  gap:1.5rem;
+}
+.editor-page:is([data-page-key="offer-lifetime"],[data-page-key="offer-certification"]) .editor-column>.editor-element:has(>h2){
+  padding-top:1rem;
+}
+.editor-page:is([data-page-key="offer-lifetime"],[data-page-key="offer-certification"]) .editor-element>h2,
+.editor-page:is([data-page-key="offer-lifetime"],[data-page-key="offer-certification"]) .editor-element>p{
+  margin-block:0;
+}
+.editor-page[data-page-key="offer-certification"]{container-type:inline-size}
+.editor-page[data-page-key="offer-certification"] .editor-element>h1{
+  font-size:clamp(1.75rem,3.5cqi,3rem);line-height:1.1;margin:0;
+}
 .editor-page[data-page-key^="offer-"]>footer{background:var(--brand-black);color:#fff;padding:1.5rem}
 .editor-page[data-page-key^="offer-"] .decline{color:inherit}
 .editor-page[data-page-key^="offer-"] .offer-price{font-weight:900}
@@ -109,7 +125,6 @@
   grid-column:1/-1;margin:0;text-align:center;
 }
 @media(min-width:48rem){
-  .editor-page[data-page-key="offer-lifetime"] .editor-column:has(>.lifetime-hero-image){display:block}
   .editor-page[data-page-key="offer-lifetime"] .editor-section-inner{padding-top:1rem}
   .editor-page[data-page-key="offer-lifetime"] .editor-element:has(>h1){padding-top:.75rem}
   .editor-page[data-page-key="offer-lifetime"] .editor-element h1{margin:.25rem 0 .65rem}
@@ -143,7 +158,6 @@
   .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer .decline{min-height:34px;padding:.35rem .65rem;font-size:.72rem}
 }
 /* The editor's device buttons resize its canvas, not the browser viewport. */
-.canvas.mobile .editor-page[data-page-key="offer-lifetime"] .editor-column:has(>.lifetime-hero-image){display:block}
 .canvas.mobile .editor-page[data-page-key="offer-lifetime"] .editor-section-inner{padding:1rem .75rem}
 .canvas.mobile .editor-page[data-page-key="offer-lifetime"] .editor-element:has(>h1){padding-top:.75rem}
 .canvas.mobile .editor-page[data-page-key="offer-lifetime"] .editor-element h1{font-size:2rem;line-height:1.02;margin:.25rem 0}
