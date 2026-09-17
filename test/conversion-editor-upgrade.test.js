@@ -24,6 +24,25 @@ test('version 1 published pages upgrade without resetting editor content', () =>
   assert.equal(validateContentDocument(upgraded, { pageKey: 'thanks-granted', imagePaths: EDITOR_IMAGE_PATHS }).ok, true);
 });
 
+test('all editor content removes emoji before validation and rendering', () => {
+  const pose = String.fromCodePoint(0x1f938);
+  const celebration = String.fromCodePoint(0x1f389);
+  const heart = String.fromCodePoint(0x2764, 0xfe0f);
+  const family = String.fromCodePoint(0x1f469, 0x200d, 0x1f469, 0x200d, 0x1f466);
+  const document = defaultDocument('landing-a');
+  document.seo.title = `Yoga ${celebration}`;
+  const list = elements(document).find((element) => element.type === 'list');
+  list.items = [`Move ${pose}`, `Recover ${heart}`, `Train ${family} together`];
+
+  const upgraded = upgradeContentDocument('landing-a', document);
+  assert.equal(upgraded.seo.title, 'Yoga');
+  assert.deepEqual(elements(upgraded).find((element) => element.type === 'list').items, [
+    'Move', 'Recover', 'Train together',
+  ]);
+  assert.equal(validateContentDocument(upgraded, { pageKey: 'landing-a', imagePaths: EDITOR_IMAGE_PATHS }).ok, true);
+  assert.doesNotMatch(renderContentDocument(upgraded, { pageKey: 'landing-a' }).body, /[\u{1F000}-\u{1FAFF}]/u);
+});
+
 test('landing upgrade uses verified proof in a separate responsive section', () => {
   const document = defaultDocument('landing-a');
   const types = elements(document).map((element) => element.type);

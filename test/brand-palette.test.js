@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { defaultDocument } from '../src/editor/defaults.js';
 import { renderContentDocument } from '../src/editor/renderer.js';
 
@@ -51,4 +51,19 @@ test('primary checkout submit is not intercepted by the secondary CTA handler', 
   const pageScript = readFileSync(new URL('../src/pages/_page.js', import.meta.url), 'utf8');
   assert.match(pageScript, /querySelectorAll\('a\[data-cart\]'\)/);
   assert.doesNotMatch(pageScript, /querySelectorAll\('\[data-cart\]'\)/);
+});
+
+test('served funnel source contains no emoji copy', () => {
+  const emoji = /[\u{1F000}-\u{1FAFF}]|[\u2600-\u27BF]\uFE0F/u;
+  const roots = [new URL('../src/pages/', import.meta.url), new URL('../src/editor/', import.meta.url)];
+  const files = [];
+  const visit = (directory) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const path = new URL(entry.name + (entry.isDirectory() ? '/' : ''), directory);
+      if (entry.isDirectory()) visit(path);
+      else files.push(path);
+    }
+  };
+  roots.forEach(visit);
+  for (const file of files) assert.doesNotMatch(readFileSync(file, 'utf8'), emoji, file.pathname);
 });

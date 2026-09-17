@@ -1,5 +1,18 @@
 const INTRO_VIDEO = 'https://iframe.mediadelivery.net/embed/215008/ad1f2932-955f-4abf-85d0-01c6a065a289?autoplay=false&loop=false&muted=false&preload=true&responsive=true&controls=true';
 
+const EMOJI_PATTERN = /(?:[0-9#*]\uFE0F?\u20E3|\p{Emoji_Presentation}|\p{Extended_Pictographic}\uFE0F|[\u{1F3FB}-\u{1F3FF}]|\u200D|\uFE0F)/gu;
+
+function removeEmoji(value) {
+  if (typeof value === 'string') {
+    return value.replace(EMOJI_PATTERN, '').replace(/[ \t]{2,}/g, ' ').replace(/[ \t]+$/gm, '');
+  }
+  if (Array.isArray(value)) return value.map(removeEmoji);
+  if (value && typeof value === 'object') {
+    for (const key of Object.keys(value)) value[key] = removeEmoji(value[key]);
+  }
+  return value;
+}
+
 function allElements(document) {
   return document.sections.flatMap((section) => section.rows.flatMap((row) => row.columns.flatMap((column) => column.elements)));
 }
@@ -12,7 +25,7 @@ function insertBefore(elements, beforeType, additions) {
 }
 
 export function upgradeContentDocument(pageKey, input) {
-  const document = structuredClone(input);
+  const document = removeEmoji(structuredClone(input));
   if (!document || ![1, 2].includes(document.version)) return document;
   document.version = 2;
   if (pageKey.startsWith('offer-')) {
