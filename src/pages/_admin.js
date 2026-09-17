@@ -51,7 +51,12 @@
     if (element.type === 'heading') body = `<h${element.level}>${esc(element.content)}</h${element.level}>`;
     else if (element.type === 'text') body = `<p>${esc(element.content)}</p>`;
     else if (element.type === 'list') body = `<ul>${element.items.map((item) => `<li>${esc(item)}</li>`).join('')}</ul>`;
-    else if (element.type === 'image') body = `<img src="${esc(element.src)}" alt="${esc(element.alt)}">`;
+    else if (element.type === 'image') {
+      const image = `<img src="${esc(element.src)}" alt="${esc(element.alt)}">`;
+      body = pageKey === 'offer-lifetime' && element.id === 'image-6e4b5e79'
+        ? `<button class="lifetime-image-action" type="button" disabled aria-label="Add lifetime access for $247">${image}</button>`
+        : image;
+    }
     else if (element.type === 'quote') body = `<blockquote><p>${esc(element.content)}</p><cite>${esc(element.attribution)}</cite></blockquote>`;
     else if (element.type === 'video') body = `<div class="editor-video"><video src="/video/yoga-for-bjj-intro.mp4" poster="/video/yoga-for-bjj-intro.jpg" title="${esc(element.title)}" controls playsinline preload="metadata"></video></div>`;
     else if (element.type === 'divider') body = '<hr>'; else if (element.type === 'spacer') body = `<div style="height:${Number(element.size)}px"></div>`;

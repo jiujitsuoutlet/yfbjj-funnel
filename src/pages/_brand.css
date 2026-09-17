@@ -101,6 +101,23 @@
 .editor-page[data-page-key="offer-lifetime"] .lifetime-hero-image img{
   width:100%;height:auto;aspect-ratio:1600/672;object-fit:cover;
 }
+.editor-page[data-page-key="offer-lifetime"] .editor-element:has(>.lifetime-image-action) >.lifetime-image-action{
+  display:block;width:100%;min-height:0;padding:0;border:0;border-radius:.75rem;
+  overflow:hidden;background:transparent;color:inherit;cursor:pointer;
+  box-shadow:none;appearance:none;
+}
+.editor-page[data-page-key="offer-lifetime"] .lifetime-image-action img{
+  display:block;transition:filter .16s ease,transform .16s ease;
+}
+.editor-page[data-page-key="offer-lifetime"] .lifetime-image-action:hover img{
+  filter:brightness(.94);transform:scale(1.005);
+}
+.editor-page[data-page-key="offer-lifetime"] .lifetime-image-action:focus-visible{
+  outline:4px solid var(--brand-red);outline-offset:4px;
+}
+.canvas .editor-page[data-page-key="offer-lifetime"] .lifetime-image-action{
+  pointer-events:none;cursor:default;
+}
 .editor-page[data-page-key="offer-lifetime"] .lifetime-quick-offer{
   display:grid;grid-template-columns:1fr;
   align-items:center;gap:1rem;margin:.5rem 0 2rem;padding:.8rem;

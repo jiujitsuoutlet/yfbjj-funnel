@@ -1,0 +1,74 @@
+{
+  "checkedAt": "2026-09-17T16:07:02.614Z",
+  "scope": "Production published JSON rendered with https://yfbjj-funnel-stripe-staging.sebastian-brosche.workers.dev CSS; not a payment journey",
+  "pages": [
+    {
+      "key": "landing-a",
+      "revision": 86
+    },
+    {
+      "key": "landing-b",
+      "revision": 22
+    },
+    {
+      "key": "offer-certification",
+      "revision": 247
+    },
+    {
+      "key": "offer-head-to-toes",
+      "revision": 4
+    },
+    {
+      "key": "offer-lifetime",
+      "revision": 192
+    },
+    {
+      "key": "offer-two-month",
+      "revision": 11
+    },
+    {
+      "key": "preview-checkout",
+      "revision": 2
+    },
+    {
+      "key": "thanks-activation",
+      "revision": 3
+    },
+    {
+      "key": "thanks-failed",
+      "revision": 2
+    },
+    {
+      "key": "thanks-granted",
+      "revision": 2
+    },
+    {
+      "key": "thanks-pending",
+      "revision": 3
+    },
+    {
+      "key": "thanks-preview",
+      "revision": 2
+    }
+  ],
+  "viewports": [
+    {
+      "width": 375,
+      "height": 812
+    },
+    {
+      "width": 768,
+      "height": 900
+    },
+    {
+      "width": 1024,
+      "height": 900
+    },
+    {
+      "width": 1440,
+      "height": 900
+    }
+  ],
+  "checks": 48,
+  "failures": []
+}

@@ -117,12 +117,20 @@ test('lifetime page repeats one safe purchase action after its opening image cop
     { id: 'lifetime-opening', type: 'text', content: 'Keep reading.' },
     { id: 'lifetime-arrow', type: 'text', content: 'Choose below. ⬇️' },
   );
+  const priceIndex = column.elements.findIndex((element) => element.type === 'price');
+  column.elements.splice(priceIndex, 0, {
+    id: 'image-6e4b5e79',
+    type: 'image',
+    src: '/img/lifetime-twist-chair-1600-v1.webp',
+    alt: 'Sebastian practicing yoga beside the words Get Lifetime Access Now.',
+  });
   const rendered = renderContentDocument(document, {
     pageKey: 'offer-lifetime',
   }).body;
   assert.match(rendered, /lifetime-hero-image/);
   assert.match(rendered, /data-commerce-repeat="lifetime-top"/);
-  assert.equal((rendered.match(/data-offer-accept/g) || []).length, 2);
+  assert.match(rendered, /class="lifetime-image-action" type="button" data-offer-accept aria-label="Add lifetime access for \$247"/);
+  assert.equal((rendered.match(/data-offer-accept/g) || []).length, 3);
   assert.equal((rendered.match(/data-offer-skip/g) || []).length, 2);
   assert.equal((rendered.match(/\$247 once/g) || []).length, 2);
   assert.ok(rendered.indexOf('Choose below. ⬇️') < rendered.indexOf('data-commerce-repeat="lifetime-top"'));

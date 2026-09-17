@@ -150,10 +150,11 @@ for (const { key, revision } of pages) {
           const headline = document.querySelector('[data-page-key="offer-certification"] h1');
           return headline ? Math.round(headline.getBoundingClientRect().height / parseFloat(getComputedStyle(headline).lineHeight)) : 0;
         })(),
-        blankButtons: [...document.querySelectorAll('button,a.cta')].filter((button) => !button.textContent.trim()).length,
+        blankButtons: [...document.querySelectorAll('button,a.cta')].filter((button) => !button.textContent.trim() && !button.getAttribute('aria-label')?.trim()).length,
         sideBySideOfferRows,
         lifetimeAccepts: document.querySelectorAll('[data-page-key="offer-lifetime"] [data-offer-accept]').length,
         lifetimeSkips: document.querySelectorAll('[data-page-key="offer-lifetime"] [data-offer-skip]').length,
+        lifetimeImageActions: document.querySelectorAll('[data-page-key="offer-lifetime"] .lifetime-image-action[data-offer-accept]').length,
         certificationAccepts: document.querySelectorAll('[data-page-key="offer-certification"] [data-offer-accept]').length,
         certificationSkips: document.querySelectorAll('[data-page-key="offer-certification"] [data-offer-skip]').length,
         imageSources: [...document.images].map((image) => image.getAttribute('src') || ''),
@@ -174,7 +175,8 @@ for (const { key, revision } of pages) {
     if (result.sideBySideOfferRows) errors.push(`${result.sideBySideOfferRows} two-column offer row(s)`);
     if (/Price from server configuration|Legal and support links from server|Preview Status from server/.test(result.text)) errors.push('server placeholder visible');
     for (const pattern of requirements[key] || []) if (!pattern.test(result.text)) errors.push(`missing ${pattern}`);
-    if (key === 'offer-lifetime' && (result.lifetimeAccepts < 2 || result.lifetimeSkips < 2)) errors.push('missing repeated lifetime actions');
+    if (key === 'offer-lifetime' && (result.lifetimeAccepts !== 3 || result.lifetimeSkips < 2)) errors.push('missing repeated lifetime actions');
+    if (key === 'offer-lifetime' && result.lifetimeImageActions !== 1) errors.push('lifetime image must expose exactly one purchase action');
     if (key === 'offer-lifetime' && (!result.imageSources.some((src) => src.includes('keep-reading')) || result.imageSources.length < 2)) errors.push('missing lifetime text-image treatment');
     if (key === 'offer-certification' && (result.certificationAccepts < 2 || result.certificationSkips < 2)) errors.push('missing repeated certification actions');
     await page.screenshot({ path: `${outputDir}/${key}-${viewport.width}.png`, fullPage: true });

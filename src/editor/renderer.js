@@ -133,7 +133,12 @@ function renderElement(element, pageKey, env, context, global, lifetime = {}, ce
     body = `<h${level}>${escapeHtml(element.content)}</h${level}>`;
   } else if (element.type === 'text') body = `<p>${escapeHtml(element.content)}</p>`;
   else if (element.type === 'list') body = `<ul>${element.items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
-  else if (element.type === 'image') body = `<img src="${escapeHtml(element.src)}" alt="${escapeHtml(element.alt)}" loading="${element.id === lifetime.heroImageId ? 'eager' : 'lazy'}"${element.id === lifetime.heroImageId ? ' fetchpriority="high"' : ''}>`;
+  else if (element.type === 'image') {
+    const image = `<img src="${escapeHtml(element.src)}" alt="${escapeHtml(element.alt)}" loading="${element.id === lifetime.heroImageId ? 'eager' : 'lazy'}"${element.id === lifetime.heroImageId ? ' fetchpriority="high"' : ''}>`;
+    body = pageKey === 'offer-lifetime' && element.id === 'image-6e4b5e79'
+      ? `<button class="lifetime-image-action" type="button" data-offer-accept aria-label="Add lifetime access for $247">${image}</button>`
+      : image;
+  }
   else if (element.type === 'quote') body = `<blockquote><p>${escapeHtml(element.content)}</p><cite>${escapeHtml(element.attribution)}</cite></blockquote>`;
   else if (element.type === 'video') {
     let approvedIntro = false;
