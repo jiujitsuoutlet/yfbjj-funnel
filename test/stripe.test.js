@@ -222,6 +222,50 @@ test('Checkout prefills a valid landing email but never adds it to metadata', as
   }
 });
 
+test('Checkout does not replay a pending session created without the newly entered email', async () => {
+  let params;
+  let creates = 0;
+  const stripe = { checkout: { sessions: { create: async (value) => {
+    creates++;
+    params = value;
+    return { id: 'cs_fresh_email', url: 'https://checkout.test/fresh-email' };
+  } } } };
+  const DB = database({ pendingCheckoutUrl: 'https://checkout.test/blank-email', pendingEmail: null });
+  const result = await handleCheckout(new Request('https://funnel.test/api/checkout', {
+    method: 'POST',
+    headers: { cookie: 'yfbjj_flow=existing-flow', 'content-type': 'application/json' },
+    body: JSON.stringify({ offer: 'bundle', email: 'Buyer@Example.com' }),
+  }), { ...env, DB }, { stripe });
+
+  assert.equal(result.status, 200);
+  assert.equal(creates, 1);
+  assert.equal(params.customer_email, 'buyer@example.com');
+  assert.deepEqual(await body(result), { ok: true, url: 'https://checkout.test/fresh-email' });
+  const insert = DB.calls.find(({ sql }) => sql.includes('INSERT INTO checkout_flows'));
+  assert.equal(insert.values[1], 'buyer@example.com');
+});
+
+test('Checkout replays a pending session only when its saved email matches', async () => {
+  let creates = 0;
+  const stripe = { checkout: { sessions: { create: async () => { creates++; } } } };
+  const result = await handleCheckout(new Request('https://funnel.test/api/checkout', {
+    method: 'POST',
+    headers: { cookie: 'yfbjj_flow=existing-flow', 'content-type': 'application/json' },
+    body: JSON.stringify({ offer: 'bundle', email: ' Buyer@Example.com ' }),
+  }), {
+    ...env,
+    DB: database({ pendingCheckoutUrl: 'https://checkout.test/same-email', pendingEmail: 'buyer@example.com' }),
+  }, { stripe });
+
+  assert.equal(result.status, 200);
+  assert.equal(creates, 0);
+  assert.deepEqual(await body(result), {
+    ok: true,
+    url: 'https://checkout.test/same-email',
+    replay: true,
+  });
+});
+
 test('checkout adds the server-owned Head to Toes order bump to the same payment', async () => {
   let created;
   const stripe = { checkout: { sessions: { create: async (params) => {
@@ -324,7 +368,7 @@ async function signature(payload, secret, timestamp) {
 }
 
 function database({ eventStatus, eventUpdatedAt, outboxStatus, outboxLeaseExpires, failOrder = false,
-  orderStatus, fulfillmentStatus, accessState = 'active', flowRow } = {}) {
+  orderStatus, fulfillmentStatus, accessState = 'active', flowRow, pendingCheckoutUrl, pendingEmail } = {}) {
   const calls = [];
   const state = {
     eventStatus,
@@ -344,6 +388,9 @@ function database({ eventStatus, eventUpdatedAt, outboxStatus, outboxLeaseExpire
         calls.push({ sql, values });
         return {
           first: async () => {
+            if (sql.includes('SELECT pending_checkout_url, email FROM checkout_flows')) {
+              return pendingCheckoutUrl ? { pending_checkout_url: pendingCheckoutUrl, email: pendingEmail } : null;
+            }
             if (sql === 'SELECT flow_hash FROM checkout_flows WHERE flow_hash = ?1') {
               return state.flowRow ? { flow_hash: values[0] } : null;
             }

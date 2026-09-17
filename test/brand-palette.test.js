@@ -46,3 +46,9 @@ test('coded landing fallbacks do not restore known copy mistakes', () => {
     assert.doesNotMatch(source, /\bIm too busy\b|but i need it|14 year anniversary/);
   }
 });
+
+test('primary checkout submit is not intercepted by the secondary CTA handler', () => {
+  const pageScript = readFileSync(new URL('../src/pages/_page.js', import.meta.url), 'utf8');
+  assert.match(pageScript, /querySelectorAll\('a\[data-cart\]'\)/);
+  assert.doesNotMatch(pageScript, /querySelectorAll\('\[data-cart\]'\)/);
+});

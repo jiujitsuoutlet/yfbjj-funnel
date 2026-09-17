@@ -90,6 +90,11 @@ export function cleanAttribution(input = {}) {
   return metadata;
 }
 
+function cleanCheckoutEmail(value) {
+  const email = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  return email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : '';
+}
+
 function cleanOrderMetadata(input = {}) {
   const metadata = cleanAttribution(input);
   if (input.order_bump === HEAD_TO_TOES_BUMP) metadata.order_bump = HEAD_TO_TOES_BUMP;
@@ -298,14 +303,16 @@ export async function handleCheckout(request, env, deps = {}) {
   if (proof.active && !proof.authorized) return response({ ok: false, error: 'qa_proof_required' }, 403);
   const { offer, priceId, entitlementKey } = mapping;
   const now = clock(deps);
+  const checkoutEmail = cleanCheckoutEmail(body.email);
   let token = readCookie(request, FLOW_COOKIE);
   let flowHash = token ? await sha256Hex(token) : null;
   if (flowHash) {
     const existing = await env.DB.prepare(
-      `SELECT pending_checkout_url FROM checkout_flows
+      `SELECT pending_checkout_url, email FROM checkout_flows
        WHERE flow_hash = ?1 AND status = 'front_checkout' AND expires_at > ?2`
     ).bind(flowHash, now.toISOString()).first();
-    if (existing && existing.pending_checkout_url) {
+    const existingEmail = cleanCheckoutEmail(existing && existing.email);
+    if (existing && existing.pending_checkout_url && existingEmail === checkoutEmail) {
       return response({ ok: true, url: existing.pending_checkout_url, replay: true });
     }
   }
@@ -331,10 +338,7 @@ export async function handleCheckout(request, env, deps = {}) {
     cancel_url: `${origin}/?checkout=cancelled`,
     payment_intent_data: { metadata, setup_future_usage: 'off_session' },
   };
-  const checkoutEmail = typeof body.email === 'string' ? body.email.trim() : '';
-  if (checkoutEmail.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(checkoutEmail)) {
-    params.customer_email = checkoutEmail;
-  }
+  if (checkoutEmail) params.customer_email = checkoutEmail;
   if (proof.authorized) {
     params.discounts = [{ coupon: proof.couponId }];
     params.metadata.qa_proof = 'true';
@@ -344,9 +348,9 @@ export async function handleCheckout(request, env, deps = {}) {
   try {
     await env.DB.prepare(
       `INSERT INTO checkout_flows
-       (flow_hash, status, attribution, expires_at, updated_at)
-       VALUES (?1, 'front_checkout', ?2, ?3, ?4)`
-    ).bind(flowHash, JSON.stringify(attribution), new Date(now.getTime() + FLOW_TTL_MS).toISOString(), now.toISOString()).run();
+       (flow_hash, status, email, attribution, expires_at, updated_at)
+       VALUES (?1, 'front_checkout', ?2, ?3, ?4, ?5)`
+    ).bind(flowHash, checkoutEmail || null, JSON.stringify(attribution), new Date(now.getTime() + FLOW_TTL_MS).toISOString(), now.toISOString()).run();
     const stripe = deps.stripe || stripeClient(env);
     const session = await stripe.checkout.sessions.create(params, {
       idempotencyKey: `front:${flowHash}`,

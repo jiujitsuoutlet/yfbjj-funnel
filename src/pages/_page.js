@@ -135,7 +135,10 @@
   })();
 
   /* --------------------------------------------------------- cart links */
-  var ctas = [].slice.call(document.querySelectorAll('[data-cart]'));
+  // Only secondary links belong here. The primary form button also carries
+  // data-cart for analytics, but wiring it as a secondary CTA would intercept
+  // the form submit and start Checkout before the entered email is read.
+  var ctas = [].slice.call(document.querySelectorAll('a[data-cart]'));
   // The href stays on the mutation-free preview page as a fail-closed fallback.
   // Live Stripe Checkout starts only through the guarded POST below.
   ctas.forEach(function (el) { el.setAttribute('href', previewTarget()); });
